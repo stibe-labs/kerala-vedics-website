@@ -231,16 +231,10 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+      <header className="absolute top-0 left-0 right-0 z-50 pointer-events-none">
         <LayoutGroup id="navbar-capsule">
-          {/* Top Bar with Logo & Luxury Dark Header */}
-          <div
-            className={`w-full px-4 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between pointer-events-auto transition-all duration-300 ${
-              isScrolled
-                ? "bg-[#09110B]/95 backdrop-blur-xl border-b border-[#EDC918]/15 shadow-[0_8px_32px_rgba(0,0,0,0.65)]"
-                : "bg-gradient-to-b from-[#070D08]/90 via-[#070D08]/50 to-transparent"
-            }`}
-          >
+          {/* Top Bar with Logo & Luxury Dark Header (Scrolls with page, not fixed) */}
+          <div className="w-full px-4 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between pointer-events-auto bg-gradient-to-b from-[#070D08]/90 via-[#070D08]/50 to-transparent">
             {/* Left: Kerala Vedics Brand Logo (Prominent & High Clarity) */}
             <Link href="/" className="flex items-center gap-3 group focus:outline-none shrink-0 py-1">
               <img
