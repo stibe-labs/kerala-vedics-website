@@ -21,17 +21,11 @@ export function Footer() {
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full border border-[#EDC918] flex items-center justify-center bg-[#273F25] text-[#EDC918] font-serif text-xl font-bold">
-                K
-              </div>
-              <div className="flex flex-col">
-                <span className="font-serif tracking-widest text-lg font-bold uppercase text-[#FAF8F2]">
-                  Kerala Vedics
-                </span>
-                <span className="text-[10px] tracking-[0.22em] uppercase font-sans text-[#EDC918]">
-                  Ayurveda · Nature · Balance
-                </span>
-              </div>
+              <img
+                src="/KV-Logo-w.png"
+                alt="Kerala Vedics"
+                className="h-10 sm:h-12 w-auto max-w-[210px] object-contain"
+              />
             </div>
             <p className="text-xs text-[#FAF8F2]/70 max-w-sm font-light leading-relaxed">
               Classical Ayurvedic manufacture anchored in the virgin rainforests of Kerala. Formulated with reverence to ancient Vaidyas and the healing intelligence of nature.

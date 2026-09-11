@@ -238,9 +238,9 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
             {/* Left: Kerala Vedics Brand Logo */}
             <Link href="/" className="flex items-center gap-3 group focus:outline-none">
               <img
-                src="/kerala-vedics-logo.png"
+                src="/KV-Logo-w.png"
                 alt="Kerala Vedics Logo"
-                className="h-9 sm:h-11 w-auto max-w-[190px] sm:max-w-[210px] object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] group-hover:scale-[1.03] transition-transform duration-300"
+                className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[230px] object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] group-hover:scale-[1.03] transition-transform duration-300"
               />
             </Link>
 
