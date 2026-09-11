@@ -8,6 +8,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getMediaUrl } from "@/lib/media";
 
 interface HeroSlide {
   id: string;
@@ -142,7 +143,7 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
             className="w-full h-full"
           >
             <video
-              src={slide.videoSrc}
+              src={getMediaUrl(slide.videoSrc)}
               autoPlay
               loop
               muted

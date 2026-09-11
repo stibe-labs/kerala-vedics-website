@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { VEDICS_LETTERS } from "@/data/vedicsData";
 import { Sparkles, ArrowRight, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getMediaUrl } from "@/lib/media";
 
 export function VedicsPromiseSection() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -225,7 +226,7 @@ export function VedicsPromiseSection() {
                     {activeItem.videoSrc ? (
                       <video
                         key={`vid-${activeItem.letter}`}
-                        src={activeItem.videoSrc}
+                        src={getMediaUrl(activeItem.videoSrc)}
                         autoPlay
                         loop
                         muted

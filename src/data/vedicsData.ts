@@ -1,3 +1,5 @@
+import { getMediaUrl } from "@/lib/media";
+
 export interface ProductRitual {
   id: string;
   name: string;
@@ -135,7 +137,7 @@ export const VEDICS_LETTERS = [
     cardTextColor: "#FFFFFF",
     highlightStat: "100% Bio-available",
     image: "/products/vitality.png",
-    videoSrc: "/videos/vitality.mp4",
+    videoSrc: getMediaUrl("/videos/vitality.mp4"),
     scenicImage: "/products/vitality.png",
     bgGradient: "from-[#FDF8F0] via-[#FAF3E7] to-[#F5E8D2]",
     badgeBg: "bg-[#C89D4A]/15 text-[#8C6418] border-[#C89D4A]/30",
@@ -154,7 +156,7 @@ export const VEDICS_LETTERS = [
     cardTextColor: "#FFFFFF",
     highlightStat: "72h Slow Decoction",
     image: "/products/rudra-nobg.png",
-    videoSrc: "/videos/botanical-infusion.mp4",
+    videoSrc: getMediaUrl("/videos/botanical-infusion.mp4"),
     scenicImage: "/products/rudra-tulasi.png",
     bgGradient: "from-[#F2FAF4] via-[#E8F6EC] to-[#D4EEDC]",
     badgeBg: "bg-[#4E8D56]/15 text-[#23602B] border-[#4E8D56]/30",
@@ -173,7 +175,7 @@ export const VEDICS_LETTERS = [
     cardTextColor: "#FFFFFF",
     highlightStat: "Zero Chemical Fillers",
     image: "/products/arshana-nobg.png",
-    videoSrc: "/videos/vericose.mp4",
+    videoSrc: getMediaUrl("/videos/vericose.mp4"),
     scenicImage: "/products/arshana-lehyam.png",
     bgGradient: "from-[#F0F9F8] via-[#E2F4F2] to-[#CEEDE9]",
     badgeBg: "bg-[#2F7E79]/15 text-[#1B5753] border-[#2F7E79]/30",
@@ -192,7 +194,7 @@ export const VEDICS_LETTERS = [
     cardTextColor: "#FFFFFF",
     highlightStat: "Adaptive Intelligence",
     image: "/products/brahmi-nobg.png",
-    videoSrc: "/videos/botanical-infusion.mp4",
+    videoSrc: getMediaUrl("/videos/botanical-infusion.mp4"),
     scenicImage: "/products/brahmi.png",
     bgGradient: "from-[#FDF6EE] via-[#F8EDDE] to-[#EEDCC4]",
     badgeBg: "bg-[#C2833E]/15 text-[#86531E] border-[#C2833E]/30",
@@ -211,7 +213,7 @@ export const VEDICS_LETTERS = [
     cardTextColor: "#FFFFFF",
     highlightStat: "Fair-Trade Sahyadri Collectives",
     image: "/products/freedom-nobg.png",
-    videoSrc: "/videos/feedon-animation.mp4",
+    videoSrc: getMediaUrl("/videos/feedon-animation.mp4"),
     scenicImage: "/products/freedom.png",
     bgGradient: "from-[#F3F9F4] via-[#E7F3E9] to-[#D2E7D6]",
     badgeBg: "bg-[#3F7553]/15 text-[#205133] border-[#3F7553]/30",
@@ -230,7 +232,7 @@ export const VEDICS_LETTERS = [
     cardTextColor: "#FFFFFF",
     highlightStat: "GMP & AYUSH Certified",
     image: "/products/varicose-nobg.png",
-    videoSrc: "/videos/freedon.mp4",
+    videoSrc: getMediaUrl("/videos/freedon.mp4"),
     scenicImage: "/products/varicose.png",
     bgGradient: "from-[#F5F7F5] via-[#E8ECE8] to-[#D5DDD5]",
     badgeBg: "bg-[#1F3D2B]/15 text-[#14281C] border-[#1F3D2B]/30",
