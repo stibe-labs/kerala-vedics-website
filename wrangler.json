@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kerala-vedics",
+  "compatibility_date": "2026-08-31",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": ".open-next/worker.js",
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kerala-vedics-db",
+      "database_id": "ee1a722d-9535-4720-ace4-4eb853966a8b"
+    }
+  ],
+  "vars": {
+    "SMTP_HOST": "smtp.gmail.com",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "arjunz.project@gmail.com",
+    "CLOUDFLARE_ACCOUNT_ID": "d8504d79ae6a685fc7010f2c447219a9",
+    "CLOUDFLARE_DATABASE_ID": "ee1a722d-9535-4720-ace4-4eb853966a8b"
+  }
+}
