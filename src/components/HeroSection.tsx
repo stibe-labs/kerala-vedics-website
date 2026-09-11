@@ -129,7 +129,7 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       id="hero"
-      className="relative w-full min-h-screen min-h-[100dvh] bg-[#182917] text-white select-none flex flex-col justify-between overflow-hidden"
+      className="relative w-full min-h-screen min-h-[100dvh] bg-[#0D160E] text-white select-none flex flex-col justify-between overflow-hidden"
     >
       {/* RIGHT SIDE VIDEO (100% FILL ON RIGHT SIDE, NO GREEN LETTERBOXING) */}
       <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[50%] xl:w-[52%] h-full overflow-hidden pointer-events-none z-0">
@@ -154,10 +154,10 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
         </AnimatePresence>
 
         {/* Clean Left-Only Gradient Transition: softly blends text area into the video */}
-        <div className="absolute inset-y-0 left-0 w-24 sm:w-36 lg:w-44 bg-gradient-to-r from-[#182917] to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 left-0 w-24 sm:w-36 lg:w-44 bg-gradient-to-r from-[#0D160E] to-transparent z-10 pointer-events-none" />
 
         {/* Mobile-only light overlay for text readability */}
-        <div className="absolute inset-0 bg-[#182917]/50 lg:hidden z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-[#0D160E]/50 lg:hidden z-10 pointer-events-none" />
       </div>
 
       {/* HERO CONTENT STAGE (ADAPTIVE FULL VIEWPORT HEIGHT) */}

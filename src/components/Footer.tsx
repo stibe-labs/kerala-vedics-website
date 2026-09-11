@@ -6,7 +6,7 @@ const MANTRA_TEXT = "Vedic Wisdom · Natural Healing · Timeless Wellness · Pur
 
 export function Footer() {
   return (
-    <footer className="bg-[#192A18] text-[#FAF8F2] border-t border-[#EDC918]/20 pt-10 pb-16 overflow-hidden">
+    <footer className="bg-[#0B130D] text-[#FAF8F2] border-t border-[#EDC918]/20 pt-10 pb-16 overflow-hidden">
       {/* Slow Continuous Looping Mantra Marquee */}
       <div className="border-b border-white/10 pb-8 overflow-hidden whitespace-nowrap">
         <div className="animate-marquee font-serif text-xl sm:text-2xl lg:text-3xl text-[#EDC918]/80 tracking-widest uppercase">
@@ -24,7 +24,7 @@ export function Footer() {
               <img
                 src="/KV-Logo-w.png"
                 alt="Kerala Vedics"
-                className="h-10 sm:h-12 w-auto max-w-[210px] object-contain"
+                className="h-14 sm:h-16 lg:h-18 w-auto max-w-[260px] object-contain"
               />
             </div>
             <p className="text-xs text-[#FAF8F2]/70 max-w-sm font-light leading-relaxed">

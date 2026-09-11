@@ -233,14 +233,20 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
         <LayoutGroup id="navbar-capsule">
-          {/* Top Bar with Logo & Transparent Header */}
-          <div className="w-full px-4 sm:px-8 py-3.5 flex items-center justify-between pointer-events-auto bg-transparent">
-            {/* Left: Kerala Vedics Brand Logo */}
-            <Link href="/" className="flex items-center gap-3 group focus:outline-none">
+          {/* Top Bar with Logo & Luxury Dark Header */}
+          <div
+            className={`w-full px-4 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between pointer-events-auto transition-all duration-300 ${
+              isScrolled
+                ? "bg-[#09110B]/95 backdrop-blur-xl border-b border-[#EDC918]/15 shadow-[0_8px_32px_rgba(0,0,0,0.65)]"
+                : "bg-gradient-to-b from-[#070D08]/90 via-[#070D08]/50 to-transparent"
+            }`}
+          >
+            {/* Left: Kerala Vedics Brand Logo (Prominent & High Clarity) */}
+            <Link href="/" className="flex items-center gap-3 group focus:outline-none shrink-0 py-1">
               <img
                 src="/KV-Logo-w.png"
                 alt="Kerala Vedics Logo"
-                className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[230px] object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] group-hover:scale-[1.03] transition-transform duration-300"
+                className="h-14 sm:h-18 lg:h-20 w-auto max-w-[240px] sm:max-w-[300px] object-contain drop-shadow-[0_4px_18px_rgba(0,0,0,0.8)] group-hover:scale-[1.03] transition-transform duration-300"
               />
             </Link>
 
@@ -248,7 +254,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
             <div className="hidden md:flex items-center justify-center">
               <motion.div
                 layout
-                className="bg-[#192A18]/90 backdrop-blur-xl border border-white/[0.12] p-1.5 rounded-full shadow-[0_12px_35px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)] flex items-center gap-1 overflow-hidden"
+                className="bg-[#0A130C]/95 backdrop-blur-xl border border-white/[0.14] p-1.5 rounded-full shadow-[0_12px_35px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.06)] flex items-center gap-1 overflow-hidden"
               >
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
@@ -271,7 +277,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                       {isActive && (
                         <motion.div
                           layoutId="active-pill-bg-desktop"
-                          className="absolute inset-0 bg-[#273F25] border border-white/20 rounded-full"
+                          className="absolute inset-0 bg-[#1C2A1D] border border-[#EDC918]/30 rounded-full"
                           transition={{
                             type: "spring",
                             stiffness: 500,
@@ -485,7 +491,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
           <div className="md:hidden fixed bottom-5 left-0 right-0 px-4 flex justify-center z-50 pointer-events-auto">
             <motion.div
               layout
-              className="bg-[#192A18]/95 backdrop-blur-2xl border border-white/15 p-1.5 rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.08)] flex items-center justify-around gap-1 max-w-[360px] w-full"
+              className="bg-[#0A130C]/95 backdrop-blur-2xl border border-white/15 p-1.5 rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.08)] flex items-center justify-around gap-1 max-w-[360px] w-full"
             >
               {/* Home */}
               <Link
