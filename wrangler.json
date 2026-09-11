@@ -6,22 +6,25 @@
     "nodejs_compat"
   ],
   "main": ".open-next/worker.js",
+  "workers_dev": true,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "d1_databases": [
+  "routes": [
     {
-      "binding": "DB",
-      "database_name": "kerala-vedics-db",
-      "database_id": "ee1a722d-9535-4720-ace4-4eb853966a8b"
+      "pattern": "keralavedics.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.keralavedics.com",
+      "custom_domain": true
     }
   ],
   "vars": {
     "SMTP_HOST": "smtp.gmail.com",
     "SMTP_PORT": "587",
     "SMTP_USER": "arjunz.project@gmail.com",
-    "CLOUDFLARE_ACCOUNT_ID": "d8504d79ae6a685fc7010f2c447219a9",
-    "CLOUDFLARE_DATABASE_ID": "ee1a722d-9535-4720-ace4-4eb853966a8b"
+    "CLOUDFLARE_ACCOUNT_ID": "7fb19661d826eacb527239392926d178"
   }
 }
