@@ -13,10 +13,6 @@
   },
   "routes": [
     {
-      "pattern": "keralavedics.com",
-      "custom_domain": true
-    },
-    {
       "pattern": "www.keralavedics.com",
       "custom_domain": true
     }
