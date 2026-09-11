@@ -127,7 +127,8 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
     <section
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative w-full min-h-screen min-h-[100dvh] bg-[#08150D] text-white select-none flex flex-col justify-between overflow-hidden"
+      id="hero"
+      className="relative w-full min-h-screen min-h-[100dvh] bg-[#182917] text-white select-none flex flex-col justify-between overflow-hidden"
     >
       {/* RIGHT SIDE VIDEO (100% FILL ON RIGHT SIDE, NO GREEN LETTERBOXING) */}
       <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[50%] xl:w-[52%] h-full overflow-hidden pointer-events-none z-0">
@@ -152,10 +153,10 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
         </AnimatePresence>
 
         {/* Clean Left-Only Gradient Transition: softly blends text area into the video */}
-        <div className="absolute inset-y-0 left-0 w-24 sm:w-36 lg:w-44 bg-gradient-to-r from-[#08150D] to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 left-0 w-24 sm:w-36 lg:w-44 bg-gradient-to-r from-[#182917] to-transparent z-10 pointer-events-none" />
 
         {/* Mobile-only light overlay for text readability */}
-        <div className="absolute inset-0 bg-[#08150D]/50 lg:hidden z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-[#182917]/50 lg:hidden z-10 pointer-events-none" />
       </div>
 
       {/* HERO CONTENT STAGE (ADAPTIVE FULL VIEWPORT HEIGHT) */}
@@ -172,19 +173,19 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
               className="space-y-4 sm:space-y-5"
             >
               {/* Top Pill Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A3824] border border-[#2D583B] text-[11px] font-medium text-[#9FCBAA] shadow-xs">
-                <Leaf className="w-3 h-3 text-[#86C298]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#273F25] border border-[#516830] text-[11px] font-medium text-[#EDC918] shadow-xs">
+                <Leaf className="w-3 h-3 text-[#EDC918]" />
                 <span>{slide.badge}</span>
               </div>
 
               {/* Main Headline with dual-color serif typography */}
-              <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-serif font-normal tracking-tight text-[#FAF7F2] leading-[1.08]">
+              <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-serif font-normal tracking-tight text-[#FAF8F2] leading-[1.08]">
                 {slide.titlePrimary}{" "}
-                <span className="text-[#96BF7E]">{slide.titleSecondary}</span>
+                <span className="text-[#EDC918]">{slide.titleSecondary}</span>
               </h1>
 
               {/* Subtitle Description */}
-              <p className="text-xs sm:text-sm text-[#D0DFD5] font-light leading-relaxed max-w-md">
+              <p className="text-xs sm:text-sm text-[#FAF8F2]/80 font-light leading-relaxed max-w-md">
                 {slide.description}
               </p>
 
@@ -192,7 +193,7 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
               <div className="pt-0.5 flex flex-wrap items-center gap-4 sm:gap-6">
                 {slide.features.map((feat, idx) => (
                   <div key={idx} className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/20 bg-white/[0.04] flex items-center justify-center shrink-0 text-[#9FCBAA]">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#516830]/50 bg-[#273F25]/60 flex items-center justify-center shrink-0 text-[#EDC918]">
                       {feat.icon === "leaf" && <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                       {feat.icon === "shield" && <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                       {feat.icon === "lotus" && <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
@@ -201,7 +202,7 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
                       <span className="block text-[11px] sm:text-xs font-medium text-white">
                         {feat.title}
                       </span>
-                      <span className="block text-[10px] text-[#A6C0B0] font-light">
+                      <span className="block text-[10px] text-[#516830]/90 font-medium">
                         {feat.subtitle}
                       </span>
                     </div>
@@ -213,7 +214,7 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
               <div className="pt-1.5 flex items-center gap-3 flex-wrap">
                 <a
                   href={slide.shopLink}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 sm:px-7 sm:py-3 rounded-xl bg-[#557532] hover:bg-[#62873a] text-white text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-md hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 sm:px-7 sm:py-3 rounded-xl bg-[#EDC918] hover:bg-[#F4D948] text-[#273F25] text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md hover:scale-[1.02]"
                 >
                   <span>Shop Now</span>
                   <ChevronRight className="w-4 h-4" />
@@ -242,7 +243,7 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
                 onClick={() => setCurrentSlideIdx(idx)}
                 className={`text-[10px] sm:text-[11px] font-mono font-medium transition-all duration-300 flex items-center justify-center cursor-pointer ${
                   isActive
-                    ? "w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#557532] text-[#9FCBAA] bg-[#1A3824]/80 shadow-md scale-110"
+                    ? "w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#EDC918] text-[#EDC918] bg-[#273F25] shadow-md scale-110"
                     : "w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white/40 hover:text-white/80 hover:bg-white/5"
                 }`}
                 aria-label={`Go to slide ${s.number}`}
@@ -256,15 +257,15 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
 
       {/* Subtle Bottom Scroll Indicator Cue */}
       <div className="relative z-20 pb-5 flex justify-center items-center pointer-events-none">
-        <div className="flex flex-col items-center gap-1.5 opacity-65">
-          <span className="text-[10px] uppercase font-mono tracking-widest text-[#9FCBAA]">
+        <div className="flex flex-col items-center gap-1.5 opacity-75">
+          <span className="text-[10px] uppercase font-mono tracking-widest text-[#EDC918]">
             Scroll to explore
           </span>
-          <div className="w-4 h-7 rounded-full border border-[#9FCBAA]/40 flex justify-center p-1">
+          <div className="w-4 h-7 rounded-full border border-[#EDC918]/40 flex justify-center p-1">
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-              className="w-1 h-1.5 rounded-full bg-[#9FCBAA]"
+              className="w-1 h-1.5 rounded-full bg-[#EDC918]"
             />
           </div>
         </div>

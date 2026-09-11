@@ -21,26 +21,26 @@ export function VedicsPromiseSection() {
   return (
     <section
       id="vedics-promise"
-      className="relative bg-[#FBF9F5] text-[#14281C] py-16 sm:py-24 lg:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative bg-[#FAF8F2] text-[#273F25] py-16 sm:py-24 lg:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
       {/* Background ambient lighting and subtle grid pattern */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-[#C89D4A]/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-[#4C6B3D]/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(#14281C_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.03] pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-[#EDC918]/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-[#516830]/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#273F25_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.03] pointer-events-none" />
 
       <div className="relative z-10 max-w-6xl mx-auto space-y-10 sm:space-y-12">
         {/* 1. TOP HEADER */}
         <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.2em] text-[#14281C] bg-white border border-[#E8E2D5] shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#C89D4A]" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.2em] text-[#273F25] bg-white border border-[#516830]/20 shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-[#EDC918]" />
             <span>Signature Brand Philosophy</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-[#14281C] leading-tight">
-            The <span className="italic text-[#C89D4A] font-normal">V-E-D-I-C-S</span> Framework
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-[#273F25] leading-tight">
+            The <span className="italic text-[#EDC918] font-normal">V-E-D-I-C-S</span> Framework
           </h2>
 
-          <p className="text-sm sm:text-base text-[#55695A] font-light leading-relaxed">
+          <p className="text-sm sm:text-base text-[#516830] font-light leading-relaxed">
             The six sacred Ashtavaidya bio-principles guiding every Kerala Vedics formulation.
           </p>
         </div>
@@ -55,16 +55,16 @@ export function VedicsPromiseSection() {
                 onClick={() => setActiveIndex(idx)}
                 className={`group relative transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border cursor-pointer select-none ${
                   isActive
-                    ? "bg-[#0F281A] text-white border-[#0F281A] shadow-lg shadow-[#0F281A]/20 scale-105"
-                    : "bg-white text-[#14281C] border-[#E8E2D5] hover:border-[#0F281A]/40 hover:bg-[#FDFBF7] shadow-xs"
+                    ? "bg-[#273F25] text-white border-[#273F25] shadow-lg shadow-[#273F25]/20 scale-105"
+                    : "bg-white text-[#273F25] border-[#516830]/20 hover:border-[#273F25]/40 hover:bg-[#FDFBF7] shadow-xs"
                 }`}
               >
                 {/* Icon / Letter Monogram Badge */}
                 <div
                   className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                     isActive
-                      ? "bg-white/15 text-[#E0BA6A]"
-                      : "bg-[#F4EFE6] text-[#14281C] group-hover:bg-[#0F281A] group-hover:text-white"
+                      ? "bg-white/15 text-[#EDC918]"
+                      : "bg-[#FAF8F2] text-[#273F25] group-hover:bg-[#273F25] group-hover:text-white"
                   }`}
                 >
                   {item.logoSrc ? (
@@ -83,14 +83,14 @@ export function VedicsPromiseSection() {
                 <div className="text-left leading-tight">
                   <span
                     className={`block text-xs sm:text-sm font-semibold tracking-wide ${
-                      isActive ? "text-white" : "text-[#14281C]"
+                      isActive ? "text-white" : "text-[#273F25]"
                     }`}
                   >
                     {item.name}
                   </span>
                   <span
                     className={`block text-[10px] font-serif ${
-                      isActive ? "text-[#E0BA6A]" : "text-[#8BA664]"
+                      isActive ? "text-[#EDC918]" : "text-[#516830]"
                     }`}
                   >
                     {item.sanskrit}
@@ -100,7 +100,7 @@ export function VedicsPromiseSection() {
                 {isActive && (
                   <motion.div
                     layoutId="activeTabGlow"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-[#C89D4A] rounded-full"
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-[#EDC918] rounded-full"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -118,14 +118,14 @@ export function VedicsPromiseSection() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.98 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden bg-[#0F281A] text-white border border-[#C89D4A]/25 shadow-2xl shadow-[#0F281A]/20"
+              className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden bg-[#273F25] text-white border border-[#EDC918]/30 shadow-2xl shadow-[#273F25]/20"
               style={{
-                backgroundColor: activeItem.cardBg || "#0F281A",
+                backgroundColor: activeItem.cardBg || "#273F25",
               }}
             >
               {/* Subtle ambient lighting sheen inside card */}
-              <div className="absolute top-0 right-0 w-96 h-96 bg-[#C89D4A]/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#4C6B3D]/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-96 h-96 bg-[#EDC918]/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#516830]/20 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-black/40 pointer-events-none" />
 
               <div className="relative z-10 p-6 sm:p-8 lg:p-9 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
@@ -135,7 +135,7 @@ export function VedicsPromiseSection() {
                   <div className="space-y-3.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
-                        <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center font-serif text-sm font-bold text-[#E0BA6A] border border-white/15">
+                        <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center font-serif text-sm font-bold text-[#EDC918] border border-white/15">
                           {activeItem.logoSrc ? (
                             <img
                               src={activeItem.logoSrc}
@@ -151,7 +151,7 @@ export function VedicsPromiseSection() {
                         </span>
                       </div>
 
-                      <span className="text-xs sm:text-sm font-serif font-medium tracking-wide text-[#E0BA6A] bg-white/10 backdrop-blur-md px-3 sm:px-3.5 py-0.5 sm:py-1 rounded-full border border-[#E0BA6A]/30">
+                      <span className="text-xs sm:text-sm font-serif font-medium tracking-wide text-[#EDC918] bg-white/10 backdrop-blur-md px-3 sm:px-3.5 py-0.5 sm:py-1 rounded-full border border-[#EDC918]/30">
                         {activeItem.sanskrit}
                       </span>
                     </div>
@@ -161,7 +161,7 @@ export function VedicsPromiseSection() {
                       <h3 className="text-2xl sm:text-3xl lg:text-[34px] font-serif font-medium text-white tracking-tight leading-tight">
                         {activeItem.name}
                       </h3>
-                      <p className="text-xs sm:text-sm font-medium text-[#E0BA6A] tracking-wide mt-1">
+                      <p className="text-xs sm:text-sm font-medium text-[#EDC918] tracking-wide mt-1">
                         {activeItem.tagline}
                       </p>
                     </div>
@@ -178,7 +178,7 @@ export function VedicsPromiseSection() {
                           key={i}
                           className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/15 text-[11px] sm:text-xs font-light text-white/90"
                         >
-                          <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#E0BA6A]" />
+                          <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#EDC918]" />
                           <span>{metric}</span>
                         </span>
                       ))}
@@ -210,8 +210,8 @@ export function VedicsPromiseSection() {
 
                     {/* CTA Button */}
                     <a
-                      href="#rituals"
-                      className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#E0BA6A] hover:bg-[#F0C978] text-[#0F281A] text-xs sm:text-sm font-semibold transition-all duration-200 shadow-md shadow-[#E0BA6A]/20 hover:scale-[1.02]"
+                      href="#products"
+                      className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#EDC918] hover:bg-[#F4D948] text-[#273F25] text-xs sm:text-sm font-bold transition-all duration-200 shadow-md shadow-[#EDC918]/20 hover:scale-[1.02]"
                     >
                       <span>Explore Formulations</span>
                       <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

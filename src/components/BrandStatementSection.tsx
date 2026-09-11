@@ -53,16 +53,16 @@ export function BrandStatementSection() {
     <section
       id="philosophy"
       ref={containerRef}
-      className="relative py-28 sm:py-36 bg-[#F4EFE6] text-[#1F3D2B] overflow-hidden border-b border-[#4C6B3D]/10"
+      className="relative py-28 sm:py-36 bg-[#FAF8F2] text-[#273F25] overflow-hidden border-b border-[#516830]/15"
     >
       <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center space-y-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest text-[#4C6B3D] bg-[#8BA664]/15 border border-[#8BA664]/30">
-          <Sparkles className="w-3.5 h-3.5 text-[#C89D4A]" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-widest text-[#516830] bg-[#516830]/10 border border-[#516830]/25">
+          <Sparkles className="w-3.5 h-3.5 text-[#EDC918]" />
           <span>The Brand Essence</span>
         </div>
 
         {/* Dynamic Scroll-Linked Blur & Unmasking */}
-        <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-light leading-[1.35] tracking-tight max-w-4xl mx-auto flex flex-wrap justify-center text-[#1F3D2B]">
+        <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-light leading-[1.35] tracking-tight max-w-4xl mx-auto flex flex-wrap justify-center text-[#273F25]">
           {words.map((word, idx) => {
             // Allocate a distinct progress segment for each word
             const start = idx / words.length;
@@ -81,8 +81,8 @@ export function BrandStatementSection() {
         </h2>
 
         <div className="pt-4 flex flex-col items-center">
-          <div className="w-16 h-[1px] bg-[#C89D4A]" />
-          <p className="text-xs uppercase tracking-[0.25em] text-[#4C6B3D] pt-4 font-medium">
+          <div className="w-16 h-[2px] bg-[#EDC918]" />
+          <p className="text-xs uppercase tracking-[0.25em] text-[#516830] pt-4 font-semibold">
             5,000 Years of Botanical Alchemy Reimagined for Daily Radiance
           </p>
         </div>

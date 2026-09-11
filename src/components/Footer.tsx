@@ -6,10 +6,10 @@ const MANTRA_TEXT = "Vedic Wisdom · Natural Healing · Timeless Wellness · Pur
 
 export function Footer() {
   return (
-    <footer className="bg-[#14281C] text-[#FAF7F2] border-t border-[#C89D4A]/20 pt-10 pb-16 overflow-hidden">
+    <footer className="bg-[#192A18] text-[#FAF8F2] border-t border-[#EDC918]/20 pt-10 pb-16 overflow-hidden">
       {/* Slow Continuous Looping Mantra Marquee */}
       <div className="border-b border-white/10 pb-8 overflow-hidden whitespace-nowrap">
-        <div className="animate-marquee font-serif text-xl sm:text-2xl lg:text-3xl text-[#E0BA6A]/80 tracking-widest uppercase">
+        <div className="animate-marquee font-serif text-xl sm:text-2xl lg:text-3xl text-[#EDC918]/80 tracking-widest uppercase">
           <span>{MANTRA_TEXT}</span>
           <span>{MANTRA_TEXT}</span>
           <span>{MANTRA_TEXT}</span>
@@ -21,61 +21,61 @@ export function Footer() {
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full border border-[#C89D4A] flex items-center justify-center bg-[#1F3D2B] text-[#C89D4A] font-serif text-xl font-bold">
+              <div className="w-10 h-10 rounded-full border border-[#EDC918] flex items-center justify-center bg-[#273F25] text-[#EDC918] font-serif text-xl font-bold">
                 K
               </div>
               <div className="flex flex-col">
-                <span className="font-serif tracking-widest text-lg font-bold uppercase text-[#FAF7F2]">
+                <span className="font-serif tracking-widest text-lg font-bold uppercase text-[#FAF8F2]">
                   Kerala Vedics
                 </span>
-                <span className="text-[10px] tracking-[0.22em] uppercase font-sans text-[#C89D4A]">
+                <span className="text-[10px] tracking-[0.22em] uppercase font-sans text-[#EDC918]">
                   Ayurveda · Nature · Balance
                 </span>
               </div>
             </div>
-            <p className="text-xs text-[#FAF7F2]/70 max-w-sm font-light leading-relaxed">
+            <p className="text-xs text-[#FAF8F2]/70 max-w-sm font-light leading-relaxed">
               Classical Ayurvedic manufacture anchored in the virgin rainforests of Kerala. Formulated with reverence to ancient Vaidyas and the healing intelligence of nature.
             </p>
           </div>
 
           {/* Nav Col 1 */}
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-mono text-[#8BA664]">
+            <h4 className="text-xs uppercase tracking-widest font-mono text-[#516830] font-semibold">
               Sacred Rituals
             </h4>
-            <ul className="space-y-2 text-xs text-[#FAF7F2]/80 font-light">
-              <li><a href="#rituals" className="hover:text-[#C89D4A] transition-colors">Kumkumadi Beauty Fluid</a></li>
-              <li><a href="#rituals" className="hover:text-[#C89D4A] transition-colors">Bhringadi Scalp Nectar</a></li>
-              <li><a href="#rituals" className="hover:text-[#C89D4A] transition-colors">Mahanarayan Joint Elixir</a></li>
-              <li><a href="#rituals" className="hover:text-[#C89D4A] transition-colors">Royal Amrit Rasayana</a></li>
-              <li><a href="#rituals" className="hover:text-[#C89D4A] transition-colors">Nidra Shanti Mist</a></li>
+            <ul className="space-y-2 text-xs text-[#FAF8F2]/80 font-light">
+              <li><a href="/products" className="hover:text-[#EDC918] transition-colors">Arshana Lehyam</a></li>
+              <li><a href="/products" className="hover:text-[#EDC918] transition-colors">Rudra Tulasi Drops</a></li>
+              <li><a href="/products" className="hover:text-[#EDC918] transition-colors">Freedom Joint Care</a></li>
+              <li><a href="/products" className="hover:text-[#EDC918] transition-colors">Brahmi Medhya Rasayana</a></li>
+              <li><a href="/products" className="hover:text-[#EDC918] transition-colors">Varicose Circulation Care</a></li>
             </ul>
           </div>
 
           {/* Nav Col 2 */}
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-mono text-[#8BA664]">
+            <h4 className="text-xs uppercase tracking-widest font-mono text-[#516830] font-semibold">
               Vedic Heritage
             </h4>
-            <ul className="space-y-2 text-xs text-[#FAF7F2]/80 font-light">
-              <li><a href="#vedics-promise" className="hover:text-[#C89D4A] transition-colors">The VEDICS Framework</a></li>
-              <li><a href="#soil-to-self" className="hover:text-[#C89D4A] transition-colors">Soil to Self Sourcing</a></li>
-              <li><a href="#pillars" className="hover:text-[#C89D4A] transition-colors">The Five Pillars</a></li>
-              <li><a href="#philosophy" className="hover:text-[#C89D4A] transition-colors">Classical Samhitas</a></li>
-              <li><a href="#soil-to-self" className="hover:text-[#C89D4A] transition-colors">Wayanad Wildcrafting</a></li>
+            <ul className="space-y-2 text-xs text-[#FAF8F2]/80 font-light">
+              <li><a href="#vedics-promise" className="hover:text-[#EDC918] transition-colors">The VEDICS Framework</a></li>
+              <li><a href="#soil-to-self" className="hover:text-[#EDC918] transition-colors">Soil to Self Sourcing</a></li>
+              <li><a href="#products" className="hover:text-[#EDC918] transition-colors">Classical Extractions</a></li>
+              <li><a href="#philosophy" className="hover:text-[#EDC918] transition-colors">Charaka Samhita Texts</a></li>
+              <li><a href="#soil-to-self" className="hover:text-[#EDC918] transition-colors">Sahyadri Wildcrafting</a></li>
             </ul>
           </div>
 
           {/* Legal / Social */}
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-mono text-[#8BA664]">
+            <h4 className="text-xs uppercase tracking-widest font-mono text-[#516830] font-semibold">
               Sanctuary
             </h4>
-            <ul className="space-y-2 text-xs text-[#FAF7F2]/80 font-light">
+            <ul className="space-y-2 text-xs text-[#FAF8F2]/80 font-light">
               <li><span>AYUSH Certified Facility</span></li>
               <li><span>GMP Standard Quality</span></li>
               <li><span>Thrissur, Kerala, India</span></li>
-              <li><a href="mailto:wisdom@keralavedics.com" className="hover:text-[#C89D4A] text-[#E0BA6A]">wisdom@keralavedics.com</a></li>
+              <li><a href="mailto:wisdom@keralavedics.com" className="hover:text-[#EDC918] text-[#EDC918]">wisdom@keralavedics.com</a></li>
             </ul>
           </div>
         </div>

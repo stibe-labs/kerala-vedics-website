@@ -248,7 +248,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
             <div className="hidden md:flex items-center justify-center">
               <motion.div
                 layout
-                className="bg-[#121714]/90 backdrop-blur-xl border border-white/[0.12] p-1.5 rounded-full shadow-[0_12px_35px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)] flex items-center gap-1 overflow-hidden"
+                className="bg-[#192A18]/90 backdrop-blur-xl border border-white/[0.12] p-1.5 rounded-full shadow-[0_12px_35px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)] flex items-center gap-1 overflow-hidden"
               >
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
@@ -271,7 +271,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                       {isActive && (
                         <motion.div
                           layoutId="active-pill-bg-desktop"
-                          className="absolute inset-0 bg-[#242b26] border border-white/20 rounded-full"
+                          className="absolute inset-0 bg-[#273F25] border border-white/20 rounded-full"
                           transition={{
                             type: "spring",
                             stiffness: 500,
@@ -283,7 +283,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                       <span className="relative z-10 flex items-center gap-2">
                         <Icon
                           className={`w-4 h-4 shrink-0 transition-colors duration-200 ${
-                            isActive ? "text-[#DFC188]" : ""
+                            isActive ? "text-[#EDC918]" : ""
                           }`}
                         />
                         <span className="whitespace-nowrap font-medium tracking-wide">
@@ -296,7 +296,6 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
               </motion.div>
             </div>
 
-            {/* Right: Search, Wishlist, Bag & User Profile Action Group */}
             {/* Right: Profile, Wishlist & Bag (Myntra-style vertical stack) */}
             <div className="flex items-center gap-5 sm:gap-7">
               {/* 1. Profile */}
@@ -306,14 +305,14 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                     e.stopPropagation();
                     setIsUserDropdownOpen((prev) => !prev);
                   }}
-                  className="flex flex-col items-center justify-center text-white/80 hover:text-[#DFC188] transition-colors cursor-pointer group select-none py-1"
+                  className="flex flex-col items-center justify-center text-white/80 hover:text-[#EDC918] transition-colors cursor-pointer group select-none py-1"
                   title="Profile & Account"
                 >
                   <User
-                    className="w-5 h-5 text-[#DFC188] group-hover:scale-110 transition-transform"
+                    className="w-5 h-5 text-[#EDC918] group-hover:scale-110 transition-transform"
                     strokeWidth={1.8}
                   />
-                  <span className="text-[11px] font-semibold tracking-tight mt-1 text-white/90 group-hover:text-[#DFC188] transition-colors">
+                  <span className="text-[11px] font-semibold tracking-tight mt-1 text-white/90 group-hover:text-[#EDC918] transition-colors">
                     {user ? user.name.split(" ")[0] : "Profile"}
                   </span>
                 </button>
@@ -327,7 +326,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                       exit={{ opacity: 0, y: 6, scale: 0.96 }}
                       transition={{ duration: 0.18, ease: "easeOut" }}
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute right-0 mt-2.5 w-64 rounded-2xl bg-[#141A16]/95 backdrop-blur-2xl border border-white/15 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.08)] z-50 text-white space-y-2"
+                      className="absolute right-0 mt-2.5 w-64 rounded-2xl bg-[#192A18]/95 backdrop-blur-2xl border border-white/15 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.08)] z-50 text-white space-y-2"
                     >
                       {user ? (
                         <>
@@ -341,7 +340,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                             onClick={() => setIsUserDropdownOpen(false)}
                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer group"
                           >
-                            <Package className="w-4 h-4 text-[#C89D4A] group-hover:scale-110 transition-transform" />
+                            <Package className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
                             <span>My Orders</span>
                           </Link>
 
@@ -350,7 +349,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                             onClick={() => setIsUserDropdownOpen(false)}
                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer group"
                           >
-                            <Heart className="w-4 h-4 text-[#C89D4A] group-hover:scale-110 transition-transform" />
+                            <Heart className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
                             <span>Wishlist ({totalWishlistItems})</span>
                           </Link>
 
@@ -359,7 +358,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                             onClick={() => setIsUserDropdownOpen(false)}
                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer group"
                           >
-                            <Sparkles className="w-4 h-4 text-[#C89D4A] group-hover:scale-110 transition-transform" />
+                            <Sparkles className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
                             <span>Personal Sanctuary</span>
                           </Link>
 
@@ -368,16 +367,16 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                             onClick={() => setIsUserDropdownOpen(false)}
                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer group"
                           >
-                            <Edit className="w-4 h-4 text-[#C89D4A] group-hover:scale-110 transition-transform" />
+                            <Edit className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
                             <span>Edit Profile</span>
                           </Link>
 
                           <Link
                             href="/admin"
                             onClick={() => setIsUserDropdownOpen(false)}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#E0BA6A] hover:bg-white/10 transition-colors cursor-pointer group"
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#EDC918] hover:bg-white/10 transition-colors cursor-pointer group"
                           >
-                            <ShieldCheck className="w-4 h-4 text-[#C89D4A] group-hover:scale-110 transition-transform" />
+                            <ShieldCheck className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
                             <span>Admin Portal</span>
                           </Link>
 
@@ -406,7 +405,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                               setIsUserDropdownOpen(false);
                               openAuthModal("login");
                             }}
-                            className="w-full py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#DFC188] via-[#E0BA6A] to-[#C89D4A] text-[#14281C] hover:brightness-105 transition-all shadow-sm cursor-pointer"
+                            className="w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#EDC918] text-[#273F25] hover:bg-[#F4D948] transition-all shadow-sm cursor-pointer"
                           >
                             Log In / Sign Up
                           </button>
@@ -417,7 +416,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                               onClick={() => setIsUserDropdownOpen(false)}
                               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                             >
-                              <Package className="w-4 h-4 text-[#C89D4A]" />
+                              <Package className="w-4 h-4 text-[#EDC918]" />
                               <span>Orders</span>
                             </Link>
                             <Link
@@ -425,7 +424,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                               onClick={() => setIsUserDropdownOpen(false)}
                               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                             >
-                              <Heart className="w-4 h-4 text-[#C89D4A]" />
+                              <Heart className="w-4 h-4 text-[#EDC918]" />
                               <span>Wishlist</span>
                             </Link>
                           </div>
@@ -439,21 +438,21 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
               {/* 2. Wishlist */}
               <Link
                 href="/wishlist"
-                className="relative flex flex-col items-center justify-center text-white/80 hover:text-[#DFC188] transition-colors cursor-pointer group select-none py-1"
+                className="relative flex flex-col items-center justify-center text-white/80 hover:text-[#EDC918] transition-colors cursor-pointer group select-none py-1"
                 title="Wishlist"
               >
                 <div className="relative">
                   <Heart
-                    className="w-5 h-5 text-[#DFC188] group-hover:scale-110 transition-transform"
+                    className="w-5 h-5 text-[#EDC918] group-hover:scale-110 transition-transform"
                     strokeWidth={1.8}
                   />
                   {totalWishlistItems > 0 && (
-                    <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-[#E0BA6A] text-[#14281C] font-bold text-[9px] flex items-center justify-center shadow-xs">
+                    <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[9px] flex items-center justify-center shadow-xs">
                       {totalWishlistItems}
                     </span>
                   )}
                 </div>
-                <span className="text-[11px] font-semibold tracking-tight mt-1 text-white/90 group-hover:text-[#DFC188] transition-colors">
+                <span className="text-[11px] font-semibold tracking-tight mt-1 text-white/90 group-hover:text-[#EDC918] transition-colors">
                   Wishlist
                 </span>
               </Link>
@@ -461,21 +460,21 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
               {/* 3. Bag */}
               <Link
                 href="/cart"
-                className="relative flex flex-col items-center justify-center text-white/80 hover:text-[#DFC188] transition-colors cursor-pointer group select-none py-1"
+                className="relative flex flex-col items-center justify-center text-white/80 hover:text-[#EDC918] transition-colors cursor-pointer group select-none py-1"
                 title="Shopping Bag"
               >
                 <div className="relative">
                   <ShoppingBag
-                    className="w-5 h-5 text-[#DFC188] group-hover:scale-110 transition-transform"
+                    className="w-5 h-5 text-[#EDC918] group-hover:scale-110 transition-transform"
                     strokeWidth={1.8}
                   />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-[#E0BA6A] text-[#14281C] font-bold text-[9px] flex items-center justify-center shadow-xs">
+                    <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[9px] flex items-center justify-center shadow-xs">
                       {totalItems}
                     </span>
                   )}
                 </div>
-                <span className="text-[11px] font-semibold tracking-tight mt-1 text-white/90 group-hover:text-[#DFC188] transition-colors">
+                <span className="text-[11px] font-semibold tracking-tight mt-1 text-white/90 group-hover:text-[#EDC918] transition-colors">
                   Bag
                 </span>
               </Link>
@@ -486,14 +485,14 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
           <div className="md:hidden fixed bottom-5 left-0 right-0 px-4 flex justify-center z-50 pointer-events-auto">
             <motion.div
               layout
-              className="bg-[#121714]/95 backdrop-blur-2xl border border-white/15 p-1.5 rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.08)] flex items-center justify-around gap-1 max-w-[360px] w-full"
+              className="bg-[#192A18]/95 backdrop-blur-2xl border border-white/15 p-1.5 rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.08)] flex items-center justify-around gap-1 max-w-[360px] w-full"
             >
               {/* Home */}
               <Link
                 href="/"
                 className="flex flex-col items-center p-2 text-white/70 hover:text-white"
               >
-                <Home className="w-4 h-4 text-[#DFC188]" />
+                <Home className="w-4 h-4 text-[#EDC918]" />
                 <span className="text-[9px] mt-0.5">Home</span>
               </Link>
 
@@ -502,7 +501,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                 href="/products"
                 className="flex flex-col items-center p-2 text-white/70 hover:text-white"
               >
-                <ShoppingBag className="w-4 h-4 text-[#DFC188]" />
+                <ShoppingBag className="w-4 h-4 text-[#EDC918]" />
                 <span className="text-[9px] mt-0.5">Shop</span>
               </Link>
 
@@ -517,7 +516,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                 }}
                 className="flex flex-col items-center p-2 text-white/70 hover:text-white cursor-pointer"
               >
-                <User className="w-4 h-4 text-[#DFC188]" />
+                <User className="w-4 h-4 text-[#EDC918]" />
                 <span className="text-[9px] mt-0.5">Profile</span>
               </button>
 
@@ -526,9 +525,9 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                 href="/wishlist"
                 className="relative flex flex-col items-center p-2 text-white/70 hover:text-white"
               >
-                <Heart className="w-4 h-4 text-[#DFC188]" />
+                <Heart className="w-4 h-4 text-[#EDC918]" />
                 {totalWishlistItems > 0 && (
-                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#C89D4A] text-[#14281C] font-bold text-[8px] flex items-center justify-center">
+                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[8px] flex items-center justify-center">
                     {totalWishlistItems}
                   </span>
                 )}
@@ -540,9 +539,9 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                 href="/cart"
                 className="relative flex flex-col items-center p-2 text-white/70 hover:text-white"
               >
-                <Package className="w-4 h-4 text-[#DFC188]" />
+                <Package className="w-4 h-4 text-[#EDC918]" />
                 {totalItems > 0 && (
-                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#C89D4A] text-[#14281C] font-bold text-[8px] flex items-center justify-center">
+                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[8px] flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}

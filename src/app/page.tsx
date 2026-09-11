@@ -25,7 +25,7 @@ export default function Home() {
 
   return (
     <SmoothScrollProvider>
-      <main className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] relative selection:bg-[#C89D4A] selection:text-[#14281C]">
+      <main className="min-h-screen bg-[#FAF8F2] text-[#273F25] relative selection:bg-[#EDC918] selection:text-[#273F25]">
         {/* Sticky Minimal Header */}
         <Navbar onOpenDoshaFinder={() => setIsDoshaModalOpen(true)} />
 
