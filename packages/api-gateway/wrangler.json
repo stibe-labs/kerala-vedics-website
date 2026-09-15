@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kerala-vedics-gateway",
+  "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.ts",
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "api.keralavedics.com/*", "custom_domain": true }
+  ],
+  "vars": {
+    "SERVICE_NAME": "api-gateway"
+  },
+  "services": [
+    { "binding": "AUTH_SERVICE", "service": "kerala-vedics-auth" },
+    { "binding": "PRODUCT_SERVICE", "service": "kerala-vedics-products" },
+    { "binding": "CUSTOMER_SERVICE", "service": "kerala-vedics-customers" },
+    { "binding": "ORDER_SERVICE", "service": "kerala-vedics-orders" },
+    { "binding": "DOCTOR_SERVICE", "service": "kerala-vedics-doctors" },
+    { "binding": "NOTIFICATION_SERVICE", "service": "kerala-vedics-notifications" }
+  ]
+}

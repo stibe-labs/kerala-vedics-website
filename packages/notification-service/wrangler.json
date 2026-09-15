@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kerala-vedics-notifications",
+  "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.ts",
+  "workers_dev": true,
+  "vars": {
+    "SMTP_HOST": "smtp.gmail.com",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "arjunz.project@gmail.com",
+    "SERVICE_NAME": "notification-service"
+  }
+}

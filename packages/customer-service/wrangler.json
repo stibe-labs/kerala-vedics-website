@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kerala-vedics-customers",
+  "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.ts",
+  "workers_dev": true,
+  "vars": {
+    "CLOUDFLARE_ACCOUNT_ID": "7fb19661d826eacb527239392926d178",
+    "SERVICE_NAME": "customer-service"
+  }
+}

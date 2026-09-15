@@ -1,0 +1,21 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "build": {
+      "outputs": [".open-next/**", "dist/**"]
+    },
+    "deploy": {
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "outputs": []
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@kerala-vedics/auth-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kerala Vedics — Auth Microservice (Cloudflare Worker)",
+  "scripts": {
+    "dev": "wrangler dev --port 8001",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kerala-vedics/shared": "workspace:*",
+    "hono": "^4.5.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0",
+    "wrangler": "^4.0.0"
+  }
+}

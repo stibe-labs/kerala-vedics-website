@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+packages/*/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -43,3 +44,10 @@ next-env.d.ts
 # cloudflare & open-next
 /.open-next/
 /.wrangler/
+packages/*/.wrangler/
+
+# pnpm
+pnpm-lock.yaml
+
+# turbo
+.turbo/

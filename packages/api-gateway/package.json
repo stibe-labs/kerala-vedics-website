@@ -1,0 +1,12 @@
+{
+  "name": "@kerala-vedics/api-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 8000",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run"
+  },
+  "dependencies": { "@kerala-vedics/shared": "workspace:*", "hono": "^4.5.0" },
+  "devDependencies": { "@cloudflare/workers-types": "^4.0.0", "typescript": "^5.0.0", "wrangler": "^4.0.0" }
+}

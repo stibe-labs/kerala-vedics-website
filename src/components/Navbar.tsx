@@ -26,6 +26,7 @@ import {
   Layers,
   Flame,
   CheckCircle2,
+  Stethoscope,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
@@ -218,6 +219,12 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
         const el = document.getElementById("soil-to-self");
         if (el) el.scrollIntoView({ behavior: "smooth" });
       },
+    },
+    {
+      id: "consult",
+      label: "Consult Vaidya",
+      icon: Stethoscope,
+      href: "/doctors",
     },
   ];
 

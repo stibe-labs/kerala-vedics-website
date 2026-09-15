@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
           newProd.id,
           newProd.slug,
           newProd.name,
-          newProd.sanskrit_name,
+          newProd.sanskrit_name ?? null,
           newProd.category,
           newProd.tagline,
           newProd.description,

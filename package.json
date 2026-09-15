@@ -7,7 +7,16 @@
     "build": "next build",
     "deploy": "next build && npx opennextjs-cloudflare build && wrangler deploy",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "services:dev": "turbo run dev --filter=./packages/*",
+    "services:deploy": "turbo run deploy --filter=./packages/*",
+    "gateway:dev": "cd packages/api-gateway && wrangler dev --port 8000",
+    "auth:dev": "cd packages/auth-service && wrangler dev --port 8001",
+    "products:dev": "cd packages/product-service && wrangler dev --port 8002",
+    "customers:dev": "cd packages/customer-service && wrangler dev --port 8003",
+    "orders:dev": "cd packages/order-service && wrangler dev --port 8004",
+    "doctors:dev": "cd packages/doctor-service && wrangler dev --port 8005",
+    "notifications:dev": "cd packages/notification-service && wrangler dev --port 8006"
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.9.0",
