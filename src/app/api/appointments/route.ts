@@ -6,12 +6,13 @@ import { Appointment } from "@/types/consultation";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const patient_id = searchParams.get("patient_id");
+  const patient_email = searchParams.get("patient_email");
   const doctor_id = searchParams.get("doctor_id");
   const status = searchParams.get("status");
   const date = searchParams.get("date");
 
-  if (!patient_id && !doctor_id) {
-    return NextResponse.json({ success: false, error: "Provide patient_id or doctor_id" }, { status: 400 });
+  if (!patient_id && !doctor_id && !patient_email) {
+    return NextResponse.json({ success: false, error: "Provide patient_id, patient_email or doctor_id" }, { status: 400 });
   }
 
   try {
@@ -30,7 +31,16 @@ export async function GET(req: NextRequest) {
     `;
     const params: (string | number | null)[] = [];
 
-    if (patient_id) { sql += " AND a.patient_id = ?"; params.push(patient_id); }
+    if (patient_id && patient_email) {
+      sql += " AND (a.patient_id = ? OR u.email = ?)";
+      params.push(patient_id, patient_email);
+    } else if (patient_id) {
+      sql += " AND a.patient_id = ?";
+      params.push(patient_id);
+    } else if (patient_email) {
+      sql += " AND u.email = ?";
+      params.push(patient_email);
+    }
     if (doctor_id) {
       sql += " AND (a.doctor_id = ? OR d.user_id = ?)";
       params.push(doctor_id, doctor_id);

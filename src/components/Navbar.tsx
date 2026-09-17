@@ -27,6 +27,7 @@ import {
   Flame,
   CheckCircle2,
   Stethoscope,
+  Calendar,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
@@ -379,12 +380,12 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                           </Link>
 
                           <Link
-                            href="/admin"
+                            href="/appointments"
                             onClick={() => setIsUserDropdownOpen(false)}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#EDC918] hover:bg-white/10 transition-colors cursor-pointer group"
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer group"
                           >
-                            <ShieldCheck className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
-                            <span>Admin Portal</span>
+                            <Calendar className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
+                            <span>My Consultations</span>
                           </Link>
 
                           <div className="border-t border-white/10 pt-1">

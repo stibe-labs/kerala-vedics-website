@@ -253,15 +253,15 @@ export default function ProfilePage() {
             </Link>
 
             <Link
-              href="/admin"
-              className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#C89D4A]/30 hover:border-[#C89D4A] transition-all group"
+              href="/appointments"
+              className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#4C6B3D]/15 hover:border-[#C89D4A] transition-all group"
             >
-              <ShieldCheck className="w-6 h-6 text-[#C89D4A] mb-2 group-hover:scale-110 transition-transform" />
+              <Calendar className="w-6 h-6 text-[#C89D4A] mb-2 group-hover:scale-110 transition-transform" />
               <h4 className="text-sm font-serif font-bold text-[#1F3D2B]">
-                Atelier Admin
+                My Consultations
               </h4>
               <p className="text-[11px] text-gray-500 mt-1">
-                Manage classical formulations catalog, pricing tiers, and stock.
+                View scheduled sessions, join live consultation rooms, and check doctor notes.
               </p>
             </Link>
           </div>
