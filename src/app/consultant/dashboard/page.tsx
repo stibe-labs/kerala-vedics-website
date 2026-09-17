@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Calendar, Clock, Video, CheckCircle2, XCircle, Users, IndianRupee,
   Star, TrendingUp, AlertCircle, ChevronRight, Leaf, Stethoscope,
   LogOut, Settings, FileText, Bell, User, Sparkles, ExternalLink, ShieldCheck,
-  Edit3
+  Edit3, X, ImageIcon, ZoomIn, ChevronDown, Activity, Pill, Apple, Moon,
+  Phone, Mail, MessageSquare, Download,
 } from "lucide-react";
-import { Appointment, Doctor } from "@/types/consultation";
+import { Appointment, Doctor, PatientReport } from "@/types/consultation";
 
 const CONSULTANT_KEY = "kv_consultant_session";
 
@@ -20,6 +21,7 @@ export default function ConsultantDashboard() {
   const [mounted, setMounted] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [stats, setStats] = useState({ total: 0, completed: 0, earnings: 0, rating: 5.0 });
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -29,20 +31,12 @@ export default function ConsultantDashboard() {
   const loadDashboard = async () => {
     setIsLoading(true);
     try {
-      // Try to get doctor session from localStorage
       const sessionStr = localStorage.getItem(CONSULTANT_KEY);
-      if (!sessionStr) {
-        setIsLoading(false);
-        return;
-      }
+      if (!sessionStr) { setIsLoading(false); return; }
       const session = JSON.parse(sessionStr);
-
-      // Set initial doctor state immediately from local session
       setDoctor(session);
-
       const docId = session.doctor_id || session.id;
 
-      // Fetch doctor profile from D1
       try {
         if (docId) {
           const doctorRes = await fetch(`/api/doctors/${docId}`, { cache: "no-store" });
@@ -51,7 +45,6 @@ export default function ConsultantDashboard() {
             setDoctor(doctorData.doctor);
             localStorage.setItem(CONSULTANT_KEY, JSON.stringify({ ...session, ...doctorData.doctor }));
           } else {
-            // Find existing doctor in D1 by email or name match
             const allRes = await fetch("/api/doctors?admin=1", { cache: "no-store" });
             const allData = await allRes.json();
             if (allData.success && Array.isArray(allData.doctors) && allData.doctors.length > 0) {
@@ -59,21 +52,16 @@ export default function ConsultantDashboard() {
                 (session.email && d.email?.toLowerCase() === session.email?.toLowerCase()) ||
                 (session.name && d.name?.toLowerCase().includes(session.name?.toLowerCase()))
               ) || allData.doctors[0];
-
               if (matched) {
                 const linkedSession = { ...session, ...matched, doctor_id: matched.id };
                 localStorage.setItem(CONSULTANT_KEY, JSON.stringify(linkedSession));
                 setDoctor(linkedSession);
               }
             } else if (session.registration_number) {
-              // Self-heal: If doctor was cleared or missing from D1, re-register immediately
               const healRes = await fetch("/api/doctors", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ...session,
-                  verification_status: "Approved",
-                }),
+                body: JSON.stringify({ ...session, verification_status: "Approved" }),
               });
               const healData = await healRes.json();
               if (healData.success && healData.doctor_id) {
@@ -88,7 +76,6 @@ export default function ConsultantDashboard() {
         console.warn("Doctor sync check:", err);
       }
 
-      // Fetch appointments
       if (docId) {
         const apptRes = await fetch(`/api/appointments?doctor_id=${docId}`);
         const apptData = await apptRes.json();
@@ -140,7 +127,10 @@ export default function ConsultantDashboard() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: appointmentId, status }),
     });
-    if (res.ok) loadDashboard();
+    if (res.ok) {
+      loadDashboard();
+      if (selectedAppointment?.id === appointmentId) setSelectedAppointment(null);
+    }
   };
 
   const filteredAppointments = appointments.filter(a => {
@@ -156,8 +146,8 @@ export default function ConsultantDashboard() {
 
   return (
     <div className="min-h-screen" style={{ background: "#F7F5F0" }}>
-      {/* Sidebar */}
       <div className="flex">
+        {/* Sidebar */}
         <aside className="w-64 min-h-screen flex flex-col fixed left-0 top-0 z-30"
           style={{ background: "linear-gradient(180deg, #111D10 0%, #192A18 100%)", borderRight: "1px solid rgba(237,201,24,0.1)" }}>
           {/* Logo */}
@@ -194,12 +184,11 @@ export default function ConsultantDashboard() {
                     </div>
                   </div>
                 </Link>
-
                 <div className="flex items-center justify-between mt-2">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium"
                     style={{
                       background: isVerified ? "rgba(34,197,94,0.15)" : "rgba(237,201,24,0.15)",
-                      color: isVerified ? "#4ADE80" : "#EDC918"
+                      color: isVerified ? "#4ADE80" : "#EDC918",
                     }}>
                     {isVerified ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                     {doctor.verification_status || "Pending"}
@@ -231,7 +220,6 @@ export default function ConsultantDashboard() {
                 {icon} {label}
               </Link>
             ))}
-
             <div className="pt-4 mt-2 border-t" style={{ borderColor: "rgba(237,201,24,0.1)" }}>
               <Link href="/doctors" target="_blank"
                 className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:bg-white/10"
@@ -255,7 +243,7 @@ export default function ConsultantDashboard() {
 
         {/* Main Content */}
         <main className="ml-64 flex-1 p-8">
-          {/* Detailed Verification Status Banner */}
+          {/* Verification Banner */}
           {isPending && (
             <div className="mb-6 p-6 rounded-3xl shadow-sm border"
               style={{ background: "#FFFDF5", borderColor: "rgba(237,201,24,0.3)" }}>
@@ -266,24 +254,19 @@ export default function ConsultantDashboard() {
                     <ShieldCheck className="w-5 h-5" style={{ color: "#92711a" }} />
                   </div>
                   <div>
-                    <div className="font-bold text-base" style={{ color: "#92711a" }}>
-                      Doctor Verification In Progress
-                    </div>
+                    <div className="font-bold text-base" style={{ color: "#92711a" }}>Doctor Verification In Progress</div>
                     <div className="text-xs" style={{ color: "rgba(146,113,26,0.8)" }}>
                       Your clinical credentials are being verified by the Kerala Vedics Chief Medical Officer.
                     </div>
                   </div>
                 </div>
-
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Link href="/consultant/profile"
                     className="px-4 py-2 rounded-xl text-xs font-bold border transition-all text-center flex-1 sm:flex-none"
                     style={{ background: "white", borderColor: "rgba(237,201,24,0.4)", color: "#92711a" }}>
                     Edit Profile Details
                   </Link>
-                  <button
-                    onClick={handleInstantVerify}
-                    disabled={isVerifying}
+                  <button onClick={handleInstantVerify} disabled={isVerifying}
                     className="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow flex items-center justify-center gap-1.5 flex-1 sm:flex-none"
                     style={{ background: "#273F25", color: "#FAF8F2" }}>
                     <Sparkles className="w-3.5 h-3.5" style={{ color: "#EDC918" }} />
@@ -291,26 +274,18 @@ export default function ConsultantDashboard() {
                   </button>
                 </div>
               </div>
-
-              {/* What is pending breakdown */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t" style={{ borderColor: "rgba(237,201,24,0.2)" }}>
                 <div className="flex items-center gap-2 text-xs">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span style={{ color: "#273F25" }}>
-                    <strong>Step 1:</strong> Application Submitted
-                  </span>
+                  <span style={{ color: "#273F25" }}><strong>Step 1:</strong> Application Submitted</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                  <span style={{ color: "#92711a" }}>
-                    <strong>Step 2:</strong> Reg #{doctor.registration_number || "Reviewing"} Council Check
-                  </span>
+                  <span style={{ color: "#92711a" }}><strong>Step 2:</strong> Reg #{doctor?.registration_number || "Reviewing"} Council Check</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                  <span style={{ color: "#92711a" }}>
-                    <strong>Step 3:</strong> Public Directory Live
-                  </span>
+                  <span style={{ color: "#92711a" }}><strong>Step 3:</strong> Public Directory Live</span>
                 </div>
               </div>
             </div>
@@ -370,89 +345,444 @@ export default function ConsultantDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredAppointments.map(appt => (
-                  <AppointmentCard key={appt.id} appointment={appt} onUpdateStatus={updateStatus} />
+                  <AppointmentCard
+                    key={appt.id}
+                    appointment={appt}
+                    onUpdateStatus={updateStatus}
+                    onViewDetails={() => setSelectedAppointment(appt)}
+                  />
                 ))}
               </div>
             )}
           </div>
         </main>
       </div>
+
+      {/* Patient Detail Drawer */}
+      {selectedAppointment && (
+        <PatientDetailDrawer
+          appointment={selectedAppointment}
+          onClose={() => setSelectedAppointment(null)}
+          onUpdateStatus={updateStatus}
+        />
+      )}
     </div>
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Appointment Card
+// ─────────────────────────────────────────────────────────────────────
 function AppointmentCard({
   appointment,
   onUpdateStatus,
+  onViewDetails,
 }: {
   appointment: Appointment;
   onUpdateStatus: (id: string, status: string) => void;
+  onViewDetails: () => void;
 }) {
   const isToday = new Date(appointment.appointment_date).toDateString() === new Date().toDateString();
 
+  // Check if appointment is NOW (within 15 min window)
+  const isActive = (() => {
+    try {
+      const now = new Date();
+      const [h, m] = appointment.start_time.split(":").map(Number);
+      const apptDate = new Date(appointment.appointment_date);
+      apptDate.setHours(h, m, 0, 0);
+      const diff = (apptDate.getTime() - now.getTime()) / 60000; // minutes
+      return diff <= 5 && diff >= -30; // 5 min before to 30 min after
+    } catch { return false; }
+  })();
+
+  const reportCount = (() => {
+    if (!appointment.intake_reports) return 0;
+    if (Array.isArray(appointment.intake_reports)) return appointment.intake_reports.length;
+    try { return JSON.parse(appointment.intake_reports as unknown as string).length; } catch { return 0; }
+  })();
+
   return (
-    <div className="p-5 rounded-xl border transition-all"
+    <div
+      className="p-5 rounded-xl border transition-all cursor-pointer group"
       style={{
         background: isToday ? "rgba(237,201,24,0.04)" : "white",
-        borderColor: isToday ? "rgba(237,201,24,0.3)" : "rgba(81,104,48,0.1)",
-      }}>
+        borderColor: isActive ? "rgba(34,197,94,0.4)" : isToday ? "rgba(237,201,24,0.3)" : "rgba(81,104,48,0.1)",
+        boxShadow: isActive ? "0 0 0 2px rgba(34,197,94,0.15)" : "none",
+      }}
+      onClick={onViewDetails}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm"
+          {/* Avatar */}
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 transition-all group-hover:scale-105"
             style={{ background: "rgba(81,104,48,0.1)", color: "var(--kv-forest)" }}>
-            {appointment.patient_name[0]}
+            {appointment.patient_name?.[0] || "P"}
           </div>
+
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-sm" style={{ color: "var(--kv-forest)" }}>
                 {appointment.patient_name}
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full"
+              {/* Status badge */}
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{
                   background: appointment.status === "Scheduled" ? "rgba(81,104,48,0.1)" :
-                    appointment.status === "Completed" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
+                    appointment.status === "In_Progress" ? "rgba(34,197,94,0.1)" :
+                      appointment.status === "Completed" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
                   color: appointment.status === "Scheduled" ? "var(--kv-forest)" :
-                    appointment.status === "Completed" ? "#16a34a" : "#dc2626",
+                    appointment.status === "In_Progress" ? "#16a34a" :
+                      appointment.status === "Completed" ? "#16a34a" : "#dc2626",
                 }}>
-                {appointment.status}
+                {appointment.status === "In_Progress" ? "In Progress" : appointment.status}
               </span>
+              {isActive && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-bold flex items-center gap-1"
+                  style={{ background: "rgba(34,197,94,0.15)", color: "#16a34a" }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" /> NOW
+                </span>
+              )}
             </div>
+
             <div className="flex items-center gap-4 text-xs mt-1" style={{ color: "rgba(39,63,37,0.6)" }}>
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> {appointment.appointment_date}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {appointment.start_time} - {appointment.end_time}
-              </span>
+              <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {appointment.appointment_date}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {appointment.start_time} – {appointment.end_time}</span>
               <span className="capitalize">{appointment.consultation_type}</span>
             </div>
-            {appointment.health_concerns && (
-              <p className="text-xs mt-2 italic" style={{ color: "rgba(39,63,37,0.7)" }}>
-                &ldquo;{appointment.health_concerns}&rdquo;
+
+            {appointment.intake_symptoms && (
+              <p className="text-xs mt-1.5 italic truncate max-w-xs" style={{ color: "rgba(39,63,37,0.6)" }}>
+                &ldquo;{appointment.intake_symptoms}&rdquo;
               </p>
             )}
+
+            {/* Indicators */}
+            <div className="flex items-center gap-2 mt-2">
+              {reportCount > 0 && (
+                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: "rgba(237,201,24,0.1)", color: "#92711a" }}>
+                  <ImageIcon className="w-3 h-3" /> {reportCount} doc{reportCount !== 1 ? "s" : ""}
+                </span>
+              )}
+              <span className="text-[10px] text-gray-400">Click to view details →</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {appointment.video_room_id && appointment.status === "Scheduled" && (
-            <Link href={`/consultant/room/${appointment.video_room_id}`}
+        {/* Action buttons */}
+        <div className="flex items-center gap-2 ml-2 flex-shrink-0" onClick={e => e.stopPropagation()}>
+          {/* Start Call button - shown for upcoming appointments */}
+          {["Scheduled", "In_Progress"].includes(appointment.status) && (
+            <Link href={`/consultation/${appointment.id}`}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{ background: "var(--kv-forest)", color: "#FAF8F2" }}>
-              <Video className="w-3.5 h-3.5" /> Start Call
+              style={{ background: isActive ? "#16a34a" : "var(--kv-forest)", color: "#FAF8F2" }}>
+              <Video className="w-3.5 h-3.5" /> {isActive ? "Join Now" : "Start Call"}
             </Link>
           )}
           {appointment.status === "Scheduled" && (
             <button onClick={() => onUpdateStatus(appointment.id, "Completed")}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:bg-green-100"
               style={{ color: "#16a34a", border: "1px solid rgba(22,163,74,0.3)" }}>
-              <CheckCircle2 className="w-3.5 h-3.5" /> Mark Complete
+              <CheckCircle2 className="w-3.5 h-3.5" /> Done
             </button>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Patient Detail Drawer
+// ─────────────────────────────────────────────────────────────────────
+function PatientDetailDrawer({
+  appointment,
+  onClose,
+  onUpdateStatus,
+}: {
+  appointment: Appointment;
+  onClose: () => void;
+  onUpdateStatus: (id: string, status: string) => void;
+}) {
+  const [lightboxReport, setLightboxReport] = useState<PatientReport | null>(null);
+
+  const patientReports: PatientReport[] = useMemo(() => {
+    if (!appointment.intake_reports) return [];
+    if (Array.isArray(appointment.intake_reports)) return appointment.intake_reports as PatientReport[];
+    try { return JSON.parse(appointment.intake_reports as unknown as string); } catch { return []; }
+  }, [appointment]);
+
+  const isActive = (() => {
+    try {
+      const now = new Date();
+      const [h, m] = appointment.start_time.split(":").map(Number);
+      const apptDate = new Date(appointment.appointment_date);
+      apptDate.setHours(h, m, 0, 0);
+      const diff = (apptDate.getTime() - now.getTime()) / 60000;
+      return diff <= 5 && diff >= -30;
+    } catch { return false; }
+  })();
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40"
+        style={{ background: "rgba(10,15,10,0.55)", backdropFilter: "blur(4px)" }}
+        onClick={onClose}
+      />
+
+      {/* Drawer */}
+      <div
+        className="fixed right-0 top-0 h-full z-50 flex flex-col overflow-hidden"
+        style={{
+          width: "min(520px, 95vw)",
+          background: "linear-gradient(180deg, #0F1A0F 0%, #0A1209 100%)",
+          borderLeft: "1px solid rgba(237,201,24,0.15)",
+          boxShadow: "-32px 0 80px rgba(0,0,0,0.4)",
+        }}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between px-6 py-5 flex-shrink-0"
+          style={{ borderBottom: "1px solid rgba(237,201,24,0.1)" }}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg"
+              style={{ background: "rgba(237,201,24,0.12)", color: "#EDC918" }}>
+              {appointment.patient_name?.[0] || "P"}
+            </div>
+            <div>
+              <div className="font-bold text-base" style={{ color: "#FAF8F2", fontFamily: "var(--font-display)" }}>
+                {appointment.patient_name}
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: "rgba(250,248,242,0.45)" }}>
+                {appointment.appointment_date} · {appointment.start_time} – {appointment.end_time}
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl transition-all hover:bg-white/10">
+            <X className="w-5 h-5" style={{ color: "rgba(250,248,242,0.6)" }} />
+          </button>
+        </div>
+
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Action buttons */}
+          <div className="px-6 py-4 flex gap-3" style={{ borderBottom: "1px solid rgba(237,201,24,0.08)" }}>
+            <Link href={`/consultation/${appointment.id}`}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all"
+              style={{
+                background: isActive ? "linear-gradient(135deg, #16a34a, #15803d)" : "var(--kv-forest)",
+                color: "#FAF8F2",
+                boxShadow: isActive ? "0 4px 12px rgba(22,163,74,0.3)" : "none",
+              }}>
+              <Video className="w-4 h-4" />
+              {isActive ? "🟢 Join Video Call" : "Start Video Consultation"}
+            </Link>
+            {appointment.status === "Scheduled" && (
+              <button
+                onClick={() => { onUpdateStatus(appointment.id, "Completed"); onClose(); }}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all hover:bg-green-900/20"
+                style={{ borderColor: "rgba(22,163,74,0.3)", color: "#4ADE80" }}>
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Status + Type row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold"
+                style={{
+                  background: appointment.status === "Completed" ? "rgba(34,197,94,0.12)" : "rgba(237,201,24,0.12)",
+                  color: appointment.status === "Completed" ? "#4ADE80" : "#EDC918",
+                  border: `1px solid ${appointment.status === "Completed" ? "rgba(34,197,94,0.2)" : "rgba(237,201,24,0.2)"}`,
+                }}>
+                {appointment.status}
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold"
+                style={{ background: "rgba(81,104,48,0.12)", color: "rgba(250,248,242,0.7)", border: "1px solid rgba(81,104,48,0.2)" }}>
+                {appointment.consultation_type} Consultation
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold"
+                style={{ background: "rgba(81,104,48,0.12)", color: "rgba(250,248,242,0.7)", border: "1px solid rgba(81,104,48,0.2)" }}>
+                ₹{appointment.consultation_fee}
+              </span>
+            </div>
+
+            {/* Patient Info */}
+            <section>
+              <SectionTitle icon={<User className="w-4 h-4" />} title="Patient Information" />
+              <div className="space-y-2 mt-3">
+                <InfoRow label="Name" value={appointment.patient_name || "—"} />
+                {appointment.patient_email && (
+                  <InfoRow label="Email" value={appointment.patient_email} icon={<Mail className="w-3 h-3" />} />
+                )}
+              </div>
+            </section>
+
+            {/* Intake — Chief Complaints */}
+            {appointment.intake_symptoms && (
+              <section>
+                <SectionTitle icon={<Activity className="w-4 h-4" />} title="Chief Complaints" />
+                <div className="mt-3 p-4 rounded-xl text-sm leading-relaxed"
+                  style={{ background: "rgba(237,201,24,0.05)", border: "1px solid rgba(237,201,24,0.1)", color: "rgba(250,248,242,0.85)" }}>
+                  {appointment.intake_symptoms}
+                </div>
+              </section>
+            )}
+
+            {/* Intake Grid */}
+            {(appointment.intake_duration || appointment.intake_dosha || appointment.intake_medications || appointment.intake_diet) && (
+              <section>
+                <SectionTitle icon={<Stethoscope className="w-4 h-4" />} title="Intake Details" />
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  {appointment.intake_duration && (
+                    <IntakeChip label="Symptom Duration" value={appointment.intake_duration} icon={<Clock className="w-3.5 h-3.5" />} />
+                  )}
+                  {appointment.intake_dosha && (
+                    <IntakeChip label="Prakriti / Dosha" value={appointment.intake_dosha} icon={<Leaf className="w-3.5 h-3.5" />} />
+                  )}
+                  {appointment.intake_medications && (
+                    <IntakeChip label="Current Medications" value={appointment.intake_medications} icon={<Pill className="w-3.5 h-3.5" />} className="col-span-2" />
+                  )}
+                  {appointment.intake_diet && (
+                    <IntakeChip label="Diet & Lifestyle" value={appointment.intake_diet} icon={<Apple className="w-3.5 h-3.5" />} className="col-span-2" />
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Patient Uploaded Documents */}
+            <section>
+              <div className="flex items-center justify-between">
+                <SectionTitle icon={<ImageIcon className="w-4 h-4" />} title="Uploaded Documents" />
+                <span className="text-xs" style={{ color: "rgba(250,248,242,0.35)" }}>
+                  {patientReports.length} file{patientReports.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {patientReports.length === 0 ? (
+                <div className="mt-3 text-center py-8 rounded-xl"
+                  style={{ background: "rgba(250,248,242,0.03)", border: "1px dashed rgba(250,248,242,0.08)" }}>
+                  <ImageIcon className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(250,248,242,0.12)" }} />
+                  <p className="text-sm" style={{ color: "rgba(250,248,242,0.35)" }}>No documents uploaded by patient</p>
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  {patientReports.map((report, idx) => (
+                    <div key={idx} className="rounded-xl overflow-hidden"
+                      style={{ border: "1px solid rgba(237,201,24,0.15)", background: "rgba(250,248,242,0.03)" }}>
+                      {/* Preview */}
+                      <div className="relative group cursor-pointer"
+                        onClick={() => report.file_type.startsWith("image/") && setLightboxReport(report)}>
+                        {report.file_type.startsWith("image/") ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={report.data_url} alt={report.caption || report.file_name}
+                            className="w-full object-contain max-h-52"
+                            style={{ background: "rgba(0,0,0,0.4)" }} />
+                        ) : (
+                          <div className="w-full h-24 flex flex-col items-center justify-center gap-2"
+                            style={{ background: "rgba(237,201,24,0.05)" }}>
+                            <FileText className="w-7 h-7" style={{ color: "#EDC918" }} />
+                            <span className="text-xs" style={{ color: "rgba(250,248,242,0.5)" }}>{report.file_name}</span>
+                          </div>
+                        )}
+                        {report.file_type.startsWith("image/") && (
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            style={{ background: "rgba(0,0,0,0.45)" }}>
+                            <ZoomIn className="w-7 h-7 text-white" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Caption + actions */}
+                      <div className="px-4 py-3 flex items-start justify-between gap-3">
+                        <div>
+                          {report.caption && (
+                            <div className="text-sm font-medium" style={{ color: "#FAF8F2" }}>{report.caption}</div>
+                          )}
+                          <div className="text-xs mt-0.5" style={{ color: "rgba(250,248,242,0.4)" }}>{report.file_name}</div>
+                        </div>
+                        <a href={report.data_url} download={report.file_name}
+                          className="flex-shrink-0 p-2 rounded-lg transition-all hover:bg-white/10"
+                          style={{ color: "#EDC918" }}
+                          onClick={e => e.stopPropagation()}>
+                          <Download className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      {lightboxReport && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.92)" }}
+          onClick={() => setLightboxReport(null)}>
+          <button className="absolute top-5 right-5 p-2 rounded-full transition-all"
+            style={{ background: "rgba(255,255,255,0.1)", color: "#FAF8F2" }}
+            onClick={() => setLightboxReport(null)}>
+            <X className="w-5 h-5" />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={lightboxReport.data_url} alt={lightboxReport.caption || lightboxReport.file_name}
+            className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+            onClick={e => e.stopPropagation()} />
+          {lightboxReport.caption && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl text-sm"
+              style={{ background: "rgba(15,25,15,0.9)", color: "#FAF8F2", border: "1px solid rgba(237,201,24,0.2)" }}>
+              {lightboxReport.caption}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Small helper sub-components
+// ─────────────────────────────────────────────────────────────────────
+function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span style={{ color: "#EDC918" }}>{icon}</span>
+      <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(250,248,242,0.5)" }}>
+        {title}
+      </span>
+    </div>
+  );
+}
+
+function InfoRow({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span style={{ color: "rgba(250,248,242,0.45)" }}>{label}</span>
+      <span className="flex items-center gap-1.5 font-medium" style={{ color: "#FAF8F2" }}>
+        {icon && <span style={{ color: "rgba(250,248,242,0.4)" }}>{icon}</span>}
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function IntakeChip({ label, value, icon, className = "" }: { label: string; value: string; icon?: React.ReactNode; className?: string }) {
+  return (
+    <div className={`p-3 rounded-xl ${className}`}
+      style={{ background: "rgba(250,248,242,0.03)", border: "1px solid rgba(250,248,242,0.06)" }}>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <span style={{ color: "#EDC918" }}>{icon}</span>
+        <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: "rgba(250,248,242,0.35)" }}>{label}</span>
+      </div>
+      <div className="text-sm leading-relaxed" style={{ color: "rgba(250,248,242,0.8)" }}>{value}</div>
     </div>
   );
 }
