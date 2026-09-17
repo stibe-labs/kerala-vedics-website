@@ -5,14 +5,15 @@ import { Appointment } from "@/types/consultation";
 // GET /api/appointments — get appointments for patient or doctor
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
   const patient_id = searchParams.get("patient_id");
   const patient_email = searchParams.get("patient_email");
   const doctor_id = searchParams.get("doctor_id");
   const status = searchParams.get("status");
   const date = searchParams.get("date");
 
-  if (!patient_id && !doctor_id && !patient_email) {
-    return NextResponse.json({ success: false, error: "Provide patient_id, patient_email or doctor_id" }, { status: 400 });
+  if (!id && !patient_id && !doctor_id && !patient_email) {
+    return NextResponse.json({ success: false, error: "Provide id, patient_id, patient_email or doctor_id" }, { status: 400 });
   }
 
   try {
@@ -31,6 +32,10 @@ export async function GET(req: NextRequest) {
     `;
     const params: (string | number | null)[] = [];
 
+    if (id) {
+      sql += " AND a.id = ?";
+      params.push(id);
+    }
     if (patient_id && patient_email) {
       sql += " AND (a.patient_id = ? OR u.email = ?)";
       params.push(patient_id, patient_email);
@@ -134,7 +139,7 @@ export async function POST(req: NextRequest) {
 
     const appointmentId = `appt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const roomId = `kv-${appointmentId}`;
-    const meetingUrl = `https://meet.jit.si/${roomId}`;
+    const meetingUrl = `/consultation/${appointmentId}`;
 
     await executeD1Write(
       `INSERT INTO appointments (

@@ -373,7 +373,7 @@ export default function AppointmentsPage() {
 
                         {isLiveOrUpcoming ? (
                           <Link
-                            href={appt.meeting_url?.startsWith("http") ? appt.meeting_url : `/consultation/${appt.id}`}
+                            href={`/consultation/${appt.id}`}
                             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#1F3D2B] to-[#273F25] hover:from-[#C89D4A] hover:to-[#B68B38] text-white hover:text-[#14281C] shadow-md transition-all group"
                           >
                             <Video className="w-4 h-4 text-[#EDC918] group-hover:text-[#14281C] transition-colors" />

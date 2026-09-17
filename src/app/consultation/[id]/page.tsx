@@ -105,9 +105,17 @@ export default function ConsultationRoomPage() {
   // ── Determine caller role ─────────────────────────────────────────
   const getRole = useCallback((): "doctor" | "patient" => {
     try {
-      const sessionStr = localStorage.getItem("kv_consultant_session") || localStorage.getItem("kv_user_session");
-      const session = sessionStr ? JSON.parse(sessionStr) : null;
-      return session?.doctor_id ? "doctor" : "patient";
+      const consultantStr = localStorage.getItem("kv_consultant_session");
+      if (consultantStr) {
+        const c = JSON.parse(consultantStr);
+        if (c?.doctor_id || c?.registration_number) return "doctor";
+      }
+      const userStr = localStorage.getItem("kv_user_session");
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        if (u?.doctor_id) return "doctor";
+      }
+      return "patient";
     } catch { return "patient"; }
   }, []);
 
@@ -304,14 +312,27 @@ export default function ConsultationRoomPage() {
   // ── Appointment / products load ───────────────────────────────────
   const loadAppointment = async () => {
     try {
+      // 1. Direct appointment ID lookup
+      const res = await fetch(`/api/appointments?id=${appointmentId}`);
+      const data = await res.json();
+      if (data.success && data.appointments?.length > 0) {
+        setAppointment(data.appointments[0]);
+        return;
+      }
+      // 2. Fallback to session query
       const sessionStr = localStorage.getItem("kv_consultant_session") || localStorage.getItem("kv_user_session");
       const session = sessionStr ? JSON.parse(sessionStr) : null;
-      const paramKey = session?.doctor_id ? `doctor_id=${session.doctor_id}` : `patient_id=${session?.id}`;
-      const res = await fetch(`/api/appointments?${paramKey}`);
-      const data = await res.json();
-      if (data.success) {
-        const found = data.appointments.find((a: Appointment) => a.id === appointmentId);
-        setAppointment(found || null);
+      if (session) {
+        const paramKey = session?.doctor_id ? `doctor_id=${session.doctor_id}` : `patient_id=${session?.id}`;
+        const res2 = await fetch(`/api/appointments?${paramKey}`);
+        const data2 = await res2.json();
+        if (data2.success) {
+          const found = data2.appointments.find((a: Appointment) => a.id === appointmentId);
+          if (found) {
+            setAppointment(found);
+            return;
+          }
+        }
       }
     } catch {
       setAppointment({
@@ -321,8 +342,8 @@ export default function ConsultationRoomPage() {
         status: "In_Progress", consultation_type: "Video",
         consultation_fee: 499, platform_fee: 99.80, doctor_earning: 399.20,
         payment_status: "Completed", created_at: new Date().toISOString(),
-        patient_name: "Arjun Kumar", doctor_name: "Dr. Kavitha Nair",
-        meeting_url: `https://meet.jit.si/kv-${appointmentId}`,
+        patient_name: "Patient", doctor_name: "Ayurvedic Vaidya",
+        meeting_url: `/consultation/${appointmentId}`,
       });
     }
   };
@@ -555,9 +576,9 @@ export default function ConsultationRoomPage() {
               style={{ background: isCamOn ? "rgba(250,248,242,0.15)" : "rgba(220,38,38,0.8)" }}>
               {isCamOn ? <Video className="w-5 h-5 text-white" /> : <VideoOff className="w-5 h-5 text-white" />}
             </button>
-            <Link href="/consultant/dashboard"
+            <Link href={getRole() === "doctor" ? "/consultant/dashboard" : "/appointments"}
               onClick={cleanupCall}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg"
+              className="w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-105"
               style={{ background: "rgba(220,38,38,0.85)" }}>
               <PhoneOff className="w-6 h-6 text-white" />
             </Link>
@@ -566,7 +587,7 @@ export default function ConsultationRoomPage() {
           {/* Panel Toggle Buttons */}
           <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
             {[
-              { id: "prescription" as const, icon: <FileText className="w-4 h-4" />, label: "Rx" },
+              ...(getRole() === "doctor" ? [{ id: "prescription" as const, icon: <FileText className="w-4 h-4" />, label: "Rx" }] : []),
               { id: "reports" as const, icon: <ImageIcon className="w-4 h-4" />, label: "Docs", badge: patientReports.length },
               { id: "chat" as const, icon: <MessageSquare className="w-4 h-4" />, label: "Chat" },
             ].map(({ id, icon, label, badge }) => (

@@ -398,14 +398,14 @@ export default function DoctorBookingPage() {
           <div className="p-4 rounded-2xl mb-6 text-left"
             style={{ background: "rgba(250,248,242,0.05)", border: "1px solid rgba(250,248,242,0.1)" }}>
             <div className="text-sm mb-3 font-semibold" style={{ color: "#FAF8F2" }}>Join your video consultation:</div>
-            <a href={bookedAppointment?.meeting_url || "#"} target="_blank" rel="noopener noreferrer"
+            <Link href={bookedAppointment?.id ? `/consultation/${bookedAppointment.id}` : "/appointments"}
               className="block w-full text-center py-3 rounded-xl font-semibold transition-all hover:scale-105"
               style={{ background: "#EDC918", color: "#111D10" }}>
               🎥 Join Video Call
-            </a>
+            </Link>
           </div>
 
-          <Link href="/profile"
+          <Link href="/appointments"
             className="inline-flex items-center gap-2 text-sm"
             style={{ color: "rgba(250,248,242,0.6)" }}>
             View in My Appointments <ArrowRight className="w-4 h-4" />
