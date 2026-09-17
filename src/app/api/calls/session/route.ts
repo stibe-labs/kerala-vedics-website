@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
     };
 
     // ── Step 3: Store session info so the remote peer can discover it ─
-    saveCallSession(appointment_id, role as "doctor" | "patient", { sessionId, trackNames });
+    await saveCallSession(appointment_id, role as "doctor" | "patient", { sessionId, trackNames });
 
     return NextResponse.json({
       success: true,

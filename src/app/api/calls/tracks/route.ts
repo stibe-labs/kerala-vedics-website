@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: "appointment_id and role required" }, { status: 400 });
   }
 
-  const entry = getCallSession(appointment_id, role);
+  const entry = await getCallSession(appointment_id, role);
   if (!entry) {
     return NextResponse.json({ success: true, found: false });
   }
