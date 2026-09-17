@@ -17,9 +17,9 @@ function getEnv(req: NextRequest, key: string): string | undefined {
 
 export async function POST(req: NextRequest) {
   try {
-    const { local_session_id, remote_session_id, track_names, sdp_offer } = await req.json();
+    const { local_session_id, remote_session_id, track_names, tracks: tracksPayload, sdp_offer } = await req.json();
 
-    if (!local_session_id || !remote_session_id || !sdp_offer || !Array.isArray(track_names)) {
+    if (!local_session_id || !remote_session_id || !sdp_offer) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
@@ -34,10 +34,19 @@ export async function POST(req: NextRequest) {
     const AUTH = { "Authorization": `Bearer ${APP_TOKEN}`, "Content-Type": "application/json" };
 
     // Build the remote tracks list
-    const tracks = track_names.map((trackName: string) => ({
+    // Accepts either `tracks` [{ trackName, mid }] or legacy `track_names` string[]
+    const rawTracks: Array<{ trackName: string; mid?: string }> =
+      Array.isArray(tracksPayload) && tracksPayload.length > 0
+        ? tracksPayload
+        : Array.isArray(track_names)
+        ? track_names.map((n: string) => ({ trackName: n }))
+        : [];
+
+    const tracks = rawTracks.map((t) => ({
       location: "remote",
       sessionId: remote_session_id,
-      trackName,
+      trackName: t.trackName,
+      ...(t.mid !== undefined && t.mid !== null ? { mid: String(t.mid) } : {}),
     }));
 
     // Add remote tracks via renegotiation
@@ -57,23 +66,7 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json() as {
       sessionDescription: { type: string; sdp: string };
-      requiresImmediateRenegotiation?: boolean;
     };
-
-    // If CF requires immediate renegotiation (no remote tracks yet in SDP),
-    // trigger the renegotiate endpoint
-    if (data.requiresImmediateRenegotiation) {
-      const renego = await fetch(`${BASE}/sessions/${local_session_id}/renegotiate`, {
-        method: "PUT",
-        headers: AUTH,
-        body: JSON.stringify({
-          sessionDescription: { type: "answer", sdp: data.sessionDescription.sdp },
-        }),
-      });
-      if (!renego.ok) {
-        console.warn("CF renegotiate warning:", await renego.text());
-      }
-    }
 
     return NextResponse.json({
       success: true,

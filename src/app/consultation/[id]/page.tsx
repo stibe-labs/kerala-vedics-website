@@ -64,6 +64,7 @@ export default function ConsultationRoomPage() {
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
   const cfSessionIdRef = useRef<string | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const subscribedRef = useRef(false);
@@ -95,12 +96,32 @@ export default function ConsultationRoomPage() {
   const cleanupCall = useCallback(() => {
     if (pollTimerRef.current) clearInterval(pollTimerRef.current);
     localStreamRef.current?.getTracks().forEach(t => t.stop());
+    remoteStreamRef.current?.getTracks().forEach(t => t.stop());
     pcRef.current?.close();
     pcRef.current = null;
     localStreamRef.current = null;
+    remoteStreamRef.current = null;
     cfSessionIdRef.current = null;
     subscribedRef.current = false;
+    setRemoteConnected(false);
   }, []);
+
+  // Ensure local and remote video elements stay bound to their streams
+  useEffect(() => {
+    if (localVideoRef.current && localStreamRef.current) {
+      if (localVideoRef.current.srcObject !== localStreamRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+    }
+  }, [mounted, callStatus, isCamOn]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStreamRef.current) {
+      if (remoteVideoRef.current.srcObject !== remoteStreamRef.current) {
+        remoteVideoRef.current.srcObject = remoteStreamRef.current;
+      }
+    }
+  }, [mounted, remoteConnected]);
 
   // ── Determine caller role ─────────────────────────────────────────
   const getRole = useCallback((): "doctor" | "patient" => {
@@ -131,6 +152,13 @@ export default function ConsultationRoomPage() {
       localStreamRef.current = stream;
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
+      }
+
+      // Initialize remote MediaStream container early
+      const remoteStream = new MediaStream();
+      remoteStreamRef.current = remoteStream;
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
       }
 
       // 2. Create PeerConnection with Cloudflare STUN
@@ -193,16 +221,50 @@ export default function ConsultationRoomPage() {
       await pc.setRemoteDescription({ type: "answer", sdp: sessionData.sdp_answer });
       setCallStatus("connected");
 
-      // 8. Handle incoming remote tracks (when remote peer subscribes to us)
+      // 8. Handle incoming remote tracks (audio and video)
       pc.ontrack = (event) => {
-        if (remoteVideoRef.current && event.streams[0]) {
-          remoteVideoRef.current.srcObject = event.streams[0];
-          setRemoteConnected(true);
+        console.log(`[WebRTC] ontrack: kind=${event.track.kind}, id=${event.track.id}`);
+
+        let currentRemoteStream = remoteStreamRef.current;
+        if (!currentRemoteStream) {
+          currentRemoteStream = new MediaStream();
+          remoteStreamRef.current = currentRemoteStream;
         }
+
+        // Add track if not already present
+        if (!currentRemoteStream.getTracks().some(t => t.id === event.track.id)) {
+          currentRemoteStream.addTrack(event.track);
+          console.log(`[WebRTC] Added ${event.track.kind} track to remoteStream (total: ${currentRemoteStream.getTracks().length})`);
+        }
+
+        // Ensure remote video element has the stream bound and plays
+        if (remoteVideoRef.current) {
+          if (remoteVideoRef.current.srcObject !== currentRemoteStream) {
+            remoteVideoRef.current.srcObject = currentRemoteStream;
+          }
+          remoteVideoRef.current.play().catch(e => {
+            console.warn("[WebRTC] remoteVideo play warning:", e);
+          });
+        }
+
+        setRemoteConnected(true);
+
+        event.track.onunmute = () => {
+          console.log(`[WebRTC] Remote ${event.track.kind} track unmuted`);
+          setRemoteConnected(true);
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.play().catch(() => {});
+          }
+        };
+
+        event.track.onmute = () => {
+          console.log(`[WebRTC] Remote ${event.track.kind} track muted`);
+        };
       };
 
       // 9. Monitor connection state
       pc.onconnectionstatechange = () => {
+        console.log(`[WebRTC] connectionState: ${pc.connectionState}`);
         if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
           setRemoteConnected(false);
         }
@@ -255,15 +317,27 @@ export default function ConsultationRoomPage() {
     subscribedRef.current = true;
 
     try {
-      // Add recvonly transceivers for remote tracks
+      console.log(`[WebRTC] Subscribing to tracks from ${remoteSessionId}:`, trackNames);
+
+      // Add recvonly transceivers paired with track names
+      const trackSubscriptions: Array<{ trackName: string; transceiver: RTCRtpTransceiver }> = [];
       for (const name of trackNames) {
-        const kind = name.startsWith("audio") ? "audio" : "video";
-        pc.addTransceiver(kind, { direction: "recvonly" });
+        const isVideo = name.toLowerCase().includes("video");
+        const kind: "video" | "audio" = isVideo ? "video" : "audio";
+        const transceiver = pc.addTransceiver(kind, { direction: "recvonly" });
+        trackSubscriptions.push({ trackName: name, transceiver });
       }
 
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       await waitForIceGathering(pc);
+
+      const tracksWithMids = trackSubscriptions.map(item => ({
+        trackName: item.trackName,
+        mid: item.transceiver.mid || undefined,
+      }));
+
+      console.log("[WebRTC] Sending subscribe with MIDs:", tracksWithMids);
 
       const res = await fetch("/api/calls/subscribe", {
         method: "POST",
@@ -272,18 +346,22 @@ export default function ConsultationRoomPage() {
           local_session_id: cfSessionIdRef.current,
           remote_session_id: remoteSessionId,
           track_names: trackNames,
+          tracks: tracksWithMids,
           sdp_offer: pc.localDescription!.sdp,
         }),
       });
       const data = await res.json();
 
       if (data.success && data.sdp_answer) {
+        console.log("[WebRTC] Applying remote description from subscribe answer");
         await pc.setRemoteDescription({ type: "answer", sdp: data.sdp_answer });
+        console.log("[WebRTC] Successfully subscribed to remote tracks!");
       } else {
+        console.warn("[WebRTC] Subscribe response unsuccessful:", data.error);
         subscribedRef.current = false; // allow retry
       }
     } catch (err) {
-      console.warn("Subscribe error:", err);
+      console.warn("[WebRTC] Subscribe error:", err);
       subscribedRef.current = false;
     }
   }, []);
@@ -484,19 +562,29 @@ export default function ConsultationRoomPage() {
             />
           ) : (
             /* Cloudflare SFU WebRTC video */
-            <div className="w-full h-full relative flex items-center justify-center">
+            <div className="w-full h-full relative flex items-center justify-center bg-[#050A05]">
               {/* Remote video — full frame */}
               <video
                 ref={remoteVideoRef}
                 autoPlay
                 playsInline
-                className="w-full h-full object-cover"
-                style={{ display: remoteConnected ? "block" : "none" }}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                  remoteConnected ? "opacity-100" : "opacity-0"
+                }`}
+                onLoadedMetadata={() => {
+                  console.log("[WebRTC] remoteVideo onLoadedMetadata fired");
+                  setRemoteConnected(true);
+                  remoteVideoRef.current?.play().catch(e => console.warn("play err:", e));
+                }}
+                onPlaying={() => {
+                  console.log("[WebRTC] remoteVideo onPlaying fired");
+                  setRemoteConnected(true);
+                }}
               />
 
-              {/* Waiting / error state when no remote stream yet */}
+              {/* Waiting / connecting overlay when no remote stream yet */}
               {!remoteConnected && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-[#050A05]">
                   {callStatus === "connecting" && (
                     <>
                       <div className="w-20 h-20 rounded-full flex items-center justify-center"
@@ -545,7 +633,7 @@ export default function ConsultationRoomPage() {
               )}
 
               {/* Local video — picture-in-picture */}
-              <div className="absolute bottom-20 right-4 w-36 h-28 rounded-xl overflow-hidden shadow-2xl"
+              <div className="absolute bottom-20 right-4 w-36 h-28 rounded-xl overflow-hidden shadow-2xl z-20"
                 style={{ border: "2px solid rgba(237,201,24,0.3)", background: "#0A0F0A" }}>
                 <video
                   ref={localVideoRef}
