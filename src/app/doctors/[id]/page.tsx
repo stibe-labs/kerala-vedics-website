@@ -137,13 +137,13 @@ export default function DoctorBookingPage() {
 
   const generateMockSlots = (): TimeSlot[] => {
     const slots: TimeSlot[] = [];
-    const unavailable = new Set(["10:00", "11:20", "14:00", "15:40"]);
+    const unavailable = new Set(["10:00", "11:15", "14:00", "15:30"]);
     for (let h = 9; h < 18; h++) {
-      for (let m = 0; m < 60; m += 25) {
+      for (let m = 0; m < 60; m += 15) {
         if (h === 13) continue; // lunch
         const time = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-        const endH = Math.floor((h * 60 + m + 20) / 60);
-        const endM = (h * 60 + m + 20) % 60;
+        const endH = Math.floor((h * 60 + m + 15) / 60);
+        const endM = (h * 60 + m + 15) % 60;
         slots.push({
           start_time: time,
           end_time: `${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`,

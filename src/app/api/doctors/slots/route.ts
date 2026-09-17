@@ -51,9 +51,8 @@ export async function GET(req: NextRequest) {
     const allSlots: TimeSlot[] = [];
 
     for (const schedule of schedules) {
-      const slotMins = schedule.slot_duration || 20;
-      const bufferMins = schedule.buffer_mins || 5;
-      const stepMins = slotMins + bufferMins;
+      const slotMins = Number(schedule.slot_duration) || 15;
+      const stepMins = slotMins;
 
       const [startH, startM] = schedule.start_time.split(":").map(Number);
       const [endH, endM] = schedule.end_time.split(":").map(Number);

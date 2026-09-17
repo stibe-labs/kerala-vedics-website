@@ -18,11 +18,11 @@ interface ScheduleEntry {
 }
 
 const DEFAULT_SCHEDULE: ScheduleEntry[] = [
-  { day_of_week: 1, start_time: "09:00", end_time: "13:00", slot_duration: 20, buffer_mins: 5, is_active: true },
-  { day_of_week: 2, start_time: "09:00", end_time: "13:00", slot_duration: 20, buffer_mins: 5, is_active: true },
-  { day_of_week: 3, start_time: "09:00", end_time: "13:00", slot_duration: 20, buffer_mins: 5, is_active: true },
-  { day_of_week: 4, start_time: "09:00", end_time: "13:00", slot_duration: 20, buffer_mins: 5, is_active: true },
-  { day_of_week: 5, start_time: "09:00", end_time: "13:00", slot_duration: 20, buffer_mins: 5, is_active: true },
+  { day_of_week: 1, start_time: "09:00", end_time: "13:00", slot_duration: 15, buffer_mins: 0, is_active: true },
+  { day_of_week: 2, start_time: "09:00", end_time: "13:00", slot_duration: 15, buffer_mins: 0, is_active: true },
+  { day_of_week: 3, start_time: "09:00", end_time: "13:00", slot_duration: 15, buffer_mins: 0, is_active: true },
+  { day_of_week: 4, start_time: "09:00", end_time: "13:00", slot_duration: 15, buffer_mins: 0, is_active: true },
+  { day_of_week: 5, start_time: "09:00", end_time: "13:00", slot_duration: 15, buffer_mins: 0, is_active: true },
 ];
 
 export default function ConsultantAvailabilityPage() {
@@ -101,7 +101,7 @@ export default function ConsultantAvailabilityPage() {
     } else {
       setSchedule(prev => [...prev, {
         day_of_week: day, start_time: "09:00", end_time: "13:00",
-        slot_duration: 20, buffer_mins: 5, is_active: true,
+        slot_duration: 15, buffer_mins: 0, is_active: true,
       }].sort((a, b) => a.day_of_week - b.day_of_week));
     }
   };

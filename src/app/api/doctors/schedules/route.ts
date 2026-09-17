@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         [
           scheduleId, doctor_id, Number(schedule.day_of_week),
           schedule.start_time, schedule.end_time,
-          Number(schedule.slot_duration) || 20, Number(schedule.buffer_mins) || 5,
+          Number(schedule.slot_duration) || 15, Number(schedule.buffer_mins) || 0,
         ]
       );
     }
