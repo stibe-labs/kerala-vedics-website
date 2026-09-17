@@ -123,6 +123,36 @@ export interface PatientReport {
   file_type: string;    // e.g. 'image/jpeg', 'application/pdf'
 }
 
+export function parsePatientReports(raw: unknown): PatientReport[] {
+  if (!raw) return [];
+  let parsed = raw;
+
+  // Handle multi-stringified JSON (e.g. from nested serialization) safely
+  while (typeof parsed === "string") {
+    const trimmed = parsed.trim();
+    if (!trimmed || trimmed === "[]" || trimmed === "null" || trimmed === "undefined") {
+      return [];
+    }
+    try {
+      const next = JSON.parse(trimmed);
+      if (next === parsed) break;
+      parsed = next;
+    } catch {
+      break;
+    }
+  }
+
+  if (Array.isArray(parsed)) {
+    return parsed.filter(item => item && typeof item === "object") as PatientReport[];
+  }
+
+  if (parsed && typeof parsed === "object") {
+    return [parsed as PatientReport];
+  }
+
+  return [];
+}
+
 export interface BookingIntakeForm {
   symptoms: string;
   duration: string;

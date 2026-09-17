@@ -9,7 +9,7 @@ import {
   Edit3, X, ImageIcon, ZoomIn, ChevronDown, Activity, Pill, Apple, Moon,
   Phone, Mail, MessageSquare, Download,
 } from "lucide-react";
-import { Appointment, Doctor, PatientReport } from "@/types/consultation";
+import { Appointment, Doctor, PatientReport, parsePatientReports } from "@/types/consultation";
 
 const CONSULTANT_KEY = "kv_consultant_session";
 
@@ -398,11 +398,7 @@ function AppointmentCard({
     } catch { return false; }
   })();
 
-  const reportCount = (() => {
-    if (!appointment.intake_reports) return 0;
-    if (Array.isArray(appointment.intake_reports)) return appointment.intake_reports.length;
-    try { return JSON.parse(appointment.intake_reports as unknown as string).length; } catch { return 0; }
-  })();
+  const reportCount = parsePatientReports(appointment.intake_reports).length;
 
   return (
     <div
@@ -510,10 +506,8 @@ function PatientDetailDrawer({
   const [lightboxReport, setLightboxReport] = useState<PatientReport | null>(null);
 
   const patientReports: PatientReport[] = useMemo(() => {
-    if (!appointment.intake_reports) return [];
-    if (Array.isArray(appointment.intake_reports)) return appointment.intake_reports as PatientReport[];
-    try { return JSON.parse(appointment.intake_reports as unknown as string); } catch { return []; }
-  }, [appointment]);
+    return parsePatientReports(appointment.intake_reports);
+  }, [appointment.intake_reports]);
 
   const isActive = (() => {
     try {
@@ -672,49 +666,61 @@ function PatientDetailDrawer({
                 </div>
               ) : (
                 <div className="mt-3 space-y-3">
-                  {patientReports.map((report, idx) => (
-                    <div key={idx} className="rounded-xl overflow-hidden"
-                      style={{ border: "1px solid rgba(237,201,24,0.15)", background: "rgba(250,248,242,0.03)" }}>
-                      {/* Preview */}
-                      <div className="relative group cursor-pointer"
-                        onClick={() => report.file_type.startsWith("image/") && setLightboxReport(report)}>
-                        {report.file_type.startsWith("image/") ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={report.data_url} alt={report.caption || report.file_name}
-                            className="w-full object-contain max-h-52"
-                            style={{ background: "rgba(0,0,0,0.4)" }} />
-                        ) : (
-                          <div className="w-full h-24 flex flex-col items-center justify-center gap-2"
-                            style={{ background: "rgba(237,201,24,0.05)" }}>
-                            <FileText className="w-7 h-7" style={{ color: "#EDC918" }} />
-                            <span className="text-xs" style={{ color: "rgba(250,248,242,0.5)" }}>{report.file_name}</span>
-                          </div>
-                        )}
-                        {report.file_type.startsWith("image/") && (
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                            style={{ background: "rgba(0,0,0,0.45)" }}>
-                            <ZoomIn className="w-7 h-7 text-white" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Caption + actions */}
-                      <div className="px-4 py-3 flex items-start justify-between gap-3">
-                        <div>
-                          {report.caption && (
-                            <div className="text-sm font-medium" style={{ color: "#FAF8F2" }}>{report.caption}</div>
+                  {patientReports.map((report, idx) => {
+                    const isImg = Boolean(
+                      (report.file_type && report.file_type.startsWith("image/")) ||
+                      (report.data_url && report.data_url.startsWith("data:image/"))
+                    );
+                    return (
+                      <div key={idx} className="rounded-xl overflow-hidden"
+                        style={{ border: "1px solid rgba(237,201,24,0.15)", background: "rgba(250,248,242,0.03)" }}>
+                        {/* Preview */}
+                        <div className="relative group cursor-pointer"
+                          onClick={() => isImg && setLightboxReport(report)}>
+                          {isImg ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={report.data_url} alt={report.caption || report.file_name || "Document"}
+                              className="w-full object-contain max-h-52"
+                              style={{ background: "rgba(0,0,0,0.4)" }} />
+                          ) : (
+                            <div className="w-full h-24 flex flex-col items-center justify-center gap-2"
+                              style={{ background: "rgba(237,201,24,0.05)" }}>
+                              <FileText className="w-7 h-7" style={{ color: "#EDC918" }} />
+                              <span className="text-xs truncate max-w-[200px]" style={{ color: "rgba(250,248,242,0.5)" }}>
+                                {report.file_name || "Document"}
+                              </span>
+                            </div>
                           )}
-                          <div className="text-xs mt-0.5" style={{ color: "rgba(250,248,242,0.4)" }}>{report.file_name}</div>
+                          {isImg && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              style={{ background: "rgba(0,0,0,0.45)" }}>
+                              <ZoomIn className="w-7 h-7 text-white" />
+                            </div>
+                          )}
                         </div>
-                        <a href={report.data_url} download={report.file_name}
-                          className="flex-shrink-0 p-2 rounded-lg transition-all hover:bg-white/10"
-                          style={{ color: "#EDC918" }}
-                          onClick={e => e.stopPropagation()}>
-                          <Download className="w-4 h-4" />
-                        </a>
+
+                        {/* Caption + actions */}
+                        <div className="px-4 py-3 flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            {report.caption && (
+                              <div className="text-sm font-medium truncate" style={{ color: "#FAF8F2" }}>{report.caption}</div>
+                            )}
+                            <div className="text-xs mt-0.5 truncate" style={{ color: "rgba(250,248,242,0.4)" }}>
+                              {report.file_name || "Document"}
+                            </div>
+                          </div>
+                          {report.data_url && (
+                            <a href={report.data_url} download={report.file_name || "document"}
+                              className="flex-shrink-0 p-2 rounded-lg transition-all hover:bg-white/10"
+                              style={{ color: "#EDC918" }}
+                              onClick={e => e.stopPropagation()}>
+                              <Download className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </section>

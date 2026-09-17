@@ -9,7 +9,7 @@ import {
   Clock, Stethoscope, ImageIcon, ZoomIn, Wifi, WifiOff, Loader2,
   AlertCircle,
 } from "lucide-react";
-import { Appointment, Prescription, PrescriptionProduct, PatientReport } from "@/types/consultation";
+import { Appointment, Prescription, PrescriptionProduct, PatientReport, parsePatientReports } from "@/types/consultation";
 import { Product } from "@/types/product";
 
 // ── Prescription Builder State ────────────────────────────────────────
@@ -395,10 +395,8 @@ export default function ConsultationRoomPage() {
   }).slice(0, 6);
 
   const patientReports: PatientReport[] = useMemo(() => {
-    if (!appointment?.intake_reports) return [];
-    if (Array.isArray(appointment.intake_reports)) return appointment.intake_reports as PatientReport[];
-    try { return JSON.parse(appointment.intake_reports as unknown as string); } catch { return []; }
-  }, [appointment]);
+    return parsePatientReports(appointment?.intake_reports);
+  }, [appointment?.intake_reports]);
 
   if (!mounted) return null;
 
@@ -807,45 +805,55 @@ export default function ConsultationRoomPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {patientReports.map((report, idx) => (
-                    <div key={idx} className="rounded-xl overflow-hidden"
-                      style={{ border: "1px solid rgba(237,201,24,0.15)", background: "rgba(250,248,242,0.03)" }}>
-                      <div className="relative group cursor-pointer"
-                        onClick={() => report.file_type.startsWith("image/") && setLightboxReport(report)}>
-                        {report.file_type.startsWith("image/") ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={report.data_url} alt={report.caption || report.file_name}
-                            className="w-full object-contain max-h-48"
-                            style={{ background: "rgba(0,0,0,0.4)" }} />
-                        ) : (
-                          <div className="w-full h-28 flex flex-col items-center justify-center gap-2"
-                            style={{ background: "rgba(237,201,24,0.06)" }}>
-                            <FileText className="w-8 h-8" style={{ color: "#EDC918" }} />
-                            <span className="text-xs" style={{ color: "rgba(250,248,242,0.6)" }}>{report.file_name}</span>
+                  {patientReports.map((report, idx) => {
+                    const isImg = Boolean(
+                      (report.file_type && report.file_type.startsWith("image/")) ||
+                      (report.data_url && report.data_url.startsWith("data:image/"))
+                    );
+                    return (
+                      <div key={idx} className="rounded-xl overflow-hidden"
+                        style={{ border: "1px solid rgba(237,201,24,0.15)", background: "rgba(250,248,242,0.03)" }}>
+                        <div className="relative group cursor-pointer"
+                          onClick={() => isImg && setLightboxReport(report)}>
+                          {isImg ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={report.data_url} alt={report.caption || report.file_name || "Document"}
+                              className="w-full object-contain max-h-48"
+                              style={{ background: "rgba(0,0,0,0.4)" }} />
+                          ) : (
+                            <div className="w-full h-28 flex flex-col items-center justify-center gap-2"
+                              style={{ background: "rgba(237,201,24,0.06)" }}>
+                              <FileText className="w-8 h-8" style={{ color: "#EDC918" }} />
+                              <span className="text-xs truncate max-w-[200px]" style={{ color: "rgba(250,248,242,0.6)" }}>
+                                {report.file_name || "PDF Document"}
+                              </span>
+                            </div>
+                          )}
+                          {isImg && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              style={{ background: "rgba(0,0,0,0.45)" }}>
+                              <ZoomIn className="w-8 h-8 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          {report.caption && (
+                            <div className="text-sm font-medium mb-1 truncate" style={{ color: "#FAF8F2" }}>{report.caption}</div>
+                          )}
+                          <div className="text-xs truncate" style={{ color: "rgba(250,248,242,0.4)" }}>
+                            {report.file_name || "Document"}
                           </div>
-                        )}
-                        {report.file_type.startsWith("image/") && (
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                            style={{ background: "rgba(0,0,0,0.45)" }}>
-                            <ZoomIn className="w-8 h-8 text-white" />
-                          </div>
-                        )}
+                          {!isImg && report.data_url && (
+                            <a href={report.data_url} download={report.file_name || "document"}
+                              className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                              style={{ background: "rgba(237,201,24,0.12)", color: "#EDC918" }}>
+                              Download PDF
+                            </a>
+                          )}
+                        </div>
                       </div>
-                      <div className="p-3">
-                        {report.caption && (
-                          <div className="text-sm font-medium mb-1" style={{ color: "#FAF8F2" }}>{report.caption}</div>
-                        )}
-                        <div className="text-xs" style={{ color: "rgba(250,248,242,0.4)" }}>{report.file_name}</div>
-                        {!report.file_type.startsWith("image/") && (
-                          <a href={report.data_url} download={report.file_name}
-                            className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                            style={{ background: "rgba(237,201,24,0.12)", color: "#EDC918" }}>
-                            Download PDF
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

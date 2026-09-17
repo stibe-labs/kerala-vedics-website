@@ -147,8 +147,8 @@ export async function POST(req: NextRequest) {
       [
         appointmentId, patient_id, doctor_id, appointment_date, start_time, end_time,
         consultation_type, intake_symptoms || "", intake_duration || "",
-        intake_dosha || "", intake_medications || "", intake_diet || "",
-        JSON.stringify(intake_reports), consultation_fee, platform_fee, doctor_earning,
+        typeof intake_reports === "string" ? intake_reports : JSON.stringify(intake_reports || []),
+        consultation_fee, platform_fee, doctor_earning,
         coupon_code || null, roomId, meetingUrl, payment_id ? `Razorpay: ${payment_id}` : null,
       ]
     );
