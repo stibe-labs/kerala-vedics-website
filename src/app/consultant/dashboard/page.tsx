@@ -221,14 +221,14 @@ export default function ConsultantDashboard() {
               </Link>
             ))}
             <div className="pt-4 mt-2 border-t" style={{ borderColor: "rgba(237,201,24,0.1)" }}>
-              <Link href="/doctors" target="_blank"
+              <a href="https://www.keralavedics.com/doctors" target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:bg-white/10"
                 style={{ color: "#EDC918" }}>
                 <span className="flex items-center gap-2">
                   <ExternalLink className="w-3.5 h-3.5" /> Public Directory
                 </span>
                 <span>↗</span>
-              </Link>
+              </a>
             </div>
           </nav>
 

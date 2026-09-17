@@ -17,13 +17,21 @@ export function middleware(req: NextRequest) {
       return NextResponse.rewrite(url);
     }
 
-    // If path is not already prefixed with /consultant and not internal assets or api
-    if (
-      !url.pathname.startsWith("/consultant") &&
-      !url.pathname.startsWith("/api") &&
-      !url.pathname.startsWith("/_next") &&
-      !url.pathname.includes(".")
-    ) {
+    // Top-level paths that exist in the app and MUST NOT be prefixed with /consultant:
+    const EXCLUDED_PREFIXES = [
+      "/consultant",     // already prefixed
+      "/consultation",   // video consultation room (/consultation/[id])
+      "/doctors",        // public doctors directory
+      "/appointments",   // patient appointments
+      "/api",            // all api routes
+      "/_next",          // Next.js chunks & RSC
+    ];
+
+    const isExcluded =
+      EXCLUDED_PREFIXES.some((prefix) => url.pathname.startsWith(prefix)) ||
+      url.pathname.includes(".");
+
+    if (!isExcluded) {
       url.pathname = `/consultant${url.pathname}`;
       return NextResponse.rewrite(url);
     }
