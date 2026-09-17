@@ -150,11 +150,26 @@ export async function POST(req: NextRequest) {
         coupon_code, meeting_room_id, meeting_url, notes_for_patient, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, 'Scheduled', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Completed', ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       [
-        appointmentId, patient_id, doctor_id, appointment_date, start_time, end_time,
-        consultation_type, intake_symptoms || "", intake_duration || "",
+        appointmentId,
+        patient_id,
+        doctor_id,
+        appointment_date,
+        start_time,
+        end_time,
+        consultation_type || "Video",
+        intake_symptoms || "",
+        intake_duration || "",
+        intake_dosha || "",
+        intake_medications || "",
+        intake_diet || "",
         typeof intake_reports === "string" ? intake_reports : JSON.stringify(intake_reports || []),
-        consultation_fee, platform_fee, doctor_earning,
-        coupon_code || null, roomId, meetingUrl, payment_id ? `Razorpay: ${payment_id}` : null,
+        consultation_fee,
+        platform_fee,
+        doctor_earning,
+        coupon_code || null,
+        roomId,
+        meetingUrl,
+        payment_id ? `Razorpay: ${payment_id}` : null,
       ]
     );
 
