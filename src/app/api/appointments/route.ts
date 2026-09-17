@@ -17,19 +17,24 @@ export async function GET(req: NextRequest) {
   try {
     let sql = `
       SELECT a.*,
-        u.name as patient_name, u.email as patient_email,
-        d.specialization as doctor_specialization,
-        du.name as doctor_name
+        COALESCE(u.name, 'Patient') as patient_name,
+        COALESCE(u.email, '') as patient_email,
+        COALESCE(u.phone, '') as patient_phone,
+        COALESCE(d.specialization, 'Ayurvedic Consultant') as doctor_specialization,
+        COALESCE(du.name, 'Vaidya') as doctor_name
       FROM appointments a
-      JOIN users u ON a.patient_id = u.id
-      JOIN doctors d ON a.doctor_id = d.id
-      JOIN users du ON d.user_id = du.id
+      LEFT JOIN users u ON a.patient_id = u.id
+      LEFT JOIN doctors d ON a.doctor_id = d.id
+      LEFT JOIN users du ON d.user_id = du.id
       WHERE 1=1
     `;
     const params: (string | number | null)[] = [];
 
     if (patient_id) { sql += " AND a.patient_id = ?"; params.push(patient_id); }
-    if (doctor_id) { sql += " AND a.doctor_id = ?"; params.push(doctor_id); }
+    if (doctor_id) {
+      sql += " AND (a.doctor_id = ? OR d.user_id = ?)";
+      params.push(doctor_id, doctor_id);
+    }
     if (status) { sql += " AND a.status = ?"; params.push(status); }
     if (date) { sql += " AND a.appointment_date = ?"; params.push(date); }
 
@@ -50,6 +55,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       patient_id,
+      patient_name,
+      patient_email,
+      patient_phone,
       doctor_id,
       appointment_date,
       start_time,
@@ -62,27 +70,47 @@ export async function POST(req: NextRequest) {
       intake_diet,
       intake_reports = [],
       coupon_code,
+      payment_id,
     } = body;
 
     if (!patient_id || !doctor_id || !appointment_date || !start_time || !end_time) {
       return NextResponse.json({ success: false, error: "Missing required booking fields" }, { status: 400 });
     }
 
-    // Get doctor fee
+    // 1. Ensure patient exists in users table to satisfy foreign key constraint
+    try {
+      await executeD1Write(
+        `INSERT INTO users (id, name, email, password_hash, phone, role)
+         VALUES (?, ?, ?, 'customer_pwd', ?, 'customer')
+         ON CONFLICT(id) DO UPDATE SET
+           name = COALESCE(excluded.name, users.name),
+           email = COALESCE(excluded.email, users.email)`,
+        [
+          patient_id,
+          patient_name || "Patient",
+          patient_email || `${patient_id}@keralavedics.com`,
+          patient_phone || "",
+        ]
+      );
+    } catch (uErr) {
+      console.warn("User upsert warning in appointment creation:", uErr);
+    }
+
+    // 2. Get doctor fee
     const doctors = await executeD1Query<{ consultation_fee: number; commission_rate: number }>(
-      "SELECT consultation_fee, commission_rate FROM doctors WHERE id = ? AND verification_status = 'Approved'",
-      [doctor_id]
+      "SELECT consultation_fee, commission_rate FROM doctors WHERE id = ? OR user_id = ? LIMIT 1",
+      [doctor_id, doctor_id]
     );
 
     if (doctors.length === 0) {
-      return NextResponse.json({ success: false, error: "Doctor not found or not approved" }, { status: 404 });
+      return NextResponse.json({ success: false, error: "Doctor not found" }, { status: 404 });
     }
 
     const { consultation_fee, commission_rate } = doctors[0];
-    const platform_fee = Math.round(consultation_fee * commission_rate * 100) / 100;
+    const platform_fee = Math.round(consultation_fee * (commission_rate || 0.20) * 100) / 100;
     const doctor_earning = Math.round((consultation_fee - platform_fee) * 100) / 100;
 
-    // Check for slot conflicts
+    // 3. Check for slot conflicts
     const conflicts = await executeD1Query(
       `SELECT id FROM appointments
        WHERE doctor_id = ? AND appointment_date = ? AND start_time = ?
@@ -104,14 +132,14 @@ export async function POST(req: NextRequest) {
         status, consultation_type, intake_symptoms, intake_duration, intake_dosha,
         intake_medications, intake_diet, intake_reports,
         consultation_fee, platform_fee, doctor_earning, payment_status,
-        coupon_code, meeting_room_id, meeting_url, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 'Scheduled', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Completed', ?, ?, ?, CURRENT_TIMESTAMP)`,
+        coupon_code, meeting_room_id, meeting_url, notes_for_patient, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 'Scheduled', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Completed', ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       [
         appointmentId, patient_id, doctor_id, appointment_date, start_time, end_time,
         consultation_type, intake_symptoms || "", intake_duration || "",
         intake_dosha || "", intake_medications || "", intake_diet || "",
         JSON.stringify(intake_reports), consultation_fee, platform_fee, doctor_earning,
-        coupon_code || null, roomId, meetingUrl,
+        coupon_code || null, roomId, meetingUrl, payment_id ? `Razorpay: ${payment_id}` : null,
       ]
     );
 
@@ -129,6 +157,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("Appointment creation error:", err);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

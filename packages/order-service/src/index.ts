@@ -61,7 +61,7 @@ app.get("/orders", async (c) => {
       const rows = await qd1(c.env, "SELECT * FROM orders WHERE id = ? LIMIT 1", [orderId]);
       if (rows.length > 0) {
         const items = await qd1(c.env, "SELECT * FROM order_items WHERE order_id = ?", [orderId]);
-        return c.json({ success: true, order: { ...rows[0], items } });
+        return c.json({ success: true, order: { ...(rows[0] as any), items } });
       }
     } catch (e) { console.warn("[Orders] D1 lookup:", e); }
     return c.json({ success: false, error: "Order not found" }, 404);

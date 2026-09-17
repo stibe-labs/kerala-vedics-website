@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   Video, Mic, MicOff, VideoOff, PhoneOff, MessageSquare, FileText,
   Plus, Trash2, CheckCircle2, Send, Search, Leaf, ArrowRight, X,
-  Clock, Stethoscope
+  Clock, Stethoscope, ImageIcon, ZoomIn
 } from "lucide-react";
-import { Appointment, Prescription, PrescriptionProduct } from "@/types/consultation";
+import { Appointment, Prescription, PrescriptionProduct, PatientReport } from "@/types/consultation";
 import { Product } from "@/types/product";
 
 // ---- Prescription Builder State ----
@@ -25,18 +26,20 @@ const ANUPANA_OPTIONS = ["Warm water", "Honey", "Milk", "Ghee", "Warm milk", "Ri
 const TIMING_OPTIONS = ["Empty stomach", "Before meals", "After meals", "With meals", "Bedtime", "Morning", "Night"];
 const FREQUENCY_OPTIONS = ["Once daily", "Twice daily", "Thrice daily", "Morning & Night", "With every meal"];
 
-export default function ConsultationRoomPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id: appointmentId } = use(params);
+export default function ConsultationRoomPage() {
+  const routeParams = useParams();
+  const appointmentId = (routeParams?.id as string) || "";
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [productSearch, setProductSearch] = useState("");
-  const [panel, setPanel] = useState<"video" | "prescription" | "chat">("video");
+  const [panel, setPanel] = useState<"video" | "prescription" | "chat" | "reports">("video");
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCamOn, setIsCamOn] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [prescriptionSent, setPrescriptionSent] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [lightboxReport, setLightboxReport] = useState<PatientReport | null>(null);
 
   const [draft, setDraft] = useState<PrescriptionDraft>({
     diagnosis: "",
@@ -164,6 +167,13 @@ export default function ConsultationRoomPage({ params }: { params: Promise<{ id:
     return !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
   }).slice(0, 6);
 
+  // Parse patient uploaded reports from appointment intake_reports field
+  const patientReports: PatientReport[] = React.useMemo(() => {
+    if (!appointment?.intake_reports) return [];
+    if (Array.isArray(appointment.intake_reports)) return appointment.intake_reports as PatientReport[];
+    try { return JSON.parse(appointment.intake_reports as unknown as string); } catch { return []; }
+  }, [appointment]);
+
   const jitsiUrl = appointment?.meeting_url || `https://meet.jit.si/kv-${appointmentId}`;
 
   if (!mounted) return null;
@@ -231,16 +241,23 @@ export default function ConsultationRoomPage({ params }: { params: Promise<{ id:
           <div className="absolute top-4 right-4 flex flex-col gap-2">
             {[
               { id: "prescription" as const, icon: <FileText className="w-4 h-4" />, label: "Rx" },
+              { id: "reports" as const, icon: <ImageIcon className="w-4 h-4" />, label: "Docs", badge: patientReports.length },
               { id: "chat" as const, icon: <MessageSquare className="w-4 h-4" />, label: "Chat" },
-            ].map(({ id, icon, label }) => (
+            ].map(({ id, icon, label, badge }) => (
               <button key={id} onClick={() => setPanel(panel === id ? "video" : id)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all relative"
                 style={{
                   background: panel === id ? "#EDC918" : "rgba(15,25,15,0.8)",
                   color: panel === id ? "#111D10" : "#FAF8F2",
                   border: "1px solid rgba(237,201,24,0.3)",
                 }}>
                 {icon}
+                {badge ? (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center"
+                    style={{ background: "#4ADE80", color: "#0A0F0A" }}>
+                    {badge}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -465,6 +482,86 @@ export default function ConsultationRoomPage({ params }: { params: Promise<{ id:
           </div>
         )}
 
+        {/* Right Panel: Patient Reports */}
+        {panel === "reports" && (
+          <div className="w-96 flex flex-col overflow-hidden"
+            style={{ background: "#0F1A0F", borderLeft: "1px solid rgba(237,201,24,0.1)" }}>
+            <div className="p-4 flex-shrink-0 flex items-center justify-between"
+              style={{ borderBottom: "1px solid rgba(237,201,24,0.1)" }}>
+              <div>
+                <h2 className="font-bold" style={{ color: "#FAF8F2", fontFamily: "var(--font-display)" }}>
+                  Patient Documents
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(250,248,242,0.45)" }}>
+                  Reports uploaded by patient before consultation
+                </p>
+              </div>
+              <button onClick={() => setPanel("video")}>
+                <X className="w-4 h-4" style={{ color: "rgba(250,248,242,0.5)" }} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              {patientReports.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                  <ImageIcon className="w-12 h-12 mb-3" style={{ color: "rgba(250,248,242,0.12)" }} />
+                  <p className="text-sm" style={{ color: "rgba(250,248,242,0.4)" }}>
+                    No documents uploaded by patient.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {patientReports.map((report, idx) => (
+                    <div key={idx} className="rounded-xl overflow-hidden"
+                      style={{ border: "1px solid rgba(237,201,24,0.15)", background: "rgba(250,248,242,0.03)" }}>
+                      {/* Preview */}
+                      <div className="relative group cursor-pointer"
+                        onClick={() => report.file_type.startsWith("image/") && setLightboxReport(report)}>
+                        {report.file_type.startsWith("image/") ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={report.data_url} alt={report.caption || report.file_name}
+                            className="w-full object-contain max-h-48"
+                            style={{ background: "rgba(0,0,0,0.4)" }} />
+                        ) : (
+                          <div className="w-full h-28 flex flex-col items-center justify-center gap-2"
+                            style={{ background: "rgba(237,201,24,0.06)" }}>
+                            <FileText className="w-8 h-8" style={{ color: "#EDC918" }} />
+                            <span className="text-xs" style={{ color: "rgba(250,248,242,0.6)" }}>{report.file_name}</span>
+                          </div>
+                        )}
+                        {report.file_type.startsWith("image/") && (
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            style={{ background: "rgba(0,0,0,0.45)" }}>
+                            <ZoomIn className="w-8 h-8 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Caption + filename */}
+                      <div className="p-3">
+                        {report.caption && (
+                          <div className="text-sm font-medium mb-1" style={{ color: "#FAF8F2" }}>
+                            {report.caption}
+                          </div>
+                        )}
+                        <div className="text-xs" style={{ color: "rgba(250,248,242,0.4)" }}>
+                          {report.file_name}
+                        </div>
+                        {!report.file_type.startsWith("image/") && (
+                          <a href={report.data_url} download={report.file_name}
+                            className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                            style={{ background: "rgba(237,201,24,0.12)", color: "#EDC918" }}>
+                            Download PDF
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Right Panel: Chat (placeholder) */}
         {panel === "chat" && (
           <div className="w-80 flex flex-col" style={{ background: "#0F1A0F", borderLeft: "1px solid rgba(237,201,24,0.1)" }}>
@@ -486,6 +583,34 @@ export default function ConsultationRoomPage({ params }: { params: Promise<{ id:
           </div>
         )}
       </div>
+
+      {/* Lightbox for full-size image preview */}
+      {lightboxReport && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.92)" }}
+          onClick={() => setLightboxReport(null)}>
+          <button
+            className="absolute top-5 right-5 p-2 rounded-full transition-all"
+            style={{ background: "rgba(255,255,255,0.1)", color: "#FAF8F2" }}
+            onClick={() => setLightboxReport(null)}>
+            <X className="w-5 h-5" />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxReport.data_url}
+            alt={lightboxReport.caption || lightboxReport.file_name}
+            className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+          {lightboxReport.caption && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl text-sm"
+              style={{ background: "rgba(15,25,15,0.9)", color: "#FAF8F2", border: "1px solid rgba(237,201,24,0.2)" }}>
+              {lightboxReport.caption}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

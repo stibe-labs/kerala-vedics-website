@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeD1Query, executeD1Write } from "@/lib/d1";
 import { DoctorSchedule } from "@/types/consultation";
+import { saveScheduleToStore, getScheduleFromStore } from "@/lib/userStore";
+
+export const dynamic = "force-dynamic";
 
 // GET /api/doctors/schedules?doctor_id=...
 export async function GET(req: NextRequest) {
@@ -12,19 +15,33 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const schedules = await executeD1Query<DoctorSchedule>(
+    let schedules = await executeD1Query<DoctorSchedule>(
       "SELECT * FROM doctor_schedules WHERE doctor_id = ? ORDER BY day_of_week",
       [doctor_id]
     );
 
-    const leaves = await executeD1Query(
-      "SELECT * FROM doctor_leaves WHERE doctor_id = ? AND date >= date('now') ORDER BY date",
-      [doctor_id]
-    );
+    if (schedules.length === 0) {
+      const cached = getScheduleFromStore(doctor_id);
+      if (cached && cached.length > 0) {
+        schedules = cached as any;
+      }
+    }
+
+    let leaves: any[] = [];
+    try {
+      leaves = await executeD1Query(
+        "SELECT * FROM doctor_leaves WHERE doctor_id = ? AND date >= date('now') ORDER BY date",
+        [doctor_id]
+      );
+    } catch {}
 
     return NextResponse.json({ success: true, schedules, leaves });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    const cached = getScheduleFromStore(doctor_id);
+    if (cached && cached.length > 0) {
+      return NextResponse.json({ success: true, schedules: cached, leaves: [] });
+    }
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
@@ -39,7 +56,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "doctor_id and schedules array required" }, { status: 400 });
     }
 
-    // Delete existing schedules and re-insert
+    // Save to memory store immediately
+    saveScheduleToStore(doctor_id, schedules);
+
+    // Delete existing schedules and re-insert into D1
     await executeD1Write("DELETE FROM doctor_schedules WHERE doctor_id = ?", [doctor_id]);
 
     for (const schedule of schedules) {

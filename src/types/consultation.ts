@@ -94,7 +94,7 @@ export interface Appointment {
   intake_dosha?: string;
   intake_medications?: string;
   intake_diet?: string;
-  intake_reports?: string[];            // Parsed from JSON
+  intake_reports?: PatientReport[];     // Parsed from JSON
   consultation_fee: number;
   platform_fee: number;
   doctor_earning: number;
@@ -115,13 +115,21 @@ export interface Appointment {
   patient_email?: string;
 }
 
+// ---- Patient Uploaded Report ----
+export interface PatientReport {
+  caption: string;      // User-entered description of the document
+  data_url: string;     // Base64 data URL (image/pdf preview)
+  file_name: string;
+  file_type: string;    // e.g. 'image/jpeg', 'application/pdf'
+}
+
 export interface BookingIntakeForm {
   symptoms: string;
   duration: string;
   dosha: string;
   medications: string;
   diet: string;
-  reports: string[];
+  reports: PatientReport[];
   consultation_type: ConsultationType;
 }
 

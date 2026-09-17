@@ -90,3 +90,85 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
+
+// POST /api/admin/doctors — manually onboard / add an approved doctor
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const {
+      name,
+      email,
+      phone,
+      registration_number,
+      council_name,
+      degree,
+      specialization,
+      years_experience = 1,
+      bio = "",
+      languages = ["English", "Malayalam"],
+      consultation_fee = 499,
+      commission_rate = 0.2,
+      profile_photo = "",
+      certificate_url = "",
+    } = body;
+
+    if (!name || !email || !registration_number || !degree || !specialization) {
+      return NextResponse.json(
+        { success: false, error: "Name, email, registration number, degree, and specialization are required" },
+        { status: 400 }
+      );
+    }
+
+    // Ensure user exists in users table or create one
+    const existingUsers = await executeD1Query<{ id: string }>(
+      "SELECT id FROM users WHERE email = ? LIMIT 1",
+      [email]
+    );
+
+    let userId = existingUsers[0]?.id;
+    if (!userId) {
+      userId = `user_doc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      await executeD1Write(
+        `INSERT INTO users (id, name, email, password_hash, phone)
+         VALUES (?, ?, ?, 'admin_provisioned', ?)`,
+        [userId, name, email, phone || null]
+      );
+    }
+
+    const doctorId = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const langJson = JSON.stringify(Array.isArray(languages) ? languages : [languages]);
+
+    await executeD1Write(
+      `INSERT INTO doctors (
+        id, user_id, registration_number, council_name, degree, specialization,
+        years_experience, bio, languages, consultation_fee, commission_rate,
+        certificate_url, profile_photo, verification_status, is_active, rating,
+        total_consultations, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Approved', 1, 5.0, 0, CURRENT_TIMESTAMP)`,
+      [
+        doctorId,
+        userId,
+        registration_number,
+        council_name || "National Commission for Indian System of Medicine (NCISM)",
+        degree,
+        specialization,
+        Number(years_experience),
+        bio,
+        langJson,
+        Number(consultation_fee),
+        Number(commission_rate),
+        certificate_url || null,
+        profile_photo || null,
+      ]
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "Doctor successfully registered and verified.",
+      doctor_id: doctorId,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}

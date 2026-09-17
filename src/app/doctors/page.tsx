@@ -8,90 +8,9 @@ import {
 } from "lucide-react";
 import { Doctor, AYURVEDIC_SPECIALIZATIONS } from "@/types/consultation";
 
-const MOCK_DOCTORS: Doctor[] = [
-  {
-    id: "doc_001", user_id: "usr_001",
-    name: "Dr. Kavitha Nair", registration_number: "CCIM/45678",
-    council_name: "CCIM", degree: "BAMS, MD (Kayachikitsa)",
-    specialization: "Kayachikitsa", years_experience: 12,
-    bio: "Specialized in chronic lifestyle diseases including diabetes, hypertension, and digestive disorders using authentic Panchakarma protocols.",
-    languages: ["Malayalam", "English", "Hindi"],
-    consultation_fee: 499, commission_rate: 0.20,
-    verification_status: "Approved", is_active: 1,
-    rating: 4.9, total_consultations: 1423,
-    profile_photo: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop",
-    created_at: "2024-01-15",
-  },
-  {
-    id: "doc_002", user_id: "usr_002",
-    name: "Dr. Arjun Varma", registration_number: "KSAC/23456",
-    council_name: "Kerala State Ayurveda Council", degree: "BAMS, MD (Dravyaguna)",
-    specialization: "Rasayana", years_experience: 8,
-    bio: "Expert in Rasayana therapies, anti-aging protocols, and classical herbal formulation for immunity and vitality.",
-    languages: ["Malayalam", "English"],
-    consultation_fee: 399, commission_rate: 0.20,
-    verification_status: "Approved", is_active: 1,
-    rating: 4.8, total_consultations: 867,
-    profile_photo: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop",
-    created_at: "2024-02-20",
-  },
-  {
-    id: "doc_003", user_id: "usr_003",
-    name: "Dr. Priya Krishnan", registration_number: "CCIM/89012",
-    council_name: "CCIM", degree: "BAMS, MD (Twak Roga)",
-    specialization: "Twak Roga", years_experience: 6,
-    bio: "Dermatology specialist focusing on psoriasis, eczema, acne, and hyperpigmentation using Ayurvedic lepa and internal therapies.",
-    languages: ["Malayalam", "Tamil", "English"],
-    consultation_fee: 449, commission_rate: 0.20,
-    verification_status: "Approved", is_active: 1,
-    rating: 4.9, total_consultations: 534,
-    profile_photo: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop",
-    created_at: "2024-03-10",
-  },
-  {
-    id: "doc_004", user_id: "usr_004",
-    name: "Dr. Suresh Pillai", registration_number: "CCIM/34567",
-    council_name: "CCIM", degree: "BAMS",
-    specialization: "Panchakarma", years_experience: 15,
-    bio: "Panchakarma expert with deep knowledge of Vamana, Virechana, Basti, and Nasya therapies for systemic detoxification.",
-    languages: ["Malayalam", "Hindi", "English"],
-    consultation_fee: 599, commission_rate: 0.20,
-    verification_status: "Approved", is_active: 1,
-    rating: 5.0, total_consultations: 2100,
-    profile_photo: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop",
-    created_at: "2023-11-01",
-  },
-  {
-    id: "doc_005", user_id: "usr_005",
-    name: "Dr. Ananya Menon", registration_number: "KSAC/56789",
-    council_name: "Kerala State Ayurveda Council", degree: "BAMS, MD (Manasa Roga)",
-    specialization: "Manasa Roga", years_experience: 9,
-    bio: "Mental wellness and stress specialist. Offers Ayurvedic protocols for anxiety, insomnia, burnout, and emotional regulation.",
-    languages: ["Malayalam", "English"],
-    consultation_fee: 549, commission_rate: 0.20,
-    verification_status: "Approved", is_active: 1,
-    rating: 4.7, total_consultations: 712,
-    profile_photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
-    created_at: "2024-01-30",
-  },
-  {
-    id: "doc_006", user_id: "usr_006",
-    name: "Dr. Ramesh Kumar", registration_number: "CCIM/67890",
-    council_name: "CCIM", degree: "BAMS, MD (Stri Roga)",
-    specialization: "Stri Roga", years_experience: 11,
-    bio: "Women's health specialist covering PCOS, menstrual disorders, fertility optimization, and pregnancy care through Ayurveda.",
-    languages: ["Tamil", "English", "Hindi"],
-    consultation_fee: 499, commission_rate: 0.20,
-    verification_status: "Approved", is_active: 1,
-    rating: 4.8, total_consultations: 945,
-    profile_photo: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&h=400&fit=crop",
-    created_at: "2024-02-05",
-  },
-];
-
 export default function DoctorsPage() {
-  const [doctors, setDoctors] = useState<Doctor[]>(MOCK_DOCTORS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterSpec, setFilterSpec] = useState("");
   const [filterMaxFee, setFilterMaxFee] = useState("");
@@ -107,13 +26,17 @@ export default function DoctorsPage() {
       if (filterSpec) params.set("specialization", filterSpec);
       if (filterMaxFee) params.set("maxFee", filterMaxFee);
 
-      const res = await fetch(`/api/doctors?${params.toString()}`);
+      const res = await fetch(`/api/doctors?${params.toString()}`, {
+        cache: "no-store",
+      });
       const data = await res.json();
-      if (data.success && data.doctors.length > 0) {
+      if (data.success && Array.isArray(data.doctors)) {
         setDoctors(data.doctors);
+      } else {
+        setDoctors([]);
       }
     } catch {
-      // Use mock data if API fails
+      setDoctors([]);
     } finally {
       setIsLoading(false);
     }
@@ -241,10 +164,24 @@ export default function DoctorsPage() {
         )}
 
         {filtered.length === 0 && !isLoading && (
-          <div className="text-center py-20">
-            <Stethoscope className="w-16 h-16 mx-auto mb-4" style={{ color: "rgba(81,104,48,0.2)" }} />
-            <h3 className="text-xl font-semibold mb-2" style={{ color: "var(--kv-forest)" }}>No Vaidyas Found</h3>
-            <p style={{ color: "rgba(39,63,37,0.5)" }}>Try adjusting your filters or search query.</p>
+          <div className="text-center py-20 max-w-md mx-auto">
+            <Stethoscope className="w-16 h-16 mx-auto mb-4" style={{ color: "rgba(81,104,48,0.3)" }} />
+            <h3 className="text-xl font-semibold mb-2" style={{ color: "var(--kv-forest)" }}>
+              {searchQuery || filterSpec || filterMaxFee ? "No Vaidyas Found" : "No Consulting Vaidyas Available At Present"}
+            </h3>
+            <p className="text-sm mb-6" style={{ color: "rgba(39,63,37,0.6)" }}>
+              {searchQuery || filterSpec || filterMaxFee
+                ? "Try adjusting your filters or search query."
+                : "Our verified Ayurvedic physicians will appear here once approved by our board."}
+            </p>
+            <Link
+              href="/consultant/register"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-transform hover:scale-105"
+              style={{ background: "var(--kv-forest)", color: "#FAF8F2" }}
+            >
+              <span>Register as a Doctor</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#EDC918]" />
+            </Link>
           </div>
         )}
       </div>

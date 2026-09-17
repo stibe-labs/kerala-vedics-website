@@ -6,7 +6,7 @@
   "main": "src/index.ts",
   "workers_dev": true,
   "routes": [
-    { "pattern": "api.keralavedics.com/*", "custom_domain": true }
+    { "pattern": "api.keralavedics.com", "custom_domain": true }
   ],
   "vars": {
     "SERVICE_NAME": "api-gateway"

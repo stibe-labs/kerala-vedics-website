@@ -46,22 +46,47 @@ export default function ConsultantAvailabilityPage() {
   }, []);
 
   const loadSchedule = async (docId: string) => {
+    // 1. Immediately restore from local storage cache
     try {
-      const res = await fetch(`/api/doctors/schedules?doctor_id=${docId}`);
-      const data = await res.json();
-      if (data.success && data.schedules.length > 0) {
-        setSchedule(data.schedules.map((s: DoctorSchedule) => ({
+      const cached = localStorage.getItem(`kv_schedule_${docId}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSchedule(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("Local schedule read error:", e);
+    }
+
+    // 2. Fetch latest saved schedule from D1 database
+    try {
+      let targetId = docId;
+      let res = await fetch(`/api/doctors/schedules?doctor_id=${targetId}`, { cache: "no-store" });
+      let data = await res.json();
+
+      if ((!data.success || !data.schedules || data.schedules.length === 0) && targetId !== "doc_abhishek_vaidya") {
+        targetId = "doc_abhishek_vaidya";
+        setDoctorId(targetId);
+        res = await fetch(`/api/doctors/schedules?doctor_id=${targetId}`, { cache: "no-store" });
+        data = await res.json();
+      }
+
+      if (data.success && data.schedules && data.schedules.length > 0) {
+        const loaded = data.schedules.map((s: DoctorSchedule) => ({
           day_of_week: s.day_of_week,
           start_time: s.start_time,
           end_time: s.end_time,
           slot_duration: s.slot_duration,
           buffer_mins: s.buffer_mins,
           is_active: s.is_active === 1,
-        })));
+        }));
+        setSchedule(loaded);
+        localStorage.setItem(`kv_schedule_${targetId}`, JSON.stringify(loaded));
         setLeaves(data.leaves || []);
       }
     } catch {
-      // Use defaults
+      // Use existing loaded schedule
     }
   };
 
@@ -100,6 +125,7 @@ export default function ConsultantAvailabilityPage() {
 
     setIsSaving(true);
     try {
+      localStorage.setItem(`kv_schedule_${doctorId}`, JSON.stringify(schedule));
       const res = await fetch("/api/doctors/schedules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,9 +150,13 @@ export default function ConsultantAvailabilityPage() {
       <div className="px-6 py-4" style={{ background: "var(--kv-forest)", borderBottom: "1px solid rgba(237,201,24,0.1)" }}>
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/consultant/dashboard" className="flex items-center gap-1 text-sm transition-all"
+            <Link href="/consultant/dashboard" className="flex items-center gap-1 text-sm transition-all hover:text-white"
               style={{ color: "rgba(250,248,242,0.7)" }}>
               <ChevronLeft className="w-4 h-4" /> Dashboard
+            </Link>
+            <Link href="/consultant/profile" className="text-sm transition-all hover:text-white"
+              style={{ color: "rgba(250,248,242,0.7)" }}>
+              My Profile
             </Link>
             <div className="flex items-center gap-2">
               <Leaf className="w-4 h-4" style={{ color: "#EDC918" }} />

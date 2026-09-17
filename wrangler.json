@@ -19,12 +19,26 @@
     {
       "pattern": "www.keralavedics.com",
       "custom_domain": true
+    },
+    {
+      "pattern": "consultant.keralavedics.com",
+      "custom_domain": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kerala-vedics-db",
+      "database_id": "90c1b4e3-4db0-4389-92a5-04a076f6ea6b"
     }
   ],
   "vars": {
     "SMTP_HOST": "smtp.gmail.com",
     "SMTP_PORT": "587",
     "SMTP_USER": "arjunz.project@gmail.com",
-    "CLOUDFLARE_ACCOUNT_ID": "7fb19661d826eacb527239392926d178"
+    "CLOUDFLARE_ACCOUNT_ID": "7fb19661d826eacb527239392926d178",
+    "NEXT_PUBLIC_RAZORPAY_KEY_ID": "rzp_test_Tch3QDua7Lsi8I",
+    "RAZORPAY_KEY_ID": "rzp_test_Tch3QDua7Lsi8I",
+    "RAZORPAY_KEY_SECRET": "U5pNJopO6nCNvfFTB5e8F3eD"
   }
 }

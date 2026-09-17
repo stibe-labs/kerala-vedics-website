@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "deploy": "next build && npx opennextjs-cloudflare build && wrangler deploy",
+    "dev": "node node_modules/next/dist/bin/next dev",
+    "build": "node node_modules/next/dist/bin/next build",
+    "deploy": "node node_modules/next/dist/bin/next build && node node_modules/@opennextjs/cloudflare/dist/cli/index.js build && node node_modules/@opennextjs/cloudflare/dist/cli/index.js deploy",
     "start": "next start",
     "lint": "eslint",
     "services:dev": "turbo run dev --filter=./packages/*",

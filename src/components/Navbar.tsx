@@ -265,7 +265,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                     <Link
                       key={item.id}
                       href={item.href || "#"}
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent) => {
                         if (item.onClick) item.onClick();
                         setActiveTab(item.id);
                       }}

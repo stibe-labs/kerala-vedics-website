@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { loadRazorpayScript } from "@/lib/razorpay";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -140,17 +141,7 @@ export default function CheckoutPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handlePlaceOrder = async () => {
-    if (paymentMethod === "COD") {
-      if (userEnteredCaptcha.trim() !== codCaptcha) {
-        setOrderError("Verification code does not match. Please re-enter.");
-        return;
-      }
-    }
-
-    setIsProcessing(true);
-    setOrderError(null);
-
+  const executeCreateOrder = async (paymentId?: string) => {
     const fullShippingAddress = `${address.flat}, ${address.street}, ${address.city}, ${address.state} - ${address.pincode} (${address.address_type})`;
 
     try {
@@ -167,6 +158,7 @@ export default function CheckoutPage() {
           discount_amount: savings + couponDiscount,
           shipping_cost: 0,
           payment_method: paymentMethod,
+          payment_id: paymentId,
           shipping_address: fullShippingAddress,
           items: cart,
         }),
@@ -186,6 +178,90 @@ export default function CheckoutPage() {
       setIsProcessing(false);
       setOrderError(err.message || "Something went wrong while placing your order. Please retry.");
     }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (paymentMethod === "COD") {
+      if (userEnteredCaptcha.trim() !== codCaptcha) {
+        setOrderError("Verification code does not match. Please re-enter.");
+        return;
+      }
+    }
+
+    setIsProcessing(true);
+    setOrderError(null);
+
+    if (paymentMethod !== "COD") {
+      try {
+        const orderRes = await fetch("/api/payment/razorpay/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: finalTotal,
+            currency: "INR",
+            receipt: `order_${Date.now()}`,
+            notes: {
+              customer_name: address.recipient_name,
+              customer_email: user?.email || "guest@keralavedics.com",
+              phone: address.phone,
+              items_count: cart.length,
+            },
+          }),
+        });
+
+        const orderData = await orderRes.json();
+        const isRzpLoaded = await loadRazorpayScript();
+
+        if (isRzpLoaded && (window as any).Razorpay && orderData.success && !orderData.is_sandbox) {
+          const options = {
+            key: orderData.key_id,
+            amount: orderData.amount,
+            currency: orderData.currency || "INR",
+            name: "Kerala Vedics",
+            description: `Order Checkout (${cart.length} item${cart.length > 1 ? "s" : ""})`,
+            image: "https://keralavedics.com/favicon.ico",
+            order_id: orderData.order_id,
+            prefill: {
+              name: address.recipient_name,
+              email: user?.email || "",
+              contact: address.phone || "",
+            },
+            theme: {
+              color: "#1F3D2B",
+            },
+            handler: async function (response: any) {
+              try {
+                await fetch("/api/payment/razorpay/verify", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                  }),
+                });
+              } catch (e) {
+                console.warn("Signature verification warning:", e);
+              }
+              await executeCreateOrder(response.razorpay_payment_id);
+            },
+            modal: {
+              ondismiss: function () {
+                setIsProcessing(false);
+              },
+            },
+          };
+
+          const rzp = new (window as any).Razorpay(options);
+          rzp.open();
+          return;
+        }
+      } catch (e) {
+        console.warn("Razorpay order creation fallback:", e);
+      }
+    }
+
+    await executeCreateOrder();
   };
 
   if (cart.length === 0 && !isProcessing) {

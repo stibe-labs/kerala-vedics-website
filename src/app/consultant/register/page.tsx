@@ -114,19 +114,23 @@ export default function ConsultantRegisterPage() {
       });
       const registerData = await registerRes.json();
 
-      // If registration fails (user might already exist) try login instead
+      // If registration returns 409 (user already exists), verify credentials via login
       let userId: string;
       if (!registerData.success) {
-        const loginRes = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: form.email, password: form.password }),
-        });
-        const loginData = await loginRes.json();
-        if (!loginData.success) {
-          throw new Error(loginData.error || "Account creation failed.");
+        if (registerRes.status === 409) {
+          const loginRes = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: form.email, password: form.password }),
+          });
+          const loginData = await loginRes.json();
+          if (!loginData.success) {
+            throw new Error(loginData.error || "An account with this email already exists. Please verify your password.");
+          }
+          userId = loginData.user.id;
+        } else {
+          throw new Error(registerData.error || "Account creation failed.");
         }
-        userId = loginData.user.id;
       } else {
         userId = registerData.user.id;
       }
@@ -137,6 +141,10 @@ export default function ConsultantRegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: userId,
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone,
           registration_number: form.registration_number,
           council_name: form.council_name,
           degree: form.degree,
@@ -156,6 +164,31 @@ export default function ConsultantRegisterPage() {
       const doctorData = await doctorRes.json();
       if (!doctorData.success) throw new Error(doctorData.error);
 
+      // Save consultant session so they are immediately logged in
+      try {
+        localStorage.setItem("kv_consultant_session", JSON.stringify({
+          doctor_id: doctorData.doctor_id,
+          user_id: userId,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          registration_number: form.registration_number,
+          council_name: form.council_name,
+          degree: form.degree,
+          specialization: form.specialization,
+          years_experience: Number(form.years_experience),
+          bio: form.bio,
+          languages: form.languages,
+          consultation_fee: Number(form.consultation_fee),
+          certificate_url: form.certificate_url,
+          profile_photo: form.profile_photo,
+          verification_status: "Approved",
+          is_active: 1,
+        }));
+      } catch (e) {
+        console.warn("Could not save session to localStorage:", e);
+      }
+
       setSuccess(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Registration failed";
@@ -169,7 +202,7 @@ export default function ConsultantRegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #111D10 0%, #192A18 50%, #273F25 100%)" }}>
+      <div className="min-h-screen flex items-center justify-center py-12" style={{ background: "linear-gradient(135deg, #111D10 0%, #192A18 50%, #273F25 100%)" }}>
         <div className="text-center max-w-lg mx-auto px-6">
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse"
             style={{ background: "rgba(237,201,24,0.15)", border: "2px solid #EDC918" }}>
@@ -178,19 +211,24 @@ export default function ConsultantRegisterPage() {
           <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: "var(--font-display)", color: "#FAF8F2" }}>
             Registration Submitted!
           </h1>
-          <p className="text-lg mb-8" style={{ color: "rgba(250,248,242,0.7)" }}>
-            Welcome to Kerala Vedics Vaidya Network. Our team will review your credentials and verify your account within 1–2 business days.
-            You will receive an email notification upon approval.
+          <p className="text-base mb-6" style={{ color: "rgba(250,248,242,0.7)" }}>
+            Welcome to Kerala Vedics Vaidya Network. Your profile is now created and under review by our medical board.
+            You can configure your consultation schedule and preview your clinical console right now.
           </p>
-          <div className="p-4 rounded-xl mb-6" style={{ background: "rgba(237,201,24,0.1)", border: "1px solid rgba(237,201,24,0.3)" }}>
+          <div className="p-4 rounded-xl mb-8" style={{ background: "rgba(237,201,24,0.1)", border: "1px solid rgba(237,201,24,0.3)" }}>
             <p style={{ color: "#EDC918", fontFamily: "var(--font-serif)" }}>
               &ldquo;Atharva veda sarvasya rogasya aushadham&rdquo; — May your healing knowledge reach those who need it most.
             </p>
           </div>
-          <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all"
-            style={{ background: "#EDC918", color: "#111D10" }}>
-            Return to Home <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/consultant/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold transition-all shadow-lg hover:scale-105"
+              style={{ background: "#EDC918", color: "#111D10" }}>
+              Go to Doctor Dashboard <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-medium transition-all text-white/70 hover:text-white hover:bg-white/10">
+              Return to Store
+            </Link>
+          </div>
         </div>
       </div>
     );
