@@ -283,53 +283,38 @@ export default function ConsultationRoomPage() {
     }
   }, [appointmentId, getRole, cleanupCall]);
 
-  // ── Poll for remote peer's published track IDs, then subscribe ────
-  const startRemoteTrackPolling = useCallback((pc: RTCPeerConnection, remoteRole: string) => {
-    let attempts = 0;
-    const MAX = 90; // 3 minutes
-
-    pollTimerRef.current = setInterval(async () => {
-      if (subscribedRef.current || attempts >= MAX) {
-        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-        return;
-      }
-      attempts++;
-
-      try {
-        const res = await fetch(`/api/calls/tracks?appointment_id=${appointmentId}&role=${remoteRole}`);
-        const data = await res.json();
-
-        if (data.success && data.found && data.session_id && data.track_names?.length > 0) {
-          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-          await subscribeToRemoteTracks(pc, data.session_id, data.track_names);
-        }
-      } catch { /* keep polling */ }
-    }, 2000);
-  }, [appointmentId]);
-
   // ── Renegotiate to subscribe to remote peer's tracks ─────────────
   const subscribeToRemoteTracks = useCallback(async (
     pc: RTCPeerConnection,
     remoteSessionId: string,
     trackNames: string[],
-  ) => {
-    if (subscribedRef.current || !cfSessionIdRef.current) return;
-    subscribedRef.current = true;
+  ): Promise<boolean> => {
+    if (subscribedRef.current || !cfSessionIdRef.current) return false;
 
     try {
       console.log(`[WebRTC] Subscribing to tracks from ${remoteSessionId}:`, trackNames);
 
-      // Sort track names so video transceiver comes first, matching publish order
+      // Check existing transceivers to avoid creating duplicates on retries
+      const transceivers = pc.getTransceivers();
+      const hasRecvVideo = transceivers.some(
+        t => t.receiver.track.kind === "video" && t.direction === "recvonly"
+      );
+      const hasRecvAudio = transceivers.some(
+        t => t.receiver.track.kind === "audio" && t.direction === "recvonly"
+      );
+
+      // Sort track names so video is always first
       const sortedNames = [...trackNames].sort((a, b) => {
         if (a.toLowerCase().includes("video")) return -1;
         if (b.toLowerCase().includes("video")) return 1;
         return 0;
       });
 
-      for (const name of sortedNames) {
-        const isVideo = name.toLowerCase().includes("video");
-        const kind: "video" | "audio" = isVideo ? "video" : "audio";
-        pc.addTransceiver(kind, { direction: "recvonly" });
+      if (!hasRecvVideo) {
+        pc.addTransceiver("video", { direction: "recvonly" });
+      }
+      if (!hasRecvAudio) {
+        pc.addTransceiver("audio", { direction: "recvonly" });
       }
 
       const offer = await pc.createOffer();
@@ -352,15 +337,52 @@ export default function ConsultationRoomPage() {
         console.log("[WebRTC] Applying remote description from subscribe answer");
         await pc.setRemoteDescription({ type: "answer", sdp: data.sdp_answer });
         console.log("[WebRTC] Successfully subscribed to remote tracks!");
+        subscribedRef.current = true;
+        return true;
       } else {
-        console.warn("[WebRTC] Subscribe response unsuccessful:", data.error);
-        subscribedRef.current = false; // allow retry
+        console.log("[WebRTC] Remote peer track not transmitting packets yet, will retry:", data.error);
+        return false;
       }
     } catch (err) {
       console.warn("[WebRTC] Subscribe error:", err);
-      subscribedRef.current = false;
+      return false;
     }
   }, []);
+
+  // ── Poll for remote peer's published track IDs, then subscribe ────
+  const startRemoteTrackPolling = useCallback((pc: RTCPeerConnection, remoteRole: string) => {
+    let attempts = 0;
+    const MAX = 90; // 3 minutes
+
+    pollTimerRef.current = setInterval(async () => {
+      if (subscribedRef.current) {
+        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        return;
+      }
+      if (attempts >= MAX) {
+        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        return;
+      }
+      attempts++;
+
+      try {
+        const res = await fetch(`/api/calls/tracks?appointment_id=${appointmentId}&role=${remoteRole}`);
+        const data = await res.json();
+
+        if (data.success && data.found && data.session_id && data.track_names?.length > 0) {
+          const success = await subscribeToRemoteTracks(pc, data.session_id, data.track_names);
+          if (success) {
+            console.log(`[WebRTC] Successfully subscribed to ${remoteRole} tracks! Stopping poller.`);
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          } else {
+            console.log(`[WebRTC] Remote peer ${remoteRole} not ready yet (attempt ${attempts}/${MAX}), retrying in 2s...`);
+          }
+        }
+      } catch (e) {
+        console.warn("[WebRTC] Polling error:", e);
+      }
+    }, 2000);
+  }, [appointmentId, subscribeToRemoteTracks]);
 
   // ── Toggle mic/cam ────────────────────────────────────────────────
   const toggleMic = useCallback(() => {

@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       ? tracksPayload.map((t: { trackName?: string } | string) => typeof t === "string" ? t : (t.trackName || ""))
       : ["video0", "audio0"];
 
-    // Remote tracks MUST have: location: "remote", sessionId, trackName
+    // Remote tracks MUST have: location: "remote", sessionId, trackName (no mid)
     const tracks = names.filter(Boolean).map((trackName: string) => ({
       location: "remote",
       sessionId: remote_session_id,
@@ -60,14 +60,26 @@ export async function POST(req: NextRequest) {
     const raw = await res.text();
     if (!res.ok) {
       console.error("CF subscribe failed:", res.status, raw);
-      return NextResponse.json({ success: false, error: `CF subscribe failed: ${raw}` }, { status: 502 });
+      return NextResponse.json({ success: false, error: `CF subscribe failed (${res.status}): ${raw}`, retryable: true });
     }
 
     let data: any;
     try {
       data = JSON.parse(raw);
     } catch {
-      return NextResponse.json({ success: false, error: `Invalid JSON from CF: ${raw}` }, { status: 502 });
+      return NextResponse.json({ success: false, error: `Invalid JSON from CF: ${raw}`, retryable: true });
+    }
+
+    // Check if any track returned an error (e.g., not_found_track_error while remote peer is still connecting)
+    const trackErrors = data.tracks?.filter((t: any) => t.errorCode);
+    if (trackErrors && trackErrors.length > 0) {
+      const errDesc = trackErrors[0].errorDescription || trackErrors[0].errorCode;
+      console.warn("CF subscribe track error (retryable):", errDesc);
+      return NextResponse.json({
+        success: false,
+        error: errDesc,
+        retryable: true,
+      });
     }
 
     // If CF requires immediate renegotiation, trigger the renegotiate endpoint
@@ -86,8 +98,8 @@ export async function POST(req: NextRequest) {
 
     const sdpAnswer = data.sessionDescription?.sdp;
     if (!sdpAnswer) {
-      console.error("CF missing sessionDescription:", raw);
-      return NextResponse.json({ success: false, error: `CF response missing sessionDescription: ${raw}` }, { status: 502 });
+      console.warn("CF missing sessionDescription (retryable):", raw);
+      return NextResponse.json({ success: false, error: `CF response missing sessionDescription: ${raw}`, retryable: true });
     }
 
     return NextResponse.json({
