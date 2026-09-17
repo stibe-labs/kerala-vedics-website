@@ -319,25 +319,22 @@ export default function ConsultationRoomPage() {
     try {
       console.log(`[WebRTC] Subscribing to tracks from ${remoteSessionId}:`, trackNames);
 
-      // Add recvonly transceivers paired with track names
-      const trackSubscriptions: Array<{ trackName: string; transceiver: RTCRtpTransceiver }> = [];
-      for (const name of trackNames) {
+      // Sort track names so video transceiver comes first, matching publish order
+      const sortedNames = [...trackNames].sort((a, b) => {
+        if (a.toLowerCase().includes("video")) return -1;
+        if (b.toLowerCase().includes("video")) return 1;
+        return 0;
+      });
+
+      for (const name of sortedNames) {
         const isVideo = name.toLowerCase().includes("video");
         const kind: "video" | "audio" = isVideo ? "video" : "audio";
-        const transceiver = pc.addTransceiver(kind, { direction: "recvonly" });
-        trackSubscriptions.push({ trackName: name, transceiver });
+        pc.addTransceiver(kind, { direction: "recvonly" });
       }
 
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       await waitForIceGathering(pc);
-
-      const tracksWithMids = trackSubscriptions.map(item => ({
-        trackName: item.trackName,
-        mid: item.transceiver.mid || undefined,
-      }));
-
-      console.log("[WebRTC] Sending subscribe with MIDs:", tracksWithMids);
 
       const res = await fetch("/api/calls/subscribe", {
         method: "POST",
@@ -345,8 +342,7 @@ export default function ConsultationRoomPage() {
         body: JSON.stringify({
           local_session_id: cfSessionIdRef.current,
           remote_session_id: remoteSessionId,
-          track_names: trackNames,
-          tracks: tracksWithMids,
+          track_names: sortedNames,
           sdp_offer: pc.localDescription!.sdp,
         }),
       });

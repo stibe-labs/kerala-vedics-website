@@ -33,20 +33,18 @@ export async function POST(req: NextRequest) {
     const BASE = `https://rtc.live.cloudflare.com/v1/apps/${APP_ID}`;
     const AUTH = { "Authorization": `Bearer ${APP_TOKEN}`, "Content-Type": "application/json" };
 
-    // Build the remote tracks list
-    // Accepts either `tracks` [{ trackName, mid }] or legacy `track_names` string[]
-    const rawTracks: Array<{ trackName: string; mid?: string }> =
-      Array.isArray(tracksPayload) && tracksPayload.length > 0
-        ? tracksPayload
-        : Array.isArray(track_names)
-        ? track_names.map((n: string) => ({ trackName: n }))
-        : [];
+    // Extract track names
+    const names: string[] = Array.isArray(track_names) && track_names.length > 0
+      ? track_names
+      : Array.isArray(tracksPayload) && tracksPayload.length > 0
+      ? tracksPayload.map((t: { trackName?: string } | string) => typeof t === "string" ? t : (t.trackName || ""))
+      : ["video0", "audio0"];
 
-    const tracks = rawTracks.map((t) => ({
+    // Remote tracks MUST have: location: "remote", sessionId, trackName
+    const tracks = names.filter(Boolean).map((trackName: string) => ({
       location: "remote",
       sessionId: remote_session_id,
-      trackName: t.trackName,
-      ...(t.mid !== undefined && t.mid !== null ? { mid: String(t.mid) } : {}),
+      trackName,
     }));
 
     // Add remote tracks via renegotiation
@@ -59,18 +57,42 @@ export async function POST(req: NextRequest) {
       }),
     });
 
+    const raw = await res.text();
     if (!res.ok) {
-      const err = await res.text();
-      return NextResponse.json({ success: false, error: `CF subscribe failed: ${err}` }, { status: 502 });
+      console.error("CF subscribe failed:", res.status, raw);
+      return NextResponse.json({ success: false, error: `CF subscribe failed: ${raw}` }, { status: 502 });
     }
 
-    const data = await res.json() as {
-      sessionDescription: { type: string; sdp: string };
-    };
+    let data: any;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return NextResponse.json({ success: false, error: `Invalid JSON from CF: ${raw}` }, { status: 502 });
+    }
+
+    // If CF requires immediate renegotiation, trigger the renegotiate endpoint
+    if (data.requiresImmediateRenegotiation && data.sessionDescription?.sdp) {
+      const renego = await fetch(`${BASE}/sessions/${local_session_id}/renegotiate`, {
+        method: "PUT",
+        headers: AUTH,
+        body: JSON.stringify({
+          sessionDescription: { type: "answer", sdp: data.sessionDescription.sdp },
+        }),
+      });
+      if (!renego.ok) {
+        console.warn("CF renegotiate warning:", await renego.text());
+      }
+    }
+
+    const sdpAnswer = data.sessionDescription?.sdp;
+    if (!sdpAnswer) {
+      console.error("CF missing sessionDescription:", raw);
+      return NextResponse.json({ success: false, error: `CF response missing sessionDescription: ${raw}` }, { status: 502 });
+    }
 
     return NextResponse.json({
       success: true,
-      sdp_answer: data.sessionDescription.sdp,
+      sdp_answer: sdpAnswer,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
