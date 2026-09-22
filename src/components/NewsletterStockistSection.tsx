@@ -70,13 +70,22 @@ export function NewsletterStockistSection() {
           {/* Card 2: Stockists & Healing Sanctuaries */}
           <div className="bg-[#14281C] p-8 sm:p-12 rounded-3xl border border-[#8BA664]/30 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
-              <span className="text-xs uppercase tracking-widest font-mono text-[#E0BA6A]">
+              <span
+                className="text-xs uppercase tracking-widest text-[#E0BA6A]"
+                style={{ fontFamily: 'var(--font-manrope)', fontWeight: 700 }}
+              >
                 Sanctuary Locations
               </span>
-              <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2]">
+              <h3
+                className="text-2xl sm:text-3xl text-[#FAF7F2]"
+                style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500 }}
+              >
                 Experience Kerala Vedics in Person
               </h3>
-              <p className="text-xs sm:text-sm text-[#FAF7F2]/75 font-light leading-relaxed">
+              <p
+                className="text-xs sm:text-sm text-[#FAF7F2]/75 leading-relaxed"
+                style={{ fontFamily: 'var(--font-manrope)', fontWeight: 400 }}
+              >
                 Discover our ceremonial treatment oils and apothecaries across curated luxury retreats, Ayurvedic vaidyasalas, and premier botanical spas worldwide.
               </p>
             </div>
