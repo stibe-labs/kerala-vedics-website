@@ -2,19 +2,9 @@
 
 import React from "react";
 
-const MANTRA_TEXT = "Vedic Wisdom · Natural Healing · Timeless Wellness · Pure Sahyadri Botanicals · Ayurveda · Nature · Balance · ";
-
 export function Footer() {
   return (
-    <footer className="bg-[#0B130D] text-[#FAF8F2] border-t border-[#EDC918]/20 pt-10 pb-16 overflow-hidden">
-      {/* Slow Continuous Looping Mantra Marquee */}
-      <div className="border-b border-white/10 pb-8 overflow-hidden whitespace-nowrap">
-        <div className="animate-marquee font-serif text-xl sm:text-2xl lg:text-3xl text-[#EDC918]/80 tracking-widest uppercase">
-          <span>{MANTRA_TEXT}</span>
-          <span>{MANTRA_TEXT}</span>
-          <span>{MANTRA_TEXT}</span>
-        </div>
-      </div>
+    <footer className="bg-[#0B130D] text-[#FAF8F2] border-t border-[#EDC918]/20 pb-16 overflow-hidden">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
