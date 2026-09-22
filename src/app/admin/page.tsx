@@ -873,7 +873,7 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3">
                     <span className="text-xs uppercase tracking-wider font-semibold text-gray-600 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-[#C89D4A]" />
-                      <span>The "Man Matters" Funnel Conversion</span>
+                      <span>Consultation Funnel Conversion</span>
                     </span>
                   </div>
                   <div className="flex items-baseline gap-3 my-2">
