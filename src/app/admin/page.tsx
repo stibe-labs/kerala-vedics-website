@@ -255,81 +255,39 @@ export default function AdminPage() {
         const data = await res.json();
         if (data.success && Array.isArray(data.coupons)) {
           setCoupons(data.coupons);
+          setIsLoadingCoupons(false);
           return;
         }
       }
     } catch (e) {
-      console.warn("Coupons API fetch error, fallback active", e);
+      console.warn("Coupons API fetch error:", e);
+    } finally {
+      setIsLoadingCoupons(false);
     }
-    setCoupons([
-      {
-        id: "coup_1",
-        code: "VEDIC15",
-        description: "15% off all classical Kerala Vedics formulations",
-        discount_type: "PERCENTAGE",
-        discount_value: 15,
-        min_order_amount: 999,
-        max_discount_amount: 350,
-        applies_to: "PRODUCTS",
-        usage_count: 142,
-        usage_limit: 1000,
-        is_active: 1,
-        starts_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      },
-      {
-        id: "coup_2",
-        code: "FREEVAIDYA",
-        description: "100% discount on initial Ayurvedic doctor consultation",
-        discount_type: "FREE_CONSULTATION",
-        discount_value: 499,
-        min_order_amount: 1499,
-        applies_to: "CONSULTATION",
-        usage_count: 87,
-        usage_limit: 500,
-        is_active: 1,
-        starts_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      },
-      {
-        id: "coup_3",
-        code: "FLAT300",
-        description: "Flat ₹300 off on total wellness bundle purchases",
-        discount_type: "FLAT",
-        discount_value: 300,
-        min_order_amount: 1999,
-        applies_to: "BOTH",
-        usage_count: 45,
-        is_active: 1,
-        starts_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      },
-    ]);
-    setIsLoadingCoupons(false);
+    setCoupons([]);
   };
 
   const loadProducts = async () => {
     setIsLoadingProducts(true);
     try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("kv_admin_products");
+      }
       const res = await fetch("/api/products");
       if (res.ok) {
         const data = await res.json();
-        if (data.products && Array.isArray(data.products)) {
+        if (Array.isArray(data.products)) {
           setProducts(data.products);
-          localStorage.setItem("kv_admin_products", JSON.stringify(data.products));
           setIsLoadingProducts(false);
           return;
         }
       }
     } catch (err) {
-      console.warn("Failed to fetch /api/products, checking localStorage:", err);
+      console.warn("Failed to fetch /api/products:", err);
+    } finally {
+      setIsLoadingProducts(false);
     }
-
-    const stored = localStorage.getItem("kv_admin_products");
-    if (stored) {
-      setProducts(JSON.parse(stored));
-    }
-    setIsLoadingProducts(false);
+    setProducts([]);
   };
 
   // =============================================================
@@ -543,7 +501,7 @@ export default function AdminPage() {
     }
 
     setProducts(updatedList);
-    localStorage.setItem("kv_admin_products", JSON.stringify(updatedList));
+    loadProducts();
 
     setFormData(INITIAL_FORM);
     setEditingId(null);
@@ -575,7 +533,7 @@ export default function AdminPage() {
     if (!window.confirm(`Are you sure you want to delete formulation "${name}"?`)) return;
     const filtered = products.filter((p) => p.id !== id);
     setProducts(filtered);
-    localStorage.setItem("kv_admin_products", JSON.stringify(filtered));
+    loadProducts();
     setSuccessMsg(`Formulation "${name}" removed.`);
   };
 
@@ -1417,99 +1375,123 @@ export default function AdminPage() {
             </div>
 
             {/* Catalog Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((prod) => {
-                const isOutOfStock = (prod.stock_count || 0) <= 0;
-                const hasDiscount = prod.mrp && prod.offer_price && prod.mrp > prod.offer_price;
-
-                return (
-                  <div
-                    key={prod.id}
-                    className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-xs hover:shadow-sm transition-all flex flex-col justify-between group"
+            {filteredProducts.length === 0 ? (
+              <div className="bg-white border border-gray-200 rounded-3xl p-12 text-center max-w-lg mx-auto shadow-xs">
+                <div className="w-12 h-12 rounded-full bg-[#16291E]/5 text-[#16291E] flex items-center justify-center mx-auto mb-4">
+                  <Boxes className="w-6 h-6 text-[#C89D4A]" />
+                </div>
+                <h3 className="text-base font-serif font-bold text-gray-900 mb-1">
+                  {products.length === 0 ? "No Formulations in Catalog" : "No Matching Formulations"}
+                </h3>
+                <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                  {products.length === 0
+                    ? "Your database currently has no products. Click 'Add Formulation' above to enter authentic classical Kerala Vedics formulations."
+                    : "No formulations match your search query. Try different keywords."}
+                </p>
+                {products.length === 0 && (
+                  <button
+                    onClick={() => {
+                      setEditingId(null);
+                      setFormData(INITIAL_FORM);
+                      setActiveTab("add");
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#16291E] text-[#C89D4A] hover:bg-[#1f3829] text-xs font-bold transition-all shadow-sm"
                   >
-                    <div>
-                      {/* Image & Badges */}
-                      <div className="relative h-48 bg-gray-100 overflow-hidden">
-                        <img
-                          src={prod.poster_image}
-                          alt={prod.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                              "https://images.unsplash.com/photo-1608248597359-009139f4ff89?q=80&w=1000&auto=format&fit=crop";
-                          }}
-                        />
-                        <div className="absolute top-3 left-3 flex flex-col gap-1">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-sm text-gray-900 shadow-xs">
-                            {prod.category}
-                          </span>
-                          {prod.dosha_affinity && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-[#16291E]/90 text-[#C89D4A] backdrop-blur-sm">
-                              {prod.dosha_affinity}
-                            </span>
-                          )}
-                        </div>
+                    <Plus className="w-4 h-4" />
+                    <span>Add First Formulation</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map((prod) => {
+                  const isOutOfStock = (prod.stock_count || 0) <= 0;
+                  const hasDiscount = prod.mrp && prod.offer_price && prod.mrp > prod.offer_price;
 
-                        {hasDiscount && (
-                          <div className="absolute top-3 right-3">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-600 text-white shadow-xs">
-                              {Math.round(((prod.mrp! - prod.offer_price!) / prod.mrp!) * 100)}% OFF
+                  return (
+                    <div
+                      key={prod.id}
+                      className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-xs hover:shadow-sm transition-all flex flex-col justify-between group"
+                    >
+                      <div>
+                        {/* Image & Badges */}
+                        <div className="relative h-48 bg-gray-100 overflow-hidden">
+                          <img
+                            src={prod.poster_image}
+                            alt={prod.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                "https://images.unsplash.com/photo-1608248597359-009139f4ff89?q=80&w=1000&auto=format&fit=crop";
+                            }}
+                          />
+                          <div className="absolute top-3 left-3 flex flex-col gap-1">
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-sm text-gray-900 shadow-xs">
+                              {prod.category}
                             </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-5 space-y-2">
-                        {prod.sanskrit_name && (
-                          <span className="text-[11px] font-serif font-medium text-[#8BA664] block">
-                            {prod.sanskrit_name}
-                          </span>
-                        )}
-                        <h3 className="text-base font-serif font-bold text-gray-900 line-clamp-1">
-                          {prod.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                          {prod.tagline || prod.description}
-                        </p>
-
-                        <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                          <div>
-                            <span className="text-lg font-serif font-bold text-gray-900">
-                              ₹{prod.offer_price || prod.price}
-                            </span>
-                            {hasDiscount && (
-                              <span className="text-xs text-gray-400 line-through ml-2">
-                                ₹{prod.mrp}
+                            {prod.dosha_affinity && (
+                              <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-[#16291E]/90 text-[#C89D4A] backdrop-blur-sm">
+                                {prod.dosha_affinity}
                               </span>
                             )}
                           </div>
 
-                          <div className="text-right">
-                            <span
-                              className={`text-xs font-mono font-bold ${
-                                isOutOfStock ? "text-red-600" : "text-gray-700"
-                              }`}
-                            >
-                              {isOutOfStock ? "Out of Stock" : `${prod.stock_count || 50} in stock`}
+                          {hasDiscount && (
+                            <div className="absolute top-3 right-3">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-600 text-white shadow-xs">
+                                {Math.round(((prod.mrp! - prod.offer_price!) / prod.mrp!) * 100)}% OFF
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-5 space-y-3">
+                          <div>
+                            {prod.sanskrit_name && (
+                              <p className="text-[11px] font-serif text-[#C89D4A] font-semibold">
+                                {prod.sanskrit_name}
+                              </p>
+                            )}
+                            <h3 className="text-sm font-serif font-bold text-gray-900 line-clamp-1">
+                              {prod.name}
+                            </h3>
+                            {prod.tagline && (
+                              <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">
+                                {prod.tagline}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-lg font-bold text-gray-900 font-mono">
+                              ₹{(prod.offer_price || prod.price).toLocaleString()}
                             </span>
+                            {hasDiscount && (
+                              <span className="text-xs text-gray-400 line-through font-mono">
+                                ₹{prod.mrp?.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-gray-100">
+                            <span className="flex items-center gap-1">
+                              <span
+                                className={`w-2 h-2 rounded-full ${
+                                  isOutOfStock ? "bg-red-500" : "bg-emerald-500"
+                                }`}
+                              />
+                              <span className={isOutOfStock ? "text-red-600 font-semibold" : ""}>
+                                {isOutOfStock ? "Out of Stock" : `${prod.stock_count || 0} in stock`}
+                              </span>
+                            </span>
+                            {prod.volume && <span>{prod.volume}</span>}
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Actions */}
-                    <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                      <Link
-                        href={`/products/${prod.slug}`}
-                        target="_blank"
-                        className="text-xs text-gray-500 hover:text-gray-900 flex items-center gap-1"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>View</span>
-                      </Link>
-
-                      <div className="flex items-center gap-2">
+                      {/* Actions */}
+                      <div className="p-4 bg-gray-50/70 border-t border-gray-100 flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEditProduct(prod)}
                           className="p-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:text-amber-600 hover:border-amber-300 transition-colors"
@@ -1526,10 +1508,10 @@ export default function AdminPage() {
                         </button>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
