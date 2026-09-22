@@ -35,6 +35,10 @@ body {
   overflow-x: hidden;
 }
 
+p, li, span:not([class*="tracking"]), label, td, th, blockquote {
+  letter-spacing: 2px;
+}
+
 ::selection {
   background-color: var(--kv-gold);
   color: var(--kv-forest-dark);
