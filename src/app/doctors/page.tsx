@@ -231,10 +231,17 @@ function DoctorCard({ doctor }: { doctor: Doctor }) {
             <h3 className="font-bold text-base leading-tight" style={{ color: "var(--kv-forest)", fontFamily: "var(--font-serif)" }}>
               {doctor.name}
             </h3>
-            <span className="flex items-center gap-1 text-xs font-semibold flex-shrink-0"
-              style={{ color: "#EDC918" }}>
-              <Star className="w-3 h-3 fill-current" /> {doctor.rating?.toFixed(1)}
-            </span>
+            {doctor.rating && doctor.total_consultations > 0 && doctor.rating > 0 ? (
+              <span className="flex items-center gap-1 text-xs font-semibold flex-shrink-0"
+                style={{ color: "#EDC918" }}>
+                <Star className="w-3 h-3 fill-current" /> {doctor.rating.toFixed(1)}
+              </span>
+            ) : (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium flex-shrink-0"
+                style={{ background: "rgba(81,104,48,0.1)", color: "var(--kv-forest)" }}>
+                Verified Vaidya
+              </span>
+            )}
           </div>
           <p className="text-xs mt-0.5 font-medium" style={{ color: "var(--kv-moss)" }}>
             {doctor.degree}

@@ -263,12 +263,12 @@ export default function ConsultantRegisterPage() {
           </p>
           <div className="flex items-center justify-center gap-8 mb-6 flex-wrap">
             {[
-              { label: "Registered Vaidyas", value: "200+" },
-              { label: "Consultations Done", value: "12,000+" },
-              { label: "Patient Rating", value: "4.9 ★" },
+              { label: "Consultation Suite", value: "HD Video" },
+              { label: "Prescription Engine", value: "Integrated" },
+              { label: "Bank Payouts", value: "Direct" },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
-                <div className="text-3xl font-bold" style={{ color: "#EDC918", fontFamily: "var(--font-display)" }}>{value}</div>
+                <div className="text-2xl font-bold" style={{ color: "#EDC918", fontFamily: "var(--font-display)" }}>{value}</div>
                 <div className="text-sm" style={{ color: "rgba(250,248,242,0.6)" }}>{label}</div>
               </div>
             ))}

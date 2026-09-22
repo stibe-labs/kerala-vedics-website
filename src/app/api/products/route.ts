@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       images: Array.isArray(images) ? images : [],
       dosha_affinity: dosha_affinity || "Tridoshic",
       in_stock: Number(stock_count) > 0 ? 1 : 0,
-      rating: 5.0,
+      rating: 0,
       review_count: 0,
       created_at: new Date().toISOString()
     };

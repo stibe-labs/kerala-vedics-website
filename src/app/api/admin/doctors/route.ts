@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
         years_experience, bio, languages, consultation_fee, commission_rate,
         certificate_url, profile_photo, verification_status, is_active, rating,
         total_consultations, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Approved', 1, 5.0, 0, CURRENT_TIMESTAMP)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Approved', 1, 0, 0, CURRENT_TIMESTAMP)`,
       [
         doctorId,
         userId,

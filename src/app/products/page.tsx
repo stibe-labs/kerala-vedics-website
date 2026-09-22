@@ -124,7 +124,7 @@ function ProductsContent() {
 
         // Rating
         if (minRating > 0) {
-          const rating = p.rating || 4.8;
+          const rating = p.rating || 0;
           if (rating < minRating) return false;
         }
 
@@ -138,8 +138,8 @@ function ProductsContent() {
       .sort((a, b) => {
         const priceA = a.offer_price || a.price || 0;
         const priceB = b.offer_price || b.price || 0;
-        const ratingA = a.rating || 4.8;
-        const ratingB = b.rating || 4.8;
+        const ratingA = a.rating || 0;
+        const ratingB = b.rating || 0;
 
         if (sortBy === "price-asc") return priceA - priceB;
         if (sortBy === "price-desc") return priceB - priceA;
@@ -537,11 +537,13 @@ function ProductsContent() {
                             </div>
                           )}
 
-                          {/* Rating Pill */}
-                          <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[10px] font-bold backdrop-blur-sm shadow-xs">
-                            <Star className="w-3 h-3 fill-[#E0BA6A] text-[#E0BA6A]" />
-                            <span>{prod.rating || 4.9}</span>
-                          </div>
+                          {/* Rating Pill - Only display if authentic reviews exist */}
+                          {prod.rating && prod.review_count && prod.review_count > 0 ? (
+                            <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[10px] font-bold backdrop-blur-sm shadow-xs">
+                              <Star className="w-3 h-3 fill-[#E0BA6A] text-[#E0BA6A]" />
+                              <span>{prod.rating.toFixed(1)}</span>
+                            </div>
+                          ) : null}
                         </div>
 
                         {/* Title, Sanskrit & Category */}

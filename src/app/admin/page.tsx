@@ -470,7 +470,7 @@ export default function AdminPage() {
       images: parsedImages,
       dosha_affinity: formData.dosha_affinity,
       in_stock: Number(formData.stock_count) > 0 ? 1 : 0,
-      rating: 5.0,
+      rating: 0,
       review_count: 0,
       created_at: new Date().toISOString(),
     };
@@ -836,18 +836,30 @@ export default function AdminPage() {
                   </div>
                   <div className="flex items-baseline gap-3 my-2">
                     <span className="text-4xl font-serif font-bold text-[#1F3D2B]">
-                      {analytics?.consultation_conversion_rate || 68}%
+                      {analytics?.consultation_conversion_rate ?? 0}%
                     </span>
-                    <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold">
-                      High Intent
-                    </span>
+                    {(analytics?.total_appointments || 0) > 0 ? (
+                      <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold">
+                        Live Metric
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">
+                        Awaiting Consultations
+                      </span>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed mt-2">
-                    Of patients completing an Ayurvedic telehealth consult, <strong>68%</strong> proceeded to purchase the prescribed Kerala Vedics regimen via 1-click cart checkout.
-                  </p>
+                  {(analytics?.total_appointments || 0) > 0 ? (
+                    <p className="text-xs text-gray-600 leading-relaxed mt-2">
+                      <strong>{analytics?.consultation_conversion_rate ?? 0}%</strong> of completed consultations have proceeded to purchase prescribed formulations.
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 leading-relaxed mt-2">
+                      Tracks real patient conversion from completed consultations to prescribed formulation purchases. Updates automatically as consultations occur.
+                    </p>
+                  )}
                 </div>
                 <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
-                  <span>Total Appointments: {analytics?.total_appointments || 0}</span>
+                  <span>Total Consultations: {analytics?.total_appointments || 0}</span>
                   <Link href="/consultant/dashboard" className="text-[#C89D4A] font-semibold hover:underline">
                     View Logs →
                   </Link>

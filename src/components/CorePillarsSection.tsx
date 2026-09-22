@@ -8,12 +8,12 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Product } from "@/types/product";
 
-const PRODUCT_PRICING: Record<string, { price: number; mrp: number; discount: number; rating: number; reviewsCount: number }> = {
-  "arshana-lehyam": { price: 1250, mrp: 1550, discount: 20, rating: 4.9, reviewsCount: 128 },
-  "rudra-tulasi": { price: 499, mrp: 650, discount: 23, rating: 4.8, reviewsCount: 94 },
-  "freedom-joint-care": { price: 990, mrp: 1290, discount: 23, rating: 4.9, reviewsCount: 216 },
-  "brahmi-memory-nectar": { price: 1150, mrp: 1450, discount: 21, rating: 4.9, reviewsCount: 172 },
-  "varicose-vein-elixir": { price: 890, mrp: 1100, discount: 19, rating: 4.7, reviewsCount: 88 },
+const PRODUCT_PRICING: Record<string, { price: number; mrp: number; discount: number }> = {
+  "arshana-lehyam": { price: 1250, mrp: 1550, discount: 20 },
+  "rudra-tulasi": { price: 499, mrp: 650, discount: 23 },
+  "freedom-joint-care": { price: 990, mrp: 1290, discount: 23 },
+  "brahmi-memory-nectar": { price: 1150, mrp: 1450, discount: 21 },
+  "varicose-vein-elixir": { price: 890, mrp: 1100, discount: 19 },
 };
 
 export function CorePillarsSection() {
@@ -22,7 +22,7 @@ export function CorePillarsSection() {
   const [addedId, setAddedId] = useState<string | null>(null);
 
   const getProductObj = (card: (typeof KERALA_VEDIC_CARDS)[0]): Product => {
-    const meta = PRODUCT_PRICING[card.id] || { price: 990, mrp: 1250, discount: 20, rating: 4.9, reviewsCount: 100 };
+    const meta = PRODUCT_PRICING[card.id] || { price: 990, mrp: 1250, discount: 20 };
     return {
       id: card.id,
       slug: card.id,
@@ -38,8 +38,8 @@ export function CorePillarsSection() {
       poster_image: card.image,
       volume: card.volume,
       dosha_affinity: "Tridoshic",
-      rating: meta.rating,
-      review_count: meta.reviewsCount,
+      rating: 0,
+      review_count: 0,
       in_stock: 1,
     };
   };
@@ -138,12 +138,6 @@ export function CorePillarsSection() {
                         </span>
                       </div>
                     )}
-
-                    {/* Rating Pill */}
-                    <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#273F25]/80 text-white text-[10px] font-semibold backdrop-blur-xs">
-                      <Star className="w-3 h-3 fill-[#EDC918] text-[#EDC918]" />
-                      <span>{meta.rating}</span>
-                    </div>
                   </div>
 
                   {/* Category & Sanskrit */}

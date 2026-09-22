@@ -38,41 +38,7 @@ interface CustomerReview {
   helpfulCount: number;
 }
 
-const INITIAL_REVIEWS: CustomerReview[] = [
-  {
-    id: "rev-1",
-    author: "Dr. Ananya Menon",
-    rating: 5,
-    date: "August 28, 2026",
-    verified: true,
-    title: "Uncompromising Classical Ayurvedic Purity",
-    comment:
-      "As an Ayurvedic physician, finding formulations that adhere strictly to Taila Paka Vidhi without modern synthetic solvents is rare. The aroma of wild saffron and cold-pressed sesame base in this preparation is authentic and cellularly absorbable.",
-    helpfulCount: 34,
-  },
-  {
-    id: "rev-2",
-    author: "Kavita R.",
-    rating: 5,
-    date: "September 02, 2026",
-    verified: true,
-    title: "Visible Radiance Within 10 Days",
-    comment:
-      "I apply 3 drops every evening following the Dinacharya ritual. My skin texture has completely calmed, hyperpigmentation from summer heat is visibly subdued, and my natural complexion has a radiant glow.",
-    helpfulCount: 19,
-  },
-  {
-    id: "rev-3",
-    author: "Rohan V.",
-    rating: 5,
-    date: "September 05, 2026",
-    verified: true,
-    title: "Packaging & Fragrance are Pure Luxury",
-    comment:
-      "The dark violet glass bottle arrived meticulously wrapped. The scent is deeply calming before bed. Worth every rupee for true natural luxury.",
-    helpfulCount: 12,
-  },
-];
+const INITIAL_REVIEWS: CustomerReview[] = [];
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -352,15 +318,23 @@ export default function ProductDetailPage() {
               </p>
 
               {/* Rating Summary */}
-              <div className="flex items-center gap-2 pt-1">
-                <div className="flex items-center gap-1 bg-[#1F3D2B] text-white px-2.5 py-1 rounded-lg text-xs font-bold">
-                  <span>{product.rating || 4.9}</span>
-                  <Star className="w-3 h-3 fill-[#E0BA6A] text-[#E0BA6A]" />
+              {product.review_count && product.review_count > 0 && product.rating ? (
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="flex items-center gap-1 bg-[#1F3D2B] text-white px-2.5 py-1 rounded-lg text-xs font-bold">
+                    <span>{product.rating.toFixed(1)}</span>
+                    <Star className="w-3 h-3 fill-[#E0BA6A] text-[#E0BA6A]" />
+                  </div>
+                  <span className="text-xs text-gray-500 font-mono">
+                    {product.review_count} Verified Practitioner Reviews
+                  </span>
                 </div>
-                <span className="text-xs text-gray-500 font-mono">
-                  {product.review_count || 142} Verified Practitioner Reviews
-                </span>
-              </div>
+              ) : (
+                <div className="pt-1">
+                  <span className="text-xs text-gray-400 font-light">
+                    No customer reviews yet
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Price Box */}
@@ -650,86 +624,112 @@ export default function ProductDetailPage() {
             </button>
           </div>
 
-          {/* Rating Summary Card */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#4C6B3D]/15 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-4 text-center md:text-left space-y-2">
-              <div className="flex items-baseline justify-center md:justify-start gap-2">
-                <span className="text-5xl font-serif font-bold text-[#1F3D2B]">
-                  {product.rating || 4.9}
-                </span>
-                <span className="text-base text-gray-500 font-mono">/ 5.0</span>
+          {/* Reviews List & Summary */}
+          {reviews.length === 0 ? (
+            <div className="bg-white rounded-3xl p-10 border border-[#4C6B3D]/15 text-center space-y-4 max-w-lg mx-auto">
+              <div className="w-12 h-12 rounded-full bg-[#1F3D2B]/5 flex items-center justify-center mx-auto text-[#4C6B3D]">
+                <MessageSquare className="w-6 h-6 text-[#8BA664]" />
               </div>
-              <div className="flex items-center justify-center md:justify-start gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="w-4 h-4 fill-[#E0BA6A] text-[#E0BA6A]" />
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 font-mono">
-                Based on {product.review_count || 142} authenticated reviews
+              <h3 className="text-lg font-serif font-bold text-[#1F3D2B]">
+                No Reviews Yet
+              </h3>
+              <p className="text-xs text-[#4C6B3D] leading-relaxed">
+                Be the first to share your authentic experience with {product.name}. Your feedback guides others on their Ayurvedic wellness journey.
               </p>
-            </div>
-
-            <div className="md:col-span-8 space-y-2">
-              {[
-                { stars: 5, pct: 92 },
-                { stars: 4, pct: 6 },
-                { stars: 3, pct: 2 },
-                { stars: 2, pct: 0 },
-                { stars: 1, pct: 0 },
-              ].map((bar) => (
-                <div key={bar.stars} className="flex items-center gap-3 text-xs font-mono">
-                  <span className="w-12 text-gray-600">{bar.stars} Star</span>
-                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-[#C89D4A] rounded-full"
-                      style={{ width: `${bar.pct}%` }}
-                    />
-                  </div>
-                  <span className="w-10 text-right text-gray-500">{bar.pct}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Review List */}
-          <div className="space-y-4">
-            {reviews.map((rev) => (
-              <div
-                key={rev.id}
-                className="bg-white rounded-3xl p-6 border border-[#4C6B3D]/15 shadow-xs space-y-3"
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#1F3D2B] text-white hover:bg-[#C89D4A] hover:text-[#14281C] transition-all cursor-pointer"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#1F3D2B] text-[#E0BA6A] font-bold text-xs flex items-center justify-center">
-                      {rev.author.charAt(0)}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-serif font-bold text-[#1F3D2B]">
-                        {rev.author}
-                      </h4>
-                      <div className="flex items-center gap-2">
-                        {rev.verified && (
-                          <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-0.5">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Verified Buyer
-                          </span>
-                        )}
-                        <span className="text-[10px] text-gray-400 font-mono">• {rev.date}</span>
-                      </div>
-                    </div>
+                Write First Review
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Rating Summary Card */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#4C6B3D]/15 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                <div className="md:col-span-4 text-center md:text-left space-y-2">
+                  <div className="flex items-baseline justify-center md:justify-start gap-2">
+                    <span className="text-5xl font-serif font-bold text-[#1F3D2B]">
+                      {(
+                        reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+                      ).toFixed(1)}
+                    </span>
+                    <span className="text-base text-gray-500 font-mono">/ 5.0</span>
                   </div>
-
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: rev.rating }).map((_, idx) => (
-                      <Star key={idx} className="w-3.5 h-3.5 fill-[#E0BA6A] text-[#E0BA6A]" />
+                  <div className="flex items-center justify-center md:justify-start gap-1">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star key={i} className="w-4 h-4 fill-[#E0BA6A] text-[#E0BA6A]" />
                     ))}
                   </div>
+                  <p className="text-xs text-gray-500 font-mono">
+                    Based on {reviews.length} authentic customer reviews
+                  </p>
                 </div>
 
-                <h5 className="text-sm font-semibold text-[#1F3D2B]">{rev.title}</h5>
-                <p className="text-xs text-[#1F3D2B]/85 font-light leading-relaxed">
-                  {rev.comment}
-                </p>
+                <div className="md:col-span-8 space-y-2">
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const count = reviews.filter((r) => r.rating === stars).length;
+                    const pct = Math.round((count / reviews.length) * 100);
+                    return (
+                      <div key={stars} className="flex items-center gap-3 text-xs font-mono">
+                        <span className="w-12 text-gray-600">{stars} Star</span>
+                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#C89D4A] rounded-full"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="w-10 text-right text-gray-500">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Review List */}
+              <div className="space-y-4">
+                {reviews.map((rev) => (
+                  <div
+                    key={rev.id}
+                    className="bg-white rounded-3xl p-6 border border-[#4C6B3D]/15 shadow-xs space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-[#1F3D2B] text-[#E0BA6A] font-bold text-xs flex items-center justify-center">
+                          {rev.author.charAt(0)}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-serif font-bold text-[#1F3D2B]">
+                            {rev.author}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            {rev.verified && (
+                              <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-0.5">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Verified Buyer
+                              </span>
+                            )}
+                            <span className="text-[10px] text-gray-400 font-mono">• {rev.date}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: rev.rating }).map((_, idx) => (
+                          <Star key={idx} className="w-3.5 h-3.5 fill-[#E0BA6A] text-[#E0BA6A]" />
+                        ))}
+                      </div>
+                    </div>
+
+                    <h5 className="text-sm font-semibold text-[#1F3D2B]">{rev.title}</h5>
+                    <p className="text-xs text-[#1F3D2B]/85 font-light leading-relaxed">
+                      {rev.comment}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
                 <div className="pt-2 flex items-center gap-4 text-xs text-gray-500">
                   <button className="flex items-center gap-1 hover:text-[#1F3D2B] cursor-pointer">

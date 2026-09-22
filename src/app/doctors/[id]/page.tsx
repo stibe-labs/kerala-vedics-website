@@ -529,9 +529,15 @@ export default function DoctorBookingPage() {
                 </div>
                 <div className="flex justify-between">
                   <span style={{ color: "rgba(39,63,37,0.6)" }}>Rating</span>
-                  <span className="font-medium flex items-center gap-1" style={{ color: "#EDC918" }}>
-                    <Star className="w-3 h-3 fill-current" /> {doctor.rating?.toFixed(1)}
-                  </span>
+                  {doctor.rating && doctor.total_consultations > 0 && doctor.rating > 0 ? (
+                    <span className="font-medium flex items-center gap-1" style={{ color: "#EDC918" }}>
+                      <Star className="w-3 h-3 fill-current" /> {doctor.rating.toFixed(1)}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-medium" style={{ color: "var(--kv-moss)" }}>
+                      New Vaidya
+                    </span>
+                  )}
                 </div>
                 <div className="flex justify-between">
                   <span style={{ color: "rgba(39,63,37,0.6)" }}>Consultations</span>

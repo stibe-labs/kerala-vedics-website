@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
       bank_ifsc: bank_ifsc || "",
       verification_status: verificationStatus as any,
       is_active: 1,
-      rating: 5.0,
+      rating: 0,
       total_consultations: 0,
       created_at: new Date().toISOString(),
     });
