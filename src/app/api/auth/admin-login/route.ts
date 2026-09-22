@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,8 +32,23 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// Server-side session check — client calls this instead of reading document.cookie
+export async function GET(req: NextRequest) {
+  const session = req.cookies.get("kv_admin_session");
+  if (session?.value === "authenticated") {
+    return NextResponse.json({ authenticated: true });
+  }
+  return NextResponse.json({ authenticated: false }, { status: 401 });
+}
+
 export async function DELETE() {
   const res = NextResponse.json({ success: true });
-  res.cookies.set("kv_admin_session", "", { maxAge: 0, path: "/" });
+  res.cookies.set("kv_admin_session", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
   return res;
 }

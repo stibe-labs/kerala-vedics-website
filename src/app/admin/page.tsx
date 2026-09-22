@@ -84,14 +84,16 @@ export default function AdminPage() {
 
   // ── Session guard ──────────────────────────────────────────────
   useEffect(() => {
-    const hasSession = document.cookie
-      .split(";")
-      .some((c) => c.trim().startsWith("kv_admin_session="));
-    if (!hasSession) {
-      router.replace("/admin/login");
-    } else {
-      setSessionChecked(true);
-    }
+    fetch("/api/auth/admin-login")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setSessionChecked(true);
+        } else {
+          router.replace("/admin/login");
+        }
+      })
+      .catch(() => router.replace("/admin/login"));
   }, [router]);
 
   const handleLogout = async () => {
