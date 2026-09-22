@@ -21,7 +21,7 @@ export default function ConsultantDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [stats, setStats] = useState({ total: 0, completed: 0, earnings: 0, rating: 5.0 });
+  const [stats, setStats] = useState({ total: 0, completed: 0, earnings: 0, rating: 0 });
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   useEffect(() => {
@@ -84,11 +84,17 @@ export default function ConsultantDashboard() {
           const appts: Appointment[] = apptData.appointments;
           setAppointments(appts);
           const completed = appts.filter(a => a.status === "Completed");
+          const realRating =
+            (doctor?.total_consultations && doctor.total_consultations > 0 && doctor?.rating)
+              ? Number(doctor.rating)
+              : (session?.total_consultations && session.total_consultations > 0 && session?.rating)
+                ? Number(session.rating)
+                : 0;
           setStats({
             total: appts.length,
             completed: completed.length,
             earnings: completed.reduce((sum, a) => sum + a.doctor_earning, 0),
-            rating: session.rating || 5.0,
+            rating: realRating,
           });
         }
       }
@@ -302,8 +308,14 @@ export default function ConsultantDashboard() {
               { label: "Total Appointments", value: stats.total, icon: <Calendar className="w-5 h-5" />, color: "#273F25" },
               { label: "Completed", value: stats.completed, icon: <CheckCircle2 className="w-5 h-5" />, color: "#16a34a" },
               { label: "Total Earnings", value: `₹${stats.earnings.toLocaleString("en-IN")}`, icon: <IndianRupee className="w-5 h-5" />, color: "#EDC918", dark: true },
-              { label: "Patient Rating", value: `${stats.rating} ★`, icon: <Star className="w-5 h-5" />, color: "#516830" },
-            ].map(({ label, value, icon, color, dark }) => (
+              {
+                label: "Patient Rating",
+                value: stats.rating > 0 ? `${stats.rating.toFixed(1)} ★` : "—",
+                subtext: stats.rating > 0 ? undefined : "No reviews yet",
+                icon: <Star className="w-5 h-5" />,
+                color: "#516830",
+              },
+            ].map(({ label, value, subtext, icon, color, dark }) => (
               <div key={label} className="p-5 rounded-2xl"
                 style={{ background: dark ? "var(--kv-forest)" : "white", border: "1px solid rgba(81,104,48,0.12)" }}>
                 <div className="flex items-center justify-between mb-3">
@@ -312,7 +324,14 @@ export default function ConsultantDashboard() {
                     {icon}
                   </div>
                 </div>
-                <div className="text-2xl font-bold" style={{ color: dark ? "#FAF8F2" : "var(--kv-forest)" }}>{value}</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-2xl font-bold" style={{ color: dark ? "#FAF8F2" : "var(--kv-forest)" }}>{value}</div>
+                  {subtext && (
+                    <span className="text-xs font-normal" style={{ color: "rgba(39,63,37,0.45)" }}>
+                      {subtext}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

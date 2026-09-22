@@ -205,8 +205,8 @@ export async function POST(req: NextRequest) {
         id, user_id, registration_number, council_name, degree, specialization,
         years_experience, bio, languages, consultation_fee, certificate_url,
         profile_photo, bank_account_name, bank_account_number, bank_ifsc,
-        verification_status, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        verification_status, rating, total_consultations, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP)`,
       [
         doctorId, user_id, registration_number, council_name || "", degree,
         specialization, Number(years_experience) || 1, bio || "",
