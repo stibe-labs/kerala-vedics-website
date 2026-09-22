@@ -96,11 +96,11 @@ export async function POST(req: NextRequest) {
       bank_ifsc,
     } = body;
 
+    const normalizedEmail = (email || "").toLowerCase().trim();
     let user_id = inputUserId;
 
     // Failsafe: if user_id was not provided but doctor email is present, find or create the user account
-    if (!user_id && email) {
-      const normalizedEmail = email.toLowerCase().trim();
+    if (!user_id && normalizedEmail) {
       const memUser = findUserByEmail(normalizedEmail);
       if (memUser) {
         user_id = memUser.id;
@@ -141,26 +141,64 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user already registered as doctor
-    try {
-      const existing = await executeD1Query(
-        "SELECT id FROM doctors WHERE user_id = ?",
-        [user_id]
-      );
-      if (existing && existing.length > 0) {
-        return NextResponse.json(
-          { success: false, error: "You have already submitted a doctor registration." },
-          { status: 409 }
-        );
-      }
-    } catch (e) {
-      console.warn("Check existing doctor query:", e);
-    }
-
     const doctorId = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const languagesArr = Array.isArray(languages) ? languages : ["Malayalam", "English"];
     const languagesJson = JSON.stringify(languagesArr);
     const verificationStatus = body.verification_status || "Approved";
+
+    // Check if user already registered as doctor -> update profile instead of blocking
+    try {
+      const existing = await executeD1Query<any>(
+        "SELECT id FROM doctors WHERE user_id = ?",
+        [user_id]
+      );
+      if (existing && existing.length > 0) {
+        const existingDocId = existing[0].id;
+        await executeD1Write(
+          `UPDATE doctors SET
+            registration_number = ?,
+            council_name = ?,
+            degree = ?,
+            specialization = ?,
+            years_experience = ?,
+            bio = ?,
+            languages = ?,
+            consultation_fee = ?,
+            certificate_url = ?,
+            profile_photo = ?,
+            bank_account_name = ?,
+            bank_account_number = ?,
+            bank_ifsc = ?
+           WHERE id = ?`,
+          [
+            registration_number,
+            council_name || "",
+            degree,
+            specialization,
+            Number(years_experience) || 1,
+            bio || "",
+            languagesJson,
+            Number(consultation_fee),
+            certificate_url || "",
+            profile_photo || "",
+            bank_account_name || "",
+            bank_account_number || "",
+            bank_ifsc || "",
+            existingDocId,
+          ]
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: "Doctor profile updated successfully.",
+          doctor_id: existingDocId,
+          user_id,
+          verification_status: verificationStatus,
+        });
+      }
+    } catch (e) {
+      console.warn("Check/update existing doctor query:", e);
+    }
 
     await executeD1Write(
       `INSERT INTO doctors (

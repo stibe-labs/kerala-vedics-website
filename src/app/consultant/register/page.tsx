@@ -580,9 +580,22 @@ export default function ConsultantRegisterPage() {
                 </div>
 
                 {error && (
-                  <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2">
+                  <div className="p-3.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5">
                     <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                    <span>{error}</span>
+                    <div className="flex-1">
+                      <p className="leading-relaxed">{error}</p>
+                      {error.toLowerCase().includes("already") && (
+                        <div className="mt-2 pt-2 border-t border-red-500/20">
+                          <Link
+                            href="/consultant"
+                            className="inline-flex items-center gap-1.5 text-[#C89D4A] font-bold hover:underline"
+                          >
+                            <span>Sign In to Consultant Portal directly</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
