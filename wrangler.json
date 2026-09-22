@@ -23,6 +23,10 @@
     {
       "pattern": "consultant.keralavedics.com",
       "custom_domain": true
+    },
+    {
+      "pattern": "admin.keralavedics.com",
+      "custom_domain": true
     }
   ],
   "d1_databases": [
@@ -41,6 +45,8 @@
     "RAZORPAY_KEY_ID": "rzp_test_Tch3QDua7Lsi8I",
     "RAZORPAY_KEY_SECRET": "U5pNJopO6nCNvfFTB5e8F3eD",
     "CLOUDFLARE_CALLS_APP_ID": "3144b134b71b574d8505de990ca31aa7",
-    "CLOUDFLARE_CALLS_APP_TOKEN": "42a2fac62bb52dfa11d1340d74f1cae20bd0dcdc50d504bc1c606929367e7f0e"
+    "CLOUDFLARE_CALLS_APP_TOKEN": "42a2fac62bb52dfa11d1340d74f1cae20bd0dcdc50d504bc1c606929367e7f0e",
+    "ADMIN_EMAIL": "admin@keralavedics.com",
+    "ADMIN_PASSWORD": "KeralaVedics@2026"
   }
 }

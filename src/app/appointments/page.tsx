@@ -22,13 +22,26 @@ import {
   Stethoscope,
   Activity,
   HeartHandshake,
+  Lock,
 } from "lucide-react";
+import {
+  getAppointmentSessionStatus,
+  formatTime12h,
+  AppointmentSessionInfo,
+} from "@/lib/consultationTime";
 
 export default function AppointmentsPage() {
   const { user, openAuthModal, isLoading: authLoading } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+
+  // Keep time updated every 10 seconds for real-time slot state changes
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     async function fetchAppointments() {
@@ -58,17 +71,18 @@ export default function AppointmentsPage() {
     }
   }, [user, authLoading]);
 
-  // Filter into Upcoming vs Past
-  const todayStr = new Date().toISOString().split("T")[0];
+  // Filter into Upcoming vs Past based on strict slot time expiration
   const upcomingAppointments = appointments.filter((a) => {
-    const isPastStatus = a.status === "Completed" || a.status === "Cancelled" || a.status === "No_Show";
-    if (isPastStatus) return false;
-    return a.appointment_date >= todayStr;
+    const session = getAppointmentSessionStatus(a, currentTime);
+    if (session.status === "COMPLETED" || session.status === "CANCELLED" || session.status === "EXPIRED") {
+      return false;
+    }
+    return true;
   });
 
   const pastAppointments = appointments.filter((a) => {
-    const isPastStatus = a.status === "Completed" || a.status === "Cancelled" || a.status === "No_Show";
-    return isPastStatus || a.appointment_date < todayStr;
+    const session = getAppointmentSessionStatus(a, currentTime);
+    return session.status === "COMPLETED" || session.status === "CANCELLED" || session.status === "EXPIRED";
   });
 
   const displayedAppointments = activeTab === "upcoming" ? upcomingAppointments : pastAppointments;
@@ -87,39 +101,48 @@ export default function AppointmentsPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "In_Progress":
+  const getStatusBadge = (appt: Appointment, session: AppointmentSessionInfo) => {
+    if (appt.status === "Cancelled") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+          Cancelled
+        </span>
+      );
+    }
+    if (appt.status === "Completed") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+          Completed
+        </span>
+      );
+    }
+
+    // Dynamic slot status
+    switch (session.status) {
+      case "LIVE":
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse">
             <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping" />
             Live Now
           </span>
         );
-      case "Confirmed":
-      case "Scheduled":
+      case "UPCOMING":
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#273F25]/10 text-[#273F25] border border-[#273F25]/20">
             <CheckCircle2 className="w-3.5 h-3.5 text-[#516830]" />
-            Confirmed
+            Scheduled
           </span>
         );
-      case "Completed":
+      case "EXPIRED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-            Completed
-          </span>
-        );
-      case "Cancelled":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
-            Cancelled
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+            Session Ended
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-            {status}
+            {appt.status}
           </span>
         );
     }
@@ -296,7 +319,7 @@ export default function AppointmentsPage() {
                     }
                   } catch {}
 
-                  const isLiveOrUpcoming = appt.status === "Confirmed" || appt.status === "Scheduled" || appt.status === "In_Progress";
+                  const session = getAppointmentSessionStatus(appt, currentTime);
 
                   return (
                     <div
@@ -324,7 +347,7 @@ export default function AppointmentsPage() {
                               </span>
                               <span className="flex items-center gap-1 font-medium text-[#1F3D2B]">
                                 <Clock className="w-3.5 h-3.5 text-[#516830]" />
-                                {appt.start_time} - {appt.end_time}
+                                {session.formattedStartTime} – {session.formattedEndTime}
                               </span>
                               <span className="flex items-center gap-1 text-gray-400">
                                 <Video className="w-3.5 h-3.5" />
@@ -335,7 +358,7 @@ export default function AppointmentsPage() {
                         </div>
 
                         <div className="self-start sm:self-auto flex items-center gap-3">
-                          {getStatusBadge(appt.status)}
+                          {getStatusBadge(appt, session)}
                         </div>
                       </div>
 
@@ -371,22 +394,40 @@ export default function AppointmentsPage() {
                           <span>Virtual waiting room is encrypted and CCIM-compliant.</span>
                         </div>
 
-                        {isLiveOrUpcoming ? (
+                        {session.canJoin ? (
                           <Link
                             href={`/consultation/${appt.id}`}
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#1F3D2B] to-[#273F25] hover:from-[#C89D4A] hover:to-[#B68B38] text-white hover:text-[#14281C] shadow-md transition-all group"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-700 to-[#1F3D2B] hover:from-emerald-600 hover:to-[#273F25] text-white shadow-md transition-all group animate-pulse"
                           >
-                            <Video className="w-4 h-4 text-[#EDC918] group-hover:text-[#14281C] transition-colors" />
-                            <span>Join Video Room</span>
+                            <Video className="w-4 h-4 text-[#EDC918] group-hover:scale-110 transition-transform" />
+                            <span>Join Video Room (Live)</span>
                             <ArrowRight className="w-4 h-4" />
                           </Link>
+                        ) : session.isEarly ? (
+                          <div className="flex flex-col sm:items-end gap-1 w-full sm:w-auto">
+                            <div
+                              title={`Room opens at ${session.formattedStartTime}`}
+                              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200 cursor-not-allowed select-none"
+                            >
+                              <Lock className="w-3.5 h-3.5 text-amber-600" />
+                              <span>Opens at {session.formattedStartTime}</span>
+                            </div>
+                            <span className="text-[10px] text-[#516830]/80 text-center sm:text-right">
+                              Room opens precisely during scheduled slot
+                            </span>
+                          </div>
                         ) : (
-                          <Link
-                            href="/doctors"
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold text-[#516830] bg-[#FAF8F2] border border-[#4C6B3D]/20 hover:bg-[#1F3D2B] hover:text-white transition-all"
-                          >
-                            <span>Book Follow-up Session</span>
-                          </Link>
+                          <div className="flex flex-col sm:items-end gap-1 w-full sm:w-auto">
+                            <Link
+                              href="/doctors"
+                              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold text-[#516830] bg-[#FAF8F2] border border-[#4C6B3D]/20 hover:bg-[#1F3D2B] hover:text-white transition-all"
+                            >
+                              <span>Book Follow-up Session</span>
+                            </Link>
+                            <span className="text-[10px] text-gray-400 text-center sm:text-right">
+                              Session ended at {session.formattedEndTime || session.formattedStartTime}
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>

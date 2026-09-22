@@ -10,6 +10,7 @@ import {
   Phone, Mail, MessageSquare, Download,
 } from "lucide-react";
 import { Appointment, Doctor, PatientReport, parsePatientReports } from "@/types/consultation";
+import { getAppointmentSessionStatus } from "@/lib/consultationTime";
 
 const CONSULTANT_KEY = "kv_consultant_session";
 
@@ -134,8 +135,12 @@ export default function ConsultantDashboard() {
   };
 
   const filteredAppointments = appointments.filter(a => {
-    if (activeTab === "upcoming") return ["Scheduled", "In_Progress"].includes(a.status);
-    if (activeTab === "completed") return a.status === "Completed";
+    const session = getAppointmentSessionStatus(a);
+    if (activeTab === "upcoming") {
+      if (session.isExpired || a.status === "Completed" || a.status === "Cancelled" || a.status === "No_Show") return false;
+      return true;
+    }
+    if (activeTab === "completed") return a.status === "Completed" || session.isExpired;
     return ["Cancelled", "No_Show"].includes(a.status);
   });
 
@@ -386,17 +391,9 @@ function AppointmentCard({
 }) {
   const isToday = new Date(appointment.appointment_date).toDateString() === new Date().toDateString();
 
-  // Check if appointment is NOW (within 15 min window)
-  const isActive = (() => {
-    try {
-      const now = new Date();
-      const [h, m] = appointment.start_time.split(":").map(Number);
-      const apptDate = new Date(appointment.appointment_date);
-      apptDate.setHours(h, m, 0, 0);
-      const diff = (apptDate.getTime() - now.getTime()) / 60000; // minutes
-      return diff <= 5 && diff >= -30; // 5 min before to 30 min after
-    } catch { return false; }
-  })();
+  // Check if appointment is NOW (strict slot session window)
+  const session = getAppointmentSessionStatus(appointment);
+  const isActive = session.canJoin;
 
   const reportCount = parsePatientReports(appointment.intake_reports).length;
 
@@ -509,16 +506,8 @@ function PatientDetailDrawer({
     return parsePatientReports(appointment.intake_reports);
   }, [appointment.intake_reports]);
 
-  const isActive = (() => {
-    try {
-      const now = new Date();
-      const [h, m] = appointment.start_time.split(":").map(Number);
-      const apptDate = new Date(appointment.appointment_date);
-      apptDate.setHours(h, m, 0, 0);
-      const diff = (apptDate.getTime() - now.getTime()) / 60000;
-      return diff <= 5 && diff >= -30;
-    } catch { return false; }
-  })();
+  const session = getAppointmentSessionStatus(appointment);
+  const isActive = session.canJoin;
 
   return (
     <>

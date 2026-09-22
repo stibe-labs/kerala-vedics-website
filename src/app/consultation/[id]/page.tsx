@@ -7,10 +7,15 @@ import {
   Video, Mic, MicOff, VideoOff, PhoneOff, MessageSquare, FileText,
   Plus, Trash2, CheckCircle2, Send, Search, Leaf, ArrowRight, X,
   Clock, Stethoscope, ImageIcon, ZoomIn, Wifi, WifiOff, Loader2,
-  AlertCircle,
+  AlertCircle, Lock, Calendar, ShieldCheck, ChevronLeft,
 } from "lucide-react";
 import { Appointment, Prescription, PrescriptionProduct, PatientReport, parsePatientReports } from "@/types/consultation";
 import { Product } from "@/types/product";
+import {
+  getAppointmentSessionStatus,
+  formatTime12h,
+  AppointmentSessionInfo,
+} from "@/lib/consultationTime";
 
 // ── Prescription Builder State ────────────────────────────────────────
 interface PrescriptionDraft {
@@ -46,6 +51,8 @@ export default function ConsultationRoomPage() {
 
   // ── Core state ────────────────────────────────────────────────────
   const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [loadingAppointment, setLoadingAppointment] = useState(true);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [products, setProducts] = useState<Product[]>([]);
   const [productSearch, setProductSearch] = useState("");
   const [panel, setPanel] = useState<"video" | "prescription" | "chat" | "reports">("video");
@@ -55,6 +62,17 @@ export default function ConsultationRoomPage() {
   const [prescriptionSent, setPrescriptionSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [lightboxReport, setLightboxReport] = useState<PatientReport | null>(null);
+
+  // Live timer for real-time second-by-second countdown and expiration enforcement
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const sessionInfo = useMemo(() => {
+    if (!appointment) return null;
+    return getAppointmentSessionStatus(appointment, currentTime);
+  }, [appointment, currentTime]);
 
   // ── WebRTC state ──────────────────────────────────────────────────
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
@@ -84,14 +102,6 @@ export default function ConsultationRoomPage() {
     loadAppointment();
     loadProducts();
   }, [appointmentId]);
-
-  // ── Start WebRTC once appointment is loaded ───────────────────────
-  useEffect(() => {
-    if (mounted && appointmentId && !useFallback) {
-      initWebRTCCall();
-    }
-    return () => cleanupCall();
-  }, [mounted, appointmentId, useFallback]);
 
   const cleanupCall = useCallback(() => {
     if (pollTimerRef.current) clearInterval(pollTimerRef.current);
@@ -142,6 +152,16 @@ export default function ConsultationRoomPage() {
 
   // ── Main WebRTC init ──────────────────────────────────────────────
   const initWebRTCCall = useCallback(async () => {
+    const role = getRole();
+    if (role === "patient" && appointment) {
+      const currentSession = getAppointmentSessionStatus(appointment, new Date());
+      if (!currentSession.canJoin) {
+        console.warn("[WebRTC] Session not active for patient. Aborting media acquisition.");
+        setCallStatus("idle");
+        return;
+      }
+    }
+
     setCallStatus("connecting");
     setCallError(null);
     subscribedRef.current = false;
@@ -384,6 +404,27 @@ export default function ConsultationRoomPage() {
     }, 2000);
   }, [appointmentId, subscribeToRemoteTracks]);
 
+  // ── Start WebRTC once appointment is loaded and session is permitted ──
+  useEffect(() => {
+    if (!mounted || !appointmentId || useFallback || loadingAppointment) return;
+
+    const role = getRole();
+    // Strict slot enforcement for patient
+    if (role === "patient") {
+      if (sessionInfo && !sessionInfo.canJoin) {
+        if (callStatus === "connected" || callStatus === "connecting") {
+          cleanupCall();
+          setCallStatus("idle");
+        }
+        return;
+      }
+    }
+
+    if (callStatus === "idle" && (role === "doctor" || sessionInfo?.canJoin)) {
+      initWebRTCCall();
+    }
+  }, [mounted, appointmentId, useFallback, loadingAppointment, sessionInfo?.canJoin, callStatus, initWebRTCCall, cleanupCall, getRole]);
+
   // ── Toggle mic/cam ────────────────────────────────────────────────
   const toggleMic = useCallback(() => {
     const audio = localStreamRef.current?.getAudioTracks()[0];
@@ -407,6 +448,7 @@ export default function ConsultationRoomPage() {
 
   // ── Appointment / products load ───────────────────────────────────
   const loadAppointment = async () => {
+    setLoadingAppointment(true);
     try {
       // 1. Direct appointment ID lookup
       const res = await fetch(`/api/appointments?id=${appointmentId}`);
@@ -430,17 +472,22 @@ export default function ConsultationRoomPage() {
           }
         }
       }
-    } catch {
-      setAppointment({
-        id: appointmentId, patient_id: "demo", doctor_id: "demo",
-        appointment_date: new Date().toISOString().split("T")[0],
-        start_time: "10:00", end_time: "10:15",
-        status: "In_Progress", consultation_type: "Video",
-        consultation_fee: 499, platform_fee: 99.80, doctor_earning: 399.20,
-        payment_status: "Completed", created_at: new Date().toISOString(),
-        patient_name: "Patient", doctor_name: "Ayurvedic Vaidya",
-        meeting_url: `/consultation/${appointmentId}`,
-      });
+    } catch (e) {
+      console.warn("loadAppointment error:", e);
+      if (appointmentId.startsWith("demo")) {
+        setAppointment({
+          id: appointmentId, patient_id: "demo", doctor_id: "demo",
+          appointment_date: new Date().toISOString().split("T")[0],
+          start_time: "10:00", end_time: "10:15",
+          status: "In_Progress", consultation_type: "Video",
+          consultation_fee: 499, platform_fee: 99.80, doctor_earning: 399.20,
+          payment_status: "Completed", created_at: new Date().toISOString(),
+          patient_name: "Patient", doctor_name: "Ayurvedic Vaidya",
+          meeting_url: `/consultation/${appointmentId}`,
+        });
+      }
+    } finally {
+      setLoadingAppointment(false);
     }
   };
 
@@ -517,8 +564,248 @@ export default function ConsultationRoomPage() {
 
   if (!mounted) return null;
 
+  if (loadingAppointment) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F0A] text-white">
+        <Loader2 className="w-10 h-10 animate-spin text-[#EDC918] mb-4" />
+        <p className="text-sm font-medium text-[#FAF8F2]/70">Checking consultation room schedule…</p>
+      </div>
+    );
+  }
+
+  if (!appointment) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F0A] text-white px-4">
+        <div className="max-w-md w-full bg-[#111D10] border border-[#C89D4A]/20 rounded-3xl p-8 text-center space-y-4">
+          <AlertCircle className="w-12 h-12 text-[#EDC918] mx-auto" />
+          <h2 className="text-2xl font-serif font-bold text-[#FAF8F2]">Consultation Not Found</h2>
+          <p className="text-xs text-[#FAF8F2]/70">
+            We could not find the consultation record for reference <span className="font-mono text-[#EDC918]">{appointmentId}</span>.
+          </p>
+          <Link
+            href="/appointments"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-[#EDC918] text-[#111D10] hover:bg-[#FBE365] transition-all"
+          >
+            <ArrowRight className="w-4 h-4" />
+            <span>Go to My Consultations</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const role = getRole();
+
+  // Strict time window checks for patient
+  if (role === "patient" && sessionInfo) {
+    if (sessionInfo.status === "CANCELLED") {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F0A] text-white px-4">
+          <div className="max-w-md w-full bg-[#111D10] border border-red-500/20 rounded-3xl p-8 text-center space-y-4">
+            <AlertCircle className="w-12 h-12 text-red-400 mx-auto" />
+            <h2 className="text-2xl font-serif font-bold text-[#FAF8F2]">Consultation Cancelled</h2>
+            <p className="text-xs text-[#FAF8F2]/70">
+              This consultation has been cancelled. Please book a new consultation or contact our care coordinators.
+            </p>
+            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/doctors"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#EDC918] text-[#111D10]"
+              >
+                Book New Vaidya
+              </Link>
+              <Link
+                href="/appointments"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-xs font-semibold text-white/70 border border-white/20 hover:bg-white/10"
+              >
+                My Consultations
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (sessionInfo.isEarly) {
+      // Waiting Room screen before start time
+      const diffMs = Math.max(0, sessionInfo.startDateTime.getTime() - currentTime.getTime());
+      const hrs = Math.floor(diffMs / (1000 * 60 * 60));
+      const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
+      const countdownFormatted = hrs > 0
+        ? `${hrs}h ${mins}m ${secs}s`
+        : `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+
+      return (
+        <div className="min-h-screen flex flex-col justify-between bg-[#0A0F0A] text-[#FAF8F2] px-4 py-8 antialiased">
+          {/* Top Bar */}
+          <div className="max-w-3xl w-full mx-auto flex items-center justify-between pb-6 border-b border-[#EDC918]/15">
+            <div className="flex items-center gap-2.5">
+              <Leaf className="w-5 h-5 text-[#EDC918]" />
+              <span className="font-serif font-bold text-sm tracking-wide text-[#FAF8F2]">
+                Kerala Vedics · Virtual Waiting Room
+              </span>
+            </div>
+            <Link
+              href="/appointments"
+              className="inline-flex items-center gap-1.5 text-xs text-[#FAF8F2]/60 hover:text-[#EDC918] transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>My Consultations</span>
+            </Link>
+          </div>
+
+          {/* Center Card */}
+          <div className="max-w-xl w-full mx-auto my-auto py-8">
+            <div className="bg-gradient-to-b from-[#111D10] to-[#0A1209] border border-[#EDC918]/25 rounded-3xl p-8 sm:p-10 shadow-2xl space-y-6 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-[#EDC918]/10 border border-[#EDC918]/30 flex items-center justify-center mx-auto text-[#EDC918] shadow-inner">
+                <Lock className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-semibold bg-[#EDC918]/15 text-[#EDC918] border border-[#EDC918]/30">
+                  <Clock className="w-3.5 h-3.5" />
+                  Scheduled Slot: {sessionInfo.formattedStartTime} – {sessionInfo.formattedEndTime}
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF8F2]">
+                  Consultation Room Not Open Yet
+                </h1>
+                <p className="text-xs text-[#FAF8F2]/60 max-w-md mx-auto leading-relaxed">
+                  Your telemedicine session with <strong className="text-[#FAF8F2]">{appointment.doctor_name || "Ayurvedic Vaidya"}</strong> is scheduled for <strong className="text-[#EDC918]">{sessionInfo.formattedDate}</strong>.
+                </p>
+              </div>
+
+              {/* Live Countdown Box */}
+              <div className="p-6 rounded-2xl bg-black/40 border border-[#EDC918]/20 space-y-2">
+                <div className="text-[11px] uppercase tracking-wider text-[#FAF8F2]/50 font-bold">
+                  Video Room Opens In
+                </div>
+                <div className="text-4xl sm:text-5xl font-mono font-bold text-[#EDC918] tracking-widest">
+                  {countdownFormatted}
+                </div>
+                <p className="text-[11px] text-[#4ADE80] flex items-center justify-center gap-1.5 pt-1">
+                  <span className="w-2 h-2 rounded-full bg-[#4ADE80] animate-ping" />
+                  <span>Access opens automatically at {sessionInfo.formattedStartTime}. No need to refresh.</span>
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 text-[11px] text-[#FAF8F2]/50 text-left space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-[#FAF8F2]/80">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#516830]" />
+                  <span>CCIM-Compliant Virtual Room Security</span>
+                </div>
+                <p>
+                  To preserve patient privacy and scheduled physician consultation protocols, access is strictly limited to your allotted time period ({sessionInfo.formattedStartTime} to {sessionInfo.formattedEndTime}).
+                </p>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link
+                  href="/appointments"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-[#FAF8F2] transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Return to Consultations</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center text-xs text-[#FAF8F2]/40">
+            Kerala Vedics Telehealth Network · Reference ID: <span className="font-mono text-[#EDC918]">{appointment.id}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (sessionInfo.isExpired) {
+      // Session Ended screen
+      return (
+        <div className="min-h-screen flex flex-col justify-between bg-[#0A0F0A] text-[#FAF8F2] px-4 py-8 antialiased">
+          {/* Top Bar */}
+          <div className="max-w-3xl w-full mx-auto flex items-center justify-between pb-6 border-b border-white/10">
+            <div className="flex items-center gap-2.5">
+              <Leaf className="w-5 h-5 text-[#EDC918]" />
+              <span className="font-serif font-bold text-sm tracking-wide text-[#FAF8F2]">
+                Kerala Vedics · Consultation Room
+              </span>
+            </div>
+            <Link
+              href="/appointments"
+              className="inline-flex items-center gap-1.5 text-xs text-[#FAF8F2]/60 hover:text-[#EDC918] transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>My Consultations</span>
+            </Link>
+          </div>
+
+          {/* Center Card */}
+          <div className="max-w-xl w-full mx-auto my-auto py-8">
+            <div className="bg-gradient-to-b from-[#16120E] to-[#0D0907] border border-amber-500/20 rounded-3xl p-8 sm:p-10 shadow-2xl space-y-6 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400 shadow-inner">
+                <Clock className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  Session Concluded
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF8F2]">
+                  Consultation Session Ended
+                </h1>
+                <p className="text-xs text-[#FAF8F2]/70 max-w-md mx-auto leading-relaxed">
+                  This consultation was scheduled for <strong className="text-[#FAF8F2]">{sessionInfo.formattedDate}</strong> from <strong className="text-amber-400">{sessionInfo.formattedStartTime} to {sessionInfo.formattedEndTime}</strong>. The allotted time period has passed and the video room is now closed.
+                </p>
+              </div>
+
+              {/* Summary Details */}
+              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-left text-xs space-y-2">
+                <div className="flex justify-between items-center text-[#FAF8F2]/60">
+                  <span>Assigned Vaidya:</span>
+                  <span className="font-semibold text-[#FAF8F2]">{appointment.doctor_name || "Ayurvedic Vaidya"}</span>
+                </div>
+                <div className="flex justify-between items-center text-[#FAF8F2]/60">
+                  <span>Appointment Slot:</span>
+                  <span className="font-mono text-amber-300">{sessionInfo.formattedStartTime} – {sessionInfo.formattedEndTime}</span>
+                </div>
+                <div className="flex justify-between items-center text-[#FAF8F2]/60">
+                  <span>Appointment Reference:</span>
+                  <span className="font-mono text-[#FAF8F2]/80">{appointment.id}</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-[#FAF8F2]/60 leading-relaxed">
+                If you missed your session or require follow-up advice and prescriptions from our Vaidyas, you may easily book a follow-up consultation or check your consultation history.
+              </p>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link
+                  href="/doctors"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-[#EDC918] text-[#111D10] hover:bg-[#FBE365] transition-all shadow-md"
+                >
+                  <Stethoscope className="w-4 h-4" />
+                  <span>Book Follow-up Session</span>
+                </Link>
+                <Link
+                  href="/appointments"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-[#FAF8F2] transition-all"
+                >
+                  <span>View My Consultations</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center text-xs text-[#FAF8F2]/40">
+            Kerala Vedics Care Team · Need help? Contact care@keralavedics.com
+          </div>
+        </div>
+      );
+    }
+  }
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // RENDER
+  // RENDER ACTIVE CONSULTATION ROOM
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   return (
     <div className="h-screen flex flex-col" style={{ background: "#0A0F0A" }}>
@@ -559,9 +846,9 @@ export default function ConsultationRoomPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4" style={{ color: "rgba(250,248,242,0.5)" }} />
-          <span className="text-sm" style={{ color: "rgba(250,248,242,0.5)" }}>
-            {appointment?.start_time} – {appointment?.end_time}
+          <Clock className="w-4 h-4" style={{ color: sessionInfo?.isLive ? "#4ADE80" : "rgba(250,248,242,0.5)" }} />
+          <span className="text-sm font-mono" style={{ color: sessionInfo?.isLive ? "#4ADE80" : "rgba(250,248,242,0.5)" }}>
+            {sessionInfo ? `${sessionInfo.formattedStartTime} – ${sessionInfo.formattedEndTime}` : `${appointment?.start_time} – ${appointment?.end_time}`}
           </span>
         </div>
       </div>
@@ -570,6 +857,12 @@ export default function ConsultationRoomPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left: Video Area ─────────────────────────────────────── */}
         <div className="flex-1 relative" style={{ background: "#050A05" }}>
+          {sessionInfo && sessionInfo.secondsRemaining <= 120 && sessionInfo.secondsRemaining > 0 && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-amber-500/90 text-black font-semibold text-xs flex items-center gap-2 shadow-lg backdrop-blur-sm animate-pulse">
+              <Clock className="w-4 h-4 text-black" />
+              <span>Session concluding in {sessionInfo.secondsRemaining}s ({sessionInfo.formattedEndTime})</span>
+            </div>
+          )}
           {useFallback ? (
             /* Jitsi fallback iframe */
             <iframe

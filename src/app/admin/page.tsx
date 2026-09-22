@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   PackagePlus,
@@ -75,9 +76,37 @@ const DOSHAS = ["Tridoshic", "Vata", "Pitta", "Kapha"] as const;
 type AdminTab = "overview" | "doctors" | "offers" | "catalog" | "add";
 
 export default function AdminPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // ── Session guard ──────────────────────────────────────────────
+  useEffect(() => {
+    const hasSession = document.cookie
+      .split(";")
+      .some((c) => c.trim().startsWith("kv_admin_session="));
+    if (!hasSession) {
+      router.replace("/admin/login");
+    } else {
+      setSessionChecked(true);
+    }
+  }, [router]);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/admin-login", { method: "DELETE" });
+    document.cookie = "kv_admin_session=; max-age=0; path=/";
+    router.replace("/admin/login");
+  };
+
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen bg-[#111D10] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#C89D4A] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   // -------------------------------------------------------------
   // 1. ANALYTICS STATE
@@ -633,6 +662,13 @@ export default function AdminPage() {
               <span>Vaidya Directory</span>
               <ExternalLink className="w-3 h-3 opacity-60" />
             </Link>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-xl border border-red-500/20 transition-all"
+            >
+              <span>Logout</span>
+            </button>
           </div>
         </div>
 

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Doctor, TimeSlot, BookingIntakeForm, PatientReport } from "@/types/consultation";
 import { loadRazorpayScript } from "@/lib/razorpay";
+import { getAppointmentSessionStatus, formatTime12h } from "@/lib/consultationTime";
 
 const DOSHA_OPTIONS = ["Not sure (Vaidya will assess)", "Vata", "Pitta", "Kapha", "Vata-Pitta", "Pitta-Kapha", "Vata-Kapha", "Tridoshic"];
 
@@ -390,20 +391,52 @@ export default function DoctorBookingPage() {
           <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: "var(--font-display)", color: "#FAF8F2" }}>
             Appointment Booked!
           </h1>
-          <p className="mb-6" style={{ color: "rgba(250,248,242,0.7)" }}>
-            Your consultation with <strong style={{ color: "#FAF8F2" }}>{doctor?.name}</strong> is confirmed for{" "}
-            <strong style={{ color: "#EDC918" }}>{selectedDate} at {selectedSlot?.start_time}</strong>.
-          </p>
+          {(() => {
+            const bookingSession = (selectedDate && selectedSlot)
+              ? getAppointmentSessionStatus({
+                  appointment_date: selectedDate,
+                  start_time: selectedSlot.start_time,
+                  end_time: selectedSlot.end_time,
+                })
+              : null;
 
-          <div className="p-4 rounded-2xl mb-6 text-left"
-            style={{ background: "rgba(250,248,242,0.05)", border: "1px solid rgba(250,248,242,0.1)" }}>
-            <div className="text-sm mb-3 font-semibold" style={{ color: "#FAF8F2" }}>Join your video consultation:</div>
-            <Link href={bookedAppointment?.id ? `/consultation/${bookedAppointment.id}` : "/appointments"}
-              className="block w-full text-center py-3 rounded-xl font-semibold transition-all hover:scale-105"
-              style={{ background: "#EDC918", color: "#111D10" }}>
-              🎥 Join Video Call
-            </Link>
-          </div>
+            return (
+              <>
+                <p className="mb-6" style={{ color: "rgba(250,248,242,0.7)" }}>
+                  Your consultation with <strong style={{ color: "#FAF8F2" }}>{doctor?.name}</strong> is confirmed for{" "}
+                  <strong style={{ color: "#EDC918" }}>{selectedDate} at {bookingSession?.formattedStartTime || selectedSlot?.start_time}</strong>.
+                </p>
+
+                {bookingSession?.canJoin ? (
+                  <div className="p-4 rounded-2xl mb-6 text-left"
+                    style={{ background: "rgba(250,248,242,0.05)", border: "1px solid rgba(250,248,242,0.1)" }}>
+                    <div className="text-sm mb-3 font-semibold" style={{ color: "#FAF8F2" }}>Your session is live right now:</div>
+                    <Link href={bookedAppointment?.id ? `/consultation/${bookedAppointment.id}` : "/appointments"}
+                      className="block w-full text-center py-3 rounded-xl font-semibold transition-all hover:scale-105"
+                      style={{ background: "#EDC918", color: "#111D10" }}>
+                      🎥 Join Video Call (Live Now)
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="p-5 rounded-2xl mb-6 text-left space-y-3"
+                    style={{ background: "rgba(250,248,242,0.05)", border: "1px solid rgba(250,248,242,0.1)" }}>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-amber-300">
+                      <Clock className="w-4 h-4" />
+                      <span>Scheduled Room Access</span>
+                    </div>
+                    <p className="text-xs text-white/70 leading-relaxed">
+                      Your virtual consultation room will open automatically at <strong className="text-white">{bookingSession?.formattedStartTime || selectedSlot?.start_time}</strong> on <strong className="text-white">{selectedDate}</strong>.
+                    </p>
+                    <Link href="/appointments"
+                      className="block w-full text-center py-3 rounded-xl font-semibold transition-all hover:scale-105"
+                      style={{ background: "#EDC918", color: "#111D10" }}>
+                      View in My Appointments
+                    </Link>
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           <Link href="/appointments"
             className="inline-flex items-center gap-2 text-sm"

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveCallSession } from "@/lib/callsStore";
+import { executeD1Query } from "@/lib/d1";
+import { Appointment } from "@/types/consultation";
+import { getAppointmentSessionStatus } from "@/lib/consultationTime";
 
 // ─────────────────────────────────────────────────────────────────────
 // POST /api/calls/session
@@ -24,6 +27,32 @@ export async function POST(req: NextRequest) {
 
     if (!appointment_id || !role || !sdp_offer) {
       return NextResponse.json({ success: false, error: "appointment_id, role and sdp_offer are required" }, { status: 400 });
+    }
+
+    // ── Enforce strict slot timing for patient ────────────────────────
+    if (role === "patient" && !appointment_id.startsWith("demo")) {
+      try {
+        const appts = await executeD1Query<Appointment>(
+          "SELECT * FROM appointments WHERE id = ? LIMIT 1",
+          [appointment_id]
+        );
+        if (appts.length > 0) {
+          const appt = appts[0];
+          const session = getAppointmentSessionStatus(appt, new Date());
+          if (!session.canJoin) {
+            return NextResponse.json(
+              {
+                success: false,
+                error: session.message,
+                session_status: session.status,
+              },
+              { status: 403 }
+            );
+          }
+        }
+      } catch (dbErr) {
+        console.warn("Call session time validation warning:", dbErr);
+      }
     }
 
     const APP_ID = getEnv(req, "CLOUDFLARE_CALLS_APP_ID");
