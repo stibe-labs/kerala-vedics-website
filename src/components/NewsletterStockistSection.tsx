@@ -22,14 +22,23 @@ export function NewsletterStockistSection() {
           {/* Card 1: Newsletter */}
           <div className="bg-[#14281C] p-8 sm:p-12 rounded-3xl border border-[#C89D4A]/30 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
-              <span className="text-xs uppercase tracking-widest font-mono text-[#8BA664]">
+              <span
+                className="text-xs uppercase tracking-widest text-[#8BA664]"
+                style={{ fontFamily: 'var(--font-manrope)', fontWeight: 700 }}
+              >
                 The Vedic Gazette
               </span>
-              <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2]">
-                Seasonal Ritual Letters & Solstice Formulations
+              <h3
+                className="text-2xl sm:text-3xl text-[#FAF7F2]"
+                style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500 }}
+              >
+                Seasonal rituals and botanical wisdom
               </h3>
-              <p className="text-xs sm:text-sm text-[#FAF7F2]/75 font-light leading-relaxed">
-                Receive quarterly monographs on circadian herb harvesting, Ayurvedic cooking recipes, and private access to limited small-batch reserve elixirs.
+              <p
+                className="text-xs sm:text-sm text-[#FAF7F2]/75 leading-relaxed"
+                style={{ fontFamily: 'var(--font-manrope)', fontWeight: 400 }}
+              >
+                Receive thoughtful notes on Ayurvedic living, product guidance, and limited seasonal formulations.
               </p>
             </div>
 
