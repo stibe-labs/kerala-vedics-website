@@ -40,12 +40,17 @@ export default function ConsultantAvailabilityPage() {
     const sessionStr = localStorage.getItem("kv_consultant_session");
     if (sessionStr) {
       const session = JSON.parse(sessionStr);
-      setDoctorId(session.doctor_id);
-      loadSchedule(session.doctor_id);
+      const docId = session.doctor_id || session.id;
+      if (docId) {
+        setDoctorId(docId);
+        loadSchedule(docId);
+      }
     }
   }, []);
 
   const loadSchedule = async (docId: string) => {
+    if (!docId) return;
+
     // 1. Immediately restore from local storage cache
     try {
       const cached = localStorage.getItem(`kv_schedule_${docId}`);
@@ -61,18 +66,10 @@ export default function ConsultantAvailabilityPage() {
 
     // 2. Fetch latest saved schedule from D1 database
     try {
-      let targetId = docId;
-      let res = await fetch(`/api/doctors/schedules?doctor_id=${targetId}`, { cache: "no-store" });
-      let data = await res.json();
+      const res = await fetch(`/api/doctors/schedules?doctor_id=${encodeURIComponent(docId)}`, { cache: "no-store" });
+      const data = await res.json();
 
-      if ((!data.success || !data.schedules || data.schedules.length === 0) && targetId !== "doc_abhishek_vaidya") {
-        targetId = "doc_abhishek_vaidya";
-        setDoctorId(targetId);
-        res = await fetch(`/api/doctors/schedules?doctor_id=${targetId}`, { cache: "no-store" });
-        data = await res.json();
-      }
-
-      if (data.success && data.schedules && data.schedules.length > 0) {
+      if (data.success && Array.isArray(data.schedules) && data.schedules.length > 0) {
         const loaded = data.schedules.map((s: DoctorSchedule) => ({
           day_of_week: s.day_of_week,
           start_time: s.start_time,
@@ -82,11 +79,11 @@ export default function ConsultantAvailabilityPage() {
           is_active: s.is_active === 1,
         }));
         setSchedule(loaded);
-        localStorage.setItem(`kv_schedule_${targetId}`, JSON.stringify(loaded));
+        localStorage.setItem(`kv_schedule_${docId}`, JSON.stringify(loaded));
         setLeaves(data.leaves || []);
       }
-    } catch {
-      // Use existing loaded schedule
+    } catch (e) {
+      console.warn("Could not fetch remote schedule:", e);
     }
   };
 
@@ -194,7 +191,7 @@ export default function ConsultantAvailabilityPage() {
               ? <CheckCircle2 className="w-5 h-5" style={{ color: "#16a34a" }} />
               : <AlertCircle className="w-5 h-5" style={{ color: "#DC2626" }} />}
             <p className="text-sm font-medium" style={{ color: saveStatus === "success" ? "#16a34a" : "#DC2626" }}>
-              {saveStatus === "success" ? "Schedule saved! Patients can now book your available slots." : "Failed to save. Using demo mode — changes are local only."}
+              {saveStatus === "success" ? "Schedule saved! Patients can now book your available slots." : "Failed to save schedule. Please try again."}
             </p>
           </div>
         )}

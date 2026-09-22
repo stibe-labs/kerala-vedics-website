@@ -15,13 +15,26 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    let resolvedDoctorId = doctor_id;
+    try {
+      const doc = await executeD1Query<any>(
+        "SELECT id FROM doctors WHERE id = ? OR user_id = ? LIMIT 1",
+        [doctor_id, doctor_id]
+      );
+      if (doc && doc.length > 0) {
+        resolvedDoctorId = doc[0].id;
+      }
+    } catch (e) {
+      console.warn("Doctor schedule lookup error:", e);
+    }
+
     let schedules = await executeD1Query<DoctorSchedule>(
       "SELECT * FROM doctor_schedules WHERE doctor_id = ? ORDER BY day_of_week",
-      [doctor_id]
+      [resolvedDoctorId]
     );
 
     if (schedules.length === 0) {
-      const cached = getScheduleFromStore(doctor_id);
+      const cached = getScheduleFromStore(resolvedDoctorId);
       if (cached && cached.length > 0) {
         schedules = cached as any;
       }
@@ -31,7 +44,7 @@ export async function GET(req: NextRequest) {
     try {
       leaves = await executeD1Query(
         "SELECT * FROM doctor_leaves WHERE doctor_id = ? AND date >= date('now') ORDER BY date",
-        [doctor_id]
+        [resolvedDoctorId]
       );
     } catch {}
 
@@ -56,11 +69,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "doctor_id and schedules array required" }, { status: 400 });
     }
 
+    // Resolve to valid doctor ID in D1
+    let resolvedDoctorId = doctor_id;
+    try {
+      const doc = await executeD1Query<any>(
+        "SELECT id FROM doctors WHERE id = ? OR user_id = ? LIMIT 1",
+        [doctor_id, doctor_id]
+      );
+      if (doc && doc.length > 0) {
+        resolvedDoctorId = doc[0].id;
+      }
+    } catch (e) {
+      console.warn("Doctor schedule lookup error:", e);
+    }
+
     // Save to memory store immediately
-    saveScheduleToStore(doctor_id, schedules);
+    saveScheduleToStore(resolvedDoctorId, schedules);
 
     // Delete existing schedules and re-insert into D1
-    await executeD1Write("DELETE FROM doctor_schedules WHERE doctor_id = ?", [doctor_id]);
+    await executeD1Write("DELETE FROM doctor_schedules WHERE doctor_id = ?", [resolvedDoctorId]);
 
     for (const schedule of schedules) {
       const scheduleId = `sch_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
@@ -68,7 +95,7 @@ export async function POST(req: NextRequest) {
         `INSERT INTO doctor_schedules (id, doctor_id, day_of_week, start_time, end_time, slot_duration, buffer_mins, is_active)
          VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
         [
-          scheduleId, doctor_id, Number(schedule.day_of_week),
+          scheduleId, resolvedDoctorId, Number(schedule.day_of_week),
           schedule.start_time, schedule.end_time,
           Number(schedule.slot_duration) || 15, Number(schedule.buffer_mins) || 0,
         ]
