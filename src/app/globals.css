@@ -36,7 +36,7 @@ body {
 }
 
 p, li, span:not([class*="tracking"]), label, td, th, blockquote {
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 ::selection {
