@@ -730,16 +730,6 @@ export default function ProductDetailPage() {
               </div>
             </>
           )}
-
-                <div className="pt-2 flex items-center gap-4 text-xs text-gray-500">
-                  <button className="flex items-center gap-1 hover:text-[#1F3D2B] cursor-pointer">
-                    <ThumbsUp className="w-3.5 h-3.5" />
-                    <span>Helpful ({rev.helpfulCount})</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
         </section>
       </main>
 
