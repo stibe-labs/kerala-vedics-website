@@ -102,14 +102,6 @@ export default function AdminPage() {
     router.replace("/admin/login");
   };
 
-  if (!sessionChecked) {
-    return (
-      <div className="min-h-screen bg-[#111D10] flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-[#C89D4A] border-t-transparent animate-spin" />
-      </div>
-    );
-  }
-
   // -------------------------------------------------------------
   // 1. ANALYTICS STATE
   // -------------------------------------------------------------
@@ -182,11 +174,12 @@ export default function AdminPage() {
 
   // Initial Data Fetching
   useEffect(() => {
+    if (!sessionChecked) return;
     loadAnalytics();
     loadDoctors();
     loadCoupons();
     loadProducts();
-  }, []);
+  }, [sessionChecked]);
 
   // Temporary message dismisser
   useEffect(() => {
@@ -612,6 +605,14 @@ export default function AdminPage() {
     formData.mrp > formData.offer_price && formData.mrp > 0
       ? Math.round(((formData.mrp - formData.offer_price) / formData.mrp) * 100)
       : 0;
+
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen bg-[#111D10] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#C89D4A] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-gray-900 font-sans pb-24">
