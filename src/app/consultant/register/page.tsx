@@ -3,43 +3,23 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Stethoscope, ShieldCheck, Star, Clock, TrendingUp, Upload,
-  CheckCircle2, ArrowRight, Leaf, ChevronRight, IndianRupee,
-  Globe, GraduationCap, Calendar, Sparkles, AlertCircle
+  Stethoscope,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  AlertCircle,
+  GraduationCap,
+  Building2,
+  Lock,
+  Mail,
+  User,
+  Phone,
+  Briefcase
 } from "lucide-react";
 import { AYURVEDIC_SPECIALIZATIONS, AYURVEDIC_COUNCILS } from "@/types/consultation";
 
 const LANGUAGES = ["Malayalam", "Hindi", "English", "Tamil", "Telugu", "Kannada"];
-
-const PERKS = [
-  {
-    icon: <IndianRupee className="w-6 h-6" />,
-    title: "Earn on Your Terms",
-    desc: "Set your own consultation fee. Receive 80% of every booking directly to your account.",
-  },
-  {
-    icon: <Calendar className="w-6 h-6" />,
-    title: "Flexible Schedule",
-    desc: "Define your working hours, take leaves, and manage slots from a clean dashboard.",
-  },
-  {
-    icon: <Stethoscope className="w-6 h-6" />,
-    title: "Prescription-to-Cart",
-    desc: "Prescribe Kerala Vedics classical formulations directly. Patients order with one click.",
-  },
-  {
-    icon: <Globe className="w-6 h-6" />,
-    title: "Pan-India Reach",
-    desc: "Consult patients across India via high-quality video calls — no travel required.",
-  },
-];
-
-const STEPS = [
-  { step: "01", label: "Register & Upload Credentials" },
-  { step: "02", label: "Admin Verification (1–2 business days)" },
-  { step: "03", label: "Set Your Schedule & Go Live" },
-  { step: "04", label: "Start Consulting & Earning" },
-];
 
 interface FormData {
   name: string;
@@ -62,11 +42,23 @@ interface FormData {
 }
 
 const INITIAL_FORM: FormData = {
-  name: "", email: "", password: "", phone: "",
-  registration_number: "", council_name: "", degree: "", specialization: "",
-  years_experience: "1", bio: "", languages: ["Malayalam", "English"],
-  consultation_fee: "499", certificate_url: "", profile_photo: "",
-  bank_account_name: "", bank_account_number: "", bank_ifsc: "",
+  name: "",
+  email: "",
+  password: "",
+  phone: "",
+  registration_number: "",
+  council_name: "",
+  degree: "",
+  specialization: "",
+  years_experience: "1",
+  bio: "",
+  languages: ["Malayalam", "English"],
+  consultation_fee: "499",
+  certificate_url: "",
+  profile_photo: "",
+  bank_account_name: "",
+  bank_account_number: "",
+  bank_ifsc: "",
 };
 
 export default function ConsultantRegisterPage() {
@@ -77,18 +69,22 @@ export default function ConsultantRegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const toggleLanguage = (lang: string) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       languages: prev.languages.includes(lang)
-        ? prev.languages.filter(l => l !== lang)
+        ? prev.languages.filter((l) => l !== lang)
         : [...prev.languages, lang],
     }));
   };
@@ -107,14 +103,13 @@ export default function ConsultantRegisterPage() {
           name: form.name,
           email: form.email,
           password: form.password,
-          otp: "bypass_doctor", // Will need OTP in production
+          otp: "bypass_doctor",
           dosha_affinity: "Tridoshic",
           role: "doctor",
         }),
       });
       const registerData = await registerRes.json();
 
-      // If registration returns 409 (user already exists), verify credentials via login
       let userId: string;
       if (!registerData.success) {
         if (registerRes.status === 409) {
@@ -125,7 +120,10 @@ export default function ConsultantRegisterPage() {
           });
           const loginData = await loginRes.json();
           if (!loginData.success) {
-            throw new Error(loginData.error || "An account with this email already exists. Please verify your password.");
+            throw new Error(
+              loginData.error ||
+                "An account with this email already exists. Please verify your password."
+            );
           }
           userId = loginData.user.id;
         } else {
@@ -164,27 +162,30 @@ export default function ConsultantRegisterPage() {
       const doctorData = await doctorRes.json();
       if (!doctorData.success) throw new Error(doctorData.error);
 
-      // Save consultant session so they are immediately logged in
+      // Save consultant session
       try {
-        localStorage.setItem("kv_consultant_session", JSON.stringify({
-          doctor_id: doctorData.doctor_id,
-          user_id: userId,
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          registration_number: form.registration_number,
-          council_name: form.council_name,
-          degree: form.degree,
-          specialization: form.specialization,
-          years_experience: Number(form.years_experience),
-          bio: form.bio,
-          languages: form.languages,
-          consultation_fee: Number(form.consultation_fee),
-          certificate_url: form.certificate_url,
-          profile_photo: form.profile_photo,
-          verification_status: "Approved",
-          is_active: 1,
-        }));
+        localStorage.setItem(
+          "kv_consultant_session",
+          JSON.stringify({
+            doctor_id: doctorData.doctor_id,
+            user_id: userId,
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            registration_number: form.registration_number,
+            council_name: form.council_name,
+            degree: form.degree,
+            specialization: form.specialization,
+            years_experience: Number(form.years_experience),
+            bio: form.bio,
+            languages: form.languages,
+            consultation_fee: Number(form.consultation_fee),
+            certificate_url: form.certificate_url,
+            profile_photo: form.profile_photo,
+            verification_status: "Approved",
+            is_active: 1,
+          })
+        );
       } catch (e) {
         console.warn("Could not save session to localStorage:", e);
       }
@@ -202,30 +203,32 @@ export default function ConsultantRegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-12" style={{ background: "linear-gradient(135deg, #111D10 0%, #192A18 50%, #273F25 100%)" }}>
-        <div className="text-center max-w-lg mx-auto px-6">
-          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse"
-            style={{ background: "rgba(237,201,24,0.15)", border: "2px solid #EDC918" }}>
-            <CheckCircle2 className="w-12 h-12" style={{ color: "#EDC918" }} />
+      <div className="min-h-screen bg-[#111D10] text-[#FAF8F2] flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center bg-[#14281C] border border-[#C89D4A]/30 rounded-3xl p-8 shadow-2xl space-y-5">
+          <div className="w-16 h-16 rounded-full bg-[#C89D4A]/15 border border-[#C89D4A]/40 flex items-center justify-center mx-auto text-[#C89D4A]">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: "var(--font-display)", color: "#FAF8F2" }}>
-            Registration Submitted!
+          <h1
+            className="text-2xl font-serif font-bold text-[#FAF8F2]"
+            style={{ fontFamily: "var(--font-cormorant)" }}
+          >
+            Application Submitted
           </h1>
-          <p className="text-base mb-6" style={{ color: "rgba(250,248,242,0.7)" }}>
-            Welcome to Kerala Vedics Vaidya Network. Your profile is now created and under review by our medical board.
-            You can configure your consultation schedule and preview your clinical console right now.
+          <p className="text-xs text-white/70 leading-relaxed font-light">
+            Welcome to the Kerala Vedics Doctor Network. Your clinical profile has been established. You can now access your doctor dashboard to manage availability.
           </p>
-          <div className="p-4 rounded-xl mb-8" style={{ background: "rgba(237,201,24,0.1)", border: "1px solid rgba(237,201,24,0.3)" }}>
-            <p style={{ color: "#EDC918", fontFamily: "var(--font-serif)" }}>
-              &ldquo;Atharva veda sarvasya rogasya aushadham&rdquo; — May your healing knowledge reach those who need it most.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/consultant/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold transition-all shadow-lg hover:scale-105"
-              style={{ background: "#EDC918", color: "#111D10" }}>
-              Go to Doctor Dashboard <ArrowRight className="w-4 h-4" />
+          <div className="pt-2 flex flex-col gap-2.5">
+            <Link
+              href="/consultant/dashboard"
+              className="w-full py-3 rounded-xl bg-[#C89D4A] hover:bg-[#dbad54] text-[#111D10] font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+            >
+              <span>Go to Doctor Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="/" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-medium transition-all text-white/70 hover:text-white hover:bg-white/10">
+            <Link
+              href="/"
+              className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white text-xs transition-colors"
+            >
               Return to Store
             </Link>
           </div>
@@ -235,224 +238,376 @@ export default function ConsultantRegisterPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--kv-cream)" }}>
-      {/* Hero */}
-      <div className="relative overflow-hidden py-20 px-6" style={{ background: "linear-gradient(135deg, #111D10 0%, #192A18 60%, #273F25 100%)" }}>
-        <div className="absolute inset-0 opacity-5">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="absolute rounded-full" style={{
-              width: `${40 + Math.random() * 80}px`, height: `${40 + Math.random() * 80}px`,
-              background: "#EDC918", left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
-              transform: "translate(-50%,-50%)", filter: "blur(30px)"
-            }} />
-          ))}
-        </div>
+    <div className="min-h-screen bg-[#111D10] text-[#FAF8F2] flex flex-col justify-between relative px-4 py-8">
+      {/* Background Accent */}
+      <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(ellipse_at_50%_15%,#C89D4A_0%,transparent_65%)]" />
 
-        <div className="relative max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-medium"
-            style={{ background: "rgba(237,201,24,0.15)", border: "1px solid rgba(237,201,24,0.4)", color: "#EDC918" }}>
-            <Leaf className="w-4 h-4" />
-            Vaidya Network — Kerala Vedics
+      {/* Top Header */}
+      <header className="relative max-w-xl mx-auto w-full flex items-center justify-between z-10 mb-6">
+        <Link
+          href="/consultant"
+          className="text-xs text-white/60 hover:text-white flex items-center gap-1.5 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Doctor Login</span>
+        </Link>
+        <span className="text-[11px] font-mono text-[#C89D4A] tracking-wider uppercase">
+          Vaidya Onboarding
+        </span>
+      </header>
+
+      {/* Main Registration Card */}
+      <main className="relative w-full max-w-xl mx-auto z-10 my-auto">
+        {/* Title & Brand */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#C89D4A]/15 border border-[#C89D4A]/30 mb-3 shadow-inner">
+            <GraduationCap className="w-7 h-7 text-[#C89D4A]" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6" style={{ fontFamily: "var(--font-display)", color: "#FAF8F2" }}>
-            Join the Ayurvedic<br />
-            <span style={{ color: "#EDC918" }}>Telehealth Revolution</span>
+          <h1
+            className="text-2xl sm:text-3xl text-[#FAF8F2] mb-1 tracking-tight"
+            style={{ fontFamily: "var(--font-cormorant)", fontWeight: 500 }}
+          >
+            Vaidya Application
           </h1>
-          <p className="text-xl max-w-2xl mx-auto mb-10" style={{ color: "rgba(250,248,242,0.75)" }}>
-            Bring classical Ayurvedic wisdom to patients across India. Consult via video, prescribe our classical formulations, and earn — all from your clinic or home.
+          <p
+            className="text-xs uppercase tracking-widest text-[#8BA664]"
+            style={{ fontFamily: "var(--font-manrope)", fontWeight: 700 }}
+          >
+            Kerala Vedics Telehealth Network
           </p>
-          <div className="flex items-center justify-center gap-8 mb-6 flex-wrap">
+        </div>
+
+        {/* Card Box */}
+        <div className="bg-[#14281C] border border-[#C89D4A]/25 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50 backdrop-blur-md">
+          {/* Steps Indicator */}
+          <div className="flex items-center gap-2 mb-6">
             {[
-              { label: "Consultation Suite", value: "HD Video" },
-              { label: "Prescription Engine", value: "Integrated" },
-              { label: "Bank Payouts", value: "Direct" },
-            ].map(({ label, value }) => (
-              <div key={label} className="text-center">
-                <div className="text-2xl font-bold" style={{ color: "#EDC918", fontFamily: "var(--font-display)" }}>{value}</div>
-                <div className="text-sm" style={{ color: "rgba(250,248,242,0.6)" }}>{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Perks */}
-      <div className="max-w-5xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12" style={{ fontFamily: "var(--font-display)", color: "var(--kv-forest)" }}>
-          Why Vaidyas Choose Kerala Vedics
-        </h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {PERKS.map((perk) => (
-            <div key={perk.title} className="p-6 rounded-2xl flex gap-4 group transition-all hover:shadow-lg"
-              style={{ background: "white", border: "1px solid rgba(81,104,48,0.15)" }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors group-hover:scale-110 duration-300"
-                style={{ background: "rgba(81,104,48,0.1)", color: "var(--kv-moss)" }}>
-                {perk.icon}
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1" style={{ color: "var(--kv-forest)" }}>{perk.title}</h3>
-                <p style={{ color: "rgba(39,63,37,0.65)" }}>{perk.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Steps */}
-      <div className="py-12 px-6" style={{ background: "linear-gradient(to right, #FAF8F2, #EAE6DC)" }}>
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-10" style={{ fontFamily: "var(--font-display)", color: "var(--kv-forest)" }}>
-            How It Works
-          </h2>
-          <div className="flex flex-col md:flex-row items-start gap-4">
-            {STEPS.map((s, i) => (
-              <div key={s.step} className="flex-1 flex md:flex-col items-center md:items-start gap-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0"
-                  style={{ background: "var(--kv-forest)", color: "#EDC918", fontFamily: "var(--font-display)" }}>
-                  {s.step}
-                </div>
-                <p className="font-medium" style={{ color: "var(--kv-forest)" }}>{s.label}</p>
-                {i < STEPS.length - 1 && (
-                  <ChevronRight className="hidden md:block w-5 h-5 mt-3 ml-auto" style={{ color: "var(--kv-moss)" }} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Registration Form */}
-      <div className="max-w-2xl mx-auto px-6 py-16">
-        <div className="p-8 rounded-3xl shadow-xl" style={{ background: "white", border: "1px solid rgba(81,104,48,0.15)" }}>
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-              style={{ background: "rgba(39,63,37,0.08)", color: "var(--kv-forest)" }}>
-              <GraduationCap className="w-8 h-8" />
-            </div>
-            <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "var(--kv-forest)" }}>
-              Vaidya Registration
-            </h2>
-            <p style={{ color: "rgba(39,63,37,0.6)" }}>Complete all steps to submit your application</p>
-          </div>
-
-          {/* Step Tabs */}
-          <div className="flex gap-2 mb-8">
-            {([1, 2, 3] as const).map((s) => (
-              <button key={s} onClick={() => setStep(s)}
-                className="flex-1 py-2 rounded-xl text-sm font-semibold transition-all"
-                style={{
-                  background: step === s ? "var(--kv-forest)" : "rgba(81,104,48,0.08)",
-                  color: step === s ? "#FAF8F2" : "var(--kv-moss)",
-                }}>
-                {s === 1 ? "Account" : s === 2 ? "Credentials" : "Banking"}
+              { num: 1, label: "Account" },
+              { num: 2, label: "Credentials" },
+              { num: 3, label: "Practice" },
+            ].map((s) => (
+              <button
+                key={s.num}
+                type="button"
+                onClick={() => setStep(s.num as 1 | 2 | 3)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                  step === s.num
+                    ? "bg-[#C89D4A] text-[#111D10] font-bold shadow-sm"
+                    : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <span>{s.num}.</span>
+                <span>{s.label}</span>
               </button>
             ))}
           </div>
 
-          <form onSubmit={handleSubmit}>
-            {/* Step 1: Account */}
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* STEP 1: Account Information */}
             {step === 1 && (
-              <div className="space-y-4">
-                <InputField label="Full Name" name="name" value={form.name} onChange={handleChange} placeholder="Dr. Arjun Nair" required />
-                <InputField label="Email Address" name="email" type="email" value={form.email} onChange={handleChange} placeholder="dr.arjun@example.com" required />
-                <InputField label="Password" name="password" type="password" value={form.password} onChange={handleChange} placeholder="Create a strong password" required />
-                <InputField label="Mobile Number" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 98765 43210" />
-                <button type="button" onClick={() => setStep(2)}
-                  className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
-                  style={{ background: "var(--kv-forest)", color: "#FAF8F2" }}>
-                  Next: Medical Credentials <ArrowRight className="w-4 h-4" />
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Full Name <span className="text-[#C89D4A]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="Dr. Rajesh Kumar"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Email Address <span className="text-[#C89D4A]">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="doctor@example.com"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Password <span className="text-[#C89D4A]">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="Create a secure password"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Mobile Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="w-full mt-2 py-3 rounded-xl bg-[#C89D4A] hover:bg-[#dbad54] text-[#111D10] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Next: Medical Credentials</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             )}
 
-            {/* Step 2: Medical Credentials */}
+            {/* STEP 2: Medical Credentials */}
             {step === 2 && (
-              <div className="space-y-4">
-                <SelectField label="Ayurvedic Specialization" name="specialization" value={form.specialization} onChange={handleChange} required
-                  options={AYURVEDIC_SPECIALIZATIONS.map(s => ({ value: s, label: s }))} placeholder="Select specialization" />
-                <InputField label="Degree" name="degree" value={form.degree} onChange={handleChange} placeholder="e.g. BAMS, MD (Kayachikitsa)" required />
-                <SelectField label="Medical Council" name="council_name" value={form.council_name} onChange={handleChange}
-                  options={AYURVEDIC_COUNCILS.map(c => ({ value: c, label: c }))} placeholder="Select council" />
-                <InputField label="Registration Number" name="registration_number" value={form.registration_number} onChange={handleChange} placeholder="e.g. CCIM/12345" required />
-                <InputField label="Years of Experience" name="years_experience" type="number" value={form.years_experience} onChange={handleChange} min="0" />
+              <div className="space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: "var(--kv-forest)" }}>Languages Spoken</label>
-                  <div className="flex flex-wrap gap-2">
-                    {LANGUAGES.map(lang => (
-                      <button key={lang} type="button" onClick={() => toggleLanguage(lang)}
-                        className="px-3 py-1.5 rounded-full text-sm font-medium transition-all"
-                        style={{
-                          background: form.languages.includes(lang) ? "var(--kv-forest)" : "rgba(81,104,48,0.08)",
-                          color: form.languages.includes(lang) ? "#FAF8F2" : "var(--kv-moss)",
-                        }}>
-                        {lang}
-                      </button>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Ayurvedic Specialization <span className="text-[#C89D4A]">*</span>
+                  </label>
+                  <select
+                    name="specialization"
+                    value={form.specialization}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#14281C] border border-white/15 text-sm text-white focus:outline-none focus:border-[#C89D4A]/70"
+                  >
+                    <option value="">Select Specialization</option>
+                    {AYURVEDIC_SPECIALIZATIONS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                      Degree <span className="text-[#C89D4A]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      name="degree"
+                      value={form.degree}
+                      onChange={handleChange}
+                      placeholder="e.g. BAMS, MD"
+                      className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                      Experience (Years)
+                    </label>
+                    <input
+                      type="number"
+                      name="years_experience"
+                      value={form.years_experience}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                    />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: "var(--kv-forest)" }}>Professional Bio</label>
-                  <textarea name="bio" value={form.bio} onChange={handleChange} rows={3}
-                    placeholder="Describe your clinical approach, areas of expertise, and philosophy..."
-                    className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
-                    style={{ border: "1px solid rgba(81,104,48,0.25)", color: "var(--kv-forest)", background: "rgba(81,104,48,0.03)" }} />
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Medical Council
+                  </label>
+                  <select
+                    name="council_name"
+                    value={form.council_name}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#14281C] border border-white/15 text-sm text-white focus:outline-none focus:border-[#C89D4A]/70"
+                  >
+                    <option value="">Select State / National Council</option>
+                    {AYURVEDIC_COUNCILS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <InputField label="Consultation Fee (₹)" name="consultation_fee" type="number" value={form.consultation_fee} onChange={handleChange} min="99" placeholder="e.g. 499" />
-                <InputField label="Medical Certificate URL" name="certificate_url" value={form.certificate_url} onChange={handleChange}
-                  placeholder="https://drive.google.com/... or R2 URL" />
-                <div className="flex gap-3">
-                  <button type="button" onClick={() => setStep(1)}
-                    className="flex-1 py-3 rounded-xl font-semibold transition-all"
-                    style={{ background: "rgba(81,104,48,0.08)", color: "var(--kv-moss)" }}>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Registration Number <span className="text-[#C89D4A]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    name="registration_number"
+                    value={form.registration_number}
+                    onChange={handleChange}
+                    placeholder="e.g. NCISM/2022/12345"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Languages Spoken
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {LANGUAGES.map((lang) => {
+                      const isSel = form.languages.includes(lang);
+                      return (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => toggleLanguage(lang)}
+                          className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                            isSel
+                              ? "bg-[#C89D4A] text-[#111D10] font-bold"
+                              : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          {lang}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="w-1/3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-white/70 transition-colors"
+                  >
                     Back
                   </button>
-                  <button type="button" onClick={() => setStep(3)}
-                    className="flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
-                    style={{ background: "var(--kv-forest)", color: "#FAF8F2" }}>
-                    Next: Banking <ArrowRight className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => setStep(3)}
+                    className="flex-1 py-2.5 rounded-xl bg-[#C89D4A] hover:bg-[#dbad54] text-[#111D10] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <span>Next: Practice & Banking</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Step 3: Banking */}
+            {/* STEP 3: Practice & Banking */}
             {step === 3 && (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl flex gap-3" style={{ background: "rgba(237,201,24,0.08)", border: "1px solid rgba(237,201,24,0.25)" }}>
-                  <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#EDC918" }} />
-                  <p className="text-sm" style={{ color: "var(--kv-forest)" }}>
-                    Your earnings (80% of each consultation fee) are disbursed directly to this bank account weekly.
-                  </p>
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Consultation Fee (₹)
+                  </label>
+                  <input
+                    type="number"
+                    name="consultation_fee"
+                    value={form.consultation_fee}
+                    onChange={handleChange}
+                    min="100"
+                    placeholder="499"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70"
+                  />
+                  <span className="text-[11px] text-white/40 mt-1 block">
+                    You receive 80% of every completed video consultation.
+                  </span>
                 </div>
-                <InputField label="Account Holder Name" name="bank_account_name" value={form.bank_account_name} onChange={handleChange} placeholder="As per bank records" />
-                <InputField label="Account Number" name="bank_account_number" value={form.bank_account_number} onChange={handleChange} placeholder="Enter account number" />
-                <InputField label="IFSC Code" name="bank_ifsc" value={form.bank_ifsc} onChange={handleChange} placeholder="e.g. SBIN0001234" />
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-white/70 mb-1.5">
+                    Professional Bio
+                  </label>
+                  <textarea
+                    rows={3}
+                    name="bio"
+                    value={form.bio}
+                    onChange={handleChange}
+                    placeholder="Summary of clinical experience, lineage, and treatment philosophy..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/25 border border-white/15 text-xs text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]/70 resize-none"
+                  />
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-3">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#C89D4A] block">
+                    Direct Payout Account (Optional during registration)
+                  </span>
+
+                  <div>
+                    <input
+                      type="text"
+                      name="bank_account_name"
+                      value={form.bank_account_name}
+                      onChange={handleChange}
+                      placeholder="Account Holder Name"
+                      className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-xs text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      name="bank_account_number"
+                      value={form.bank_account_number}
+                      onChange={handleChange}
+                      placeholder="Bank Account Number"
+                      className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-xs text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]"
+                    />
+                    <input
+                      type="text"
+                      name="bank_ifsc"
+                      value={form.bank_ifsc}
+                      onChange={handleChange}
+                      placeholder="IFSC Code"
+                      className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-xs text-white placeholder-white/25 focus:outline-none focus:border-[#C89D4A]"
+                    />
+                  </div>
+                </div>
 
                 {error && (
-                  <div className="p-3 rounded-xl flex gap-2" style={{ background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.25)" }}>
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "#DC2626" }} />
-                    <p className="text-sm" style={{ color: "#DC2626" }}>{error}</p>
+                  <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <span>{error}</span>
                   </div>
                 )}
 
-                <div className="flex gap-3">
-                  <button type="button" onClick={() => setStep(2)}
-                    className="flex-1 py-3 rounded-xl font-semibold transition-all"
-                    style={{ background: "rgba(81,104,48,0.08)", color: "var(--kv-moss)" }}>
+                <div className="flex gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="w-1/3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-white/70 transition-colors"
+                  >
                     Back
                   </button>
-                  <button type="submit" disabled={isSubmitting}
-                    className="flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg, var(--kv-forest), var(--kv-moss))", color: "#FAF8F2" }}>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 py-2.5 rounded-xl bg-[#C89D4A] hover:bg-[#dbad54] text-[#111D10] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
                     {isSubmitting ? (
-                      <span className="flex items-center gap-2">
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Submitting...
-                      </span>
+                      <>
+                        <span className="w-3.5 h-3.5 border-2 border-[#111D10] border-t-transparent rounded-full animate-spin" />
+                        <span>Submitting...</span>
+                      </>
                     ) : (
                       <>
                         <ShieldCheck className="w-4 h-4" />
-                        Submit Application
+                        <span>Submit Registration</span>
                       </>
                     )}
                   </button>
@@ -461,55 +616,23 @@ export default function ConsultantRegisterPage() {
             )}
           </form>
 
-          <p className="text-center text-sm mt-6" style={{ color: "rgba(39,63,37,0.5)" }}>
-            Already registered?{" "}
-            <Link href="/consultant/dashboard" style={{ color: "var(--kv-moss)", fontWeight: 600 }}>
-              Go to Dashboard →
+          {/* Sign In Link */}
+          <div className="mt-6 pt-4 border-t border-white/10 text-center">
+            <span className="text-xs text-white/50">Already have a doctor account? </span>
+            <Link
+              href="/consultant"
+              className="text-xs text-[#C89D4A] hover:underline font-semibold"
+            >
+              Sign In to Portal →
             </Link>
-          </p>
+          </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      </main>
 
-// ---- Reusable Field Components ----
-function InputField({
-  label, name, value, onChange, type = "text", placeholder, required, min,
-}: {
-  label: string; name: string; value: string; onChange: React.ChangeEventHandler<HTMLInputElement>;
-  type?: string; placeholder?: string; required?: boolean; min?: string;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--kv-forest)" }}>
-        {label}{required && <span style={{ color: "#DC2626" }}> *</span>}
-      </label>
-      <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder}
-        required={required} min={min}
-        className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-        style={{ border: "1px solid rgba(81,104,48,0.25)", color: "var(--kv-forest)", background: "rgba(81,104,48,0.03)" }} />
-    </div>
-  );
-}
-
-function SelectField({
-  label, name, value, onChange, options, placeholder, required,
-}: {
-  label: string; name: string; value: string; onChange: React.ChangeEventHandler<HTMLSelectElement>;
-  options: { value: string; label: string }[]; placeholder?: string; required?: boolean;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--kv-forest)" }}>
-        {label}{required && <span style={{ color: "#DC2626" }}> *</span>}
-      </label>
-      <select name={name} value={value} onChange={onChange} required={required}
-        className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-        style={{ border: "1px solid rgba(81,104,48,0.25)", color: "var(--kv-forest)", background: "rgba(81,104,48,0.03)" }}>
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
+      {/* Footer */}
+      <footer className="relative max-w-xl mx-auto w-full text-center text-xs text-white/30 z-10 mt-6 font-light">
+        Kerala Vedics Vaidya Telehealth System • NCISM / CCIM Compliant
+      </footer>
     </div>
   );
 }
