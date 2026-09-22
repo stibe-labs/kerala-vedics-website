@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Manrope:wght@400;700&family=Cormorant+Garamond:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -13,9 +13,9 @@
   --kv-cream-pure: #FFFFFF;
   --kv-sand: #EAE6DC;
   
-  --font-serif: 'Fraunces', Georgia, serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-display: 'Cinzel', serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-manrope: 'Manrope', system-ui, sans-serif;
   --font-cormorant: 'Cormorant Garamond', Georgia, serif;
   
@@ -143,4 +143,11 @@ body {
 
 .font-sans {
   font-family: var(--font-sans);
+}
+
+/* Remap font-mono → Manrope Bold (used on all label/eyebrow elements site-wide) */
+.font-mono {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: inherit;
 }
