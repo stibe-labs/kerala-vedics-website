@@ -125,12 +125,18 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
       const vid = videoRefs.current[i];
       if (!vid) return;
       if (i === idx) {
-        // Ensure src is set and attempt play
+        // Ensure muted and attempt play
+        vid.muted = true;
         const promise = vid.play();
         if (promise !== undefined) {
           promise.catch(() => {
-            // Retry once after a short delay (some browsers need user gesture context to settle)
-            setTimeout(() => vid.play().catch(() => {}), 300);
+            // Retry once after a short delay
+            setTimeout(() => {
+              if (vid) {
+                vid.muted = true;
+                vid.play().catch(() => {});
+              }
+            }, 300);
           });
         }
       } else {
@@ -174,21 +180,37 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
               }`}
             >
               <video
-                ref={(el) => { videoRefs.current[idx] = el; }}
-                src={resolvedSrc}
+                ref={(el) => {
+                  videoRefs.current[idx] = el;
+                  if (el && idx === currentSlideIdx && el.paused) {
+                    el.muted = true;
+                    el.play().catch(() => {});
+                  }
+                }}
+                autoPlay
                 loop
                 muted
                 playsInline
-                // Only eagerly buffer the first slide; others load on demand
                 preload={idx === 0 ? "auto" : "metadata"}
-                onCanPlay={(e) => {
-                  // As soon as a video can play, start it if it's the active slide
+                onLoadedData={(e) => {
                   if (idx === currentSlideIdx) {
-                    (e.currentTarget as HTMLVideoElement).play().catch(() => {});
+                    const v = e.currentTarget;
+                    v.muted = true;
+                    v.play().catch(() => {});
+                  }
+                }}
+                onCanPlay={(e) => {
+                  if (idx === currentSlideIdx) {
+                    const v = e.currentTarget;
+                    v.muted = true;
+                    v.play().catch(() => {});
                   }
                 }}
                 className="w-full h-full object-cover object-center contrast-[1.08] saturate-[1.15] brightness-[1.03]"
-              />
+              >
+                <source src={resolvedSrc} type="video/mp4" />
+                <source src={item.videoSrc} type="video/mp4" />
+              </video>
             </div>
           );
         })}

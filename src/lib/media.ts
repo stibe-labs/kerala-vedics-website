@@ -10,12 +10,7 @@ export function getMediaUrl(path: string): string {
     return path;
   }
   if (path.startsWith("/videos/")) {
-    // Serve videos directly from the app's own /public/videos/ directory.
-    // This works in both dev (localhost:3000) and production (keralavedics.com).
-    // The pub-*.r2.dev URL is rate-limited and blocked by some networks.
-    // Switch back to R2 by returning `${R2_MEDIA_BASE_URL}${path}` once you have
-    // a custom domain connected to your R2 bucket.
-    return path;
+    return `${R2_MEDIA_BASE_URL}${path}`;
   }
   return path;
 }
