@@ -32,6 +32,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useSmoothScroll } from "@/components/SmoothScrollProvider";
 import { Product } from "@/types/product";
 
 interface NavbarProps {
@@ -58,6 +59,7 @@ const TRENDING_SEARCHES = [
 
 export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
   const router = useRouter();
+  const { scrollTo } = useSmoothScroll();
   const {
     user,
     login,
@@ -160,22 +162,32 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
   }, [isAuthModalOpen, authModalMode]);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const isNowScrolled = scrollY > 40;
+          setIsScrolled((prev) => (prev !== isNowScrolled ? isNowScrolled : prev));
 
-      const scrollY = window.scrollY;
-      const productsEl = document.getElementById("products");
-      const promiseEl = document.getElementById("vedics-promise");
-      const soilEl = document.getElementById("soil-to-self");
+          const productsEl = document.getElementById("products");
+          const promiseEl = document.getElementById("vedics-promise");
+          const soilEl = document.getElementById("soil-to-self");
 
-      if (soilEl && scrollY >= soilEl.offsetTop - 250) {
-        setActiveTab("soil");
-      } else if (promiseEl && scrollY >= promiseEl.offsetTop - 250) {
-        setActiveTab("promise");
-      } else if (productsEl && scrollY >= productsEl.offsetTop - 250) {
-        setActiveTab("products");
-      } else {
-        setActiveTab("home");
+          let nextTab = "home";
+          if (soilEl && scrollY >= soilEl.offsetTop - 250) {
+            nextTab = "soil";
+          } else if (promiseEl && scrollY >= promiseEl.offsetTop - 250) {
+            nextTab = "promise";
+          } else if (productsEl && scrollY >= productsEl.offsetTop - 250) {
+            nextTab = "products";
+          }
+
+          setActiveTab((prev) => (prev !== nextTab ? nextTab : prev));
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
@@ -191,7 +203,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
       href: "/",
       onClick: () => {
         if (window.location.pathname === "/") {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          scrollTo(0);
         }
       },
     },
@@ -207,8 +219,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
       icon: Sparkles,
       href: "/#vedics-promise",
       onClick: () => {
-        const el = document.getElementById("vedics-promise");
-        if (el) el.scrollIntoView({ behavior: "smooth" });
+        scrollTo("#vedics-promise", { offset: -70 });
       },
     },
     {
@@ -217,8 +228,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
       icon: Bookmark,
       href: "/#soil-to-self",
       onClick: () => {
-        const el = document.getElementById("soil-to-self");
-        if (el) el.scrollIntoView({ behavior: "smooth" });
+        scrollTo("#soil-to-self", { offset: -70 });
       },
     },
     {

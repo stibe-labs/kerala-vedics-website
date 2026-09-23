@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { BrandStatementSection } from "@/components/BrandStatementSection";
@@ -29,8 +28,7 @@ export default function Home() {
       {/* Luxury Ayurvedic Video Preloading Screen */}
       <LoadingScreen />
 
-      <SmoothScrollProvider>
-        <main className="min-h-screen bg-[#FAF8F2] text-[#273F25] relative selection:bg-[#EDC918] selection:text-[#273F25]">
+      <main className="min-h-screen bg-[#FAF8F2] text-[#273F25] relative selection:bg-[#EDC918] selection:text-[#273F25]">
         {/* Sticky Minimal Header */}
         <Navbar onOpenDoshaFinder={() => setIsDoshaModalOpen(true)} />
 
@@ -71,7 +69,6 @@ export default function Home() {
           onClose={() => setSelectedProduct(null)}
         />
       </main>
-    </SmoothScrollProvider>
     </>
   );
 }

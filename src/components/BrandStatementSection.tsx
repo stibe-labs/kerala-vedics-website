@@ -12,12 +12,12 @@ interface ScrollWordProps {
 }
 
 function ScrollWord({ word, range, progress, isLast }: ScrollWordProps) {
-  // Dynamically interpolate blur from 12px -> 0px, opacity from 0.15 -> 1, y from 16px -> 0px as user scrolls
+  // Dynamically interpolate blur from 8px -> 0px, opacity from 0.15 -> 1, y from 16px -> 0px as user scrolls
   const opacity = useTransform(progress, range, [0.15, 1]);
   const blurFilter = useTransform(
     progress,
     range,
-    ["blur(12px)", "blur(0px)"]
+    ["blur(8px)", "blur(0px)"]
   );
   const y = useTransform(progress, range, [16, 0]);
 
@@ -28,7 +28,7 @@ function ScrollWord({ word, range, progress, isLast }: ScrollWordProps) {
         filter: blurFilter,
         y,
       }}
-      className="inline-block will-change-[transform,filter,opacity] transition-all duration-75"
+      className="inline-block will-change-[transform,filter,opacity]"
     >
       {word}
       {!isLast && "\u00A0"}

@@ -4,6 +4,7 @@ import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { CartDrawer } from "@/components/CartDrawer";
 import { VideoPreloadProvider } from "@/context/VideoPreloadContext";
+import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className="antialiased font-sans bg-[#F4EFE6] text-[#1F3D2B]"
         suppressHydrationWarning
@@ -35,8 +36,10 @@ export default function RootLayout({
           <WishlistProvider>
             <CartProvider>
               <VideoPreloadProvider>
-                {children}
-                <CartDrawer />
+                <SmoothScrollProvider>
+                  {children}
+                  <CartDrawer />
+                </SmoothScrollProvider>
               </VideoPreloadProvider>
             </CartProvider>
           </WishlistProvider>
