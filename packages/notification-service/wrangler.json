@@ -8,7 +8,7 @@
   "vars": {
     "SMTP_HOST": "smtp.gmail.com",
     "SMTP_PORT": "587",
-    "SMTP_USER": "arjunz.project@gmail.com",
+    "SMTP_USER": "mail.keralavedics@gmail.com",
     "SERVICE_NAME": "notification-service"
   }
 }

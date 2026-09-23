@@ -39,7 +39,7 @@
   "vars": {
     "SMTP_HOST": "smtp.gmail.com",
     "SMTP_PORT": "587",
-    "SMTP_USER": "arjunz.project@gmail.com",
+    "SMTP_USER": "mail.keralavedics@gmail.com",
     "CLOUDFLARE_ACCOUNT_ID": "7fb19661d826eacb527239392926d178",
     "NEXT_PUBLIC_RAZORPAY_KEY_ID": "rzp_test_Tch3QDua7Lsi8I",
     "RAZORPAY_KEY_ID": "rzp_test_Tch3QDua7Lsi8I",
