@@ -7,6 +7,8 @@ import {
   Leaf, Stethoscope, Globe, CheckCircle2, ArrowRight, X
 } from "lucide-react";
 import { Doctor, AYURVEDIC_SPECIALIZATIONS } from "@/types/consultation";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 export default function DoctorsPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -59,9 +61,12 @@ export default function DoctorsPage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--kv-cream)" }}>
-      {/* Header */}
-      <div className="relative py-20 px-6 overflow-hidden"
+    <div className="min-h-screen flex flex-col justify-between" style={{ background: "var(--kv-cream)" }}>
+      <Navbar />
+
+      <main className="flex-1 pt-20 sm:pt-24">
+        {/* Header */}
+        <div className="relative py-16 sm:py-20 px-6 overflow-hidden"
         style={{ background: "linear-gradient(135deg, #111D10 0%, #192A18 60%, #273F25 100%)" }}>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -202,6 +207,9 @@ export default function DoctorsPage() {
           </Link>
         </div>
       </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

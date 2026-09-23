@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -59,6 +59,7 @@ const TRENDING_SEARCHES = [
 
 export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { scrollTo } = useSmoothScroll();
   const {
     user,
@@ -75,8 +76,17 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
   const { totalItems } = useCart();
   const { totalWishlistItems } = useWishlist();
 
-  const [activeTab, setActiveTab] = useState<string>("home");
   const [isScrolled, setIsScrolled] = useState(false);
+  const isHeaderSolid = isScrolled || pathname !== "/";
+
+  const activeTab = (() => {
+    if (pathname === "/") return "home";
+    if (pathname.startsWith("/products")) return "products";
+    if (pathname.startsWith("/doctors")) return "consult";
+    if (pathname.startsWith("/promise")) return "promise";
+    if (pathname.startsWith("/soil-to-self")) return "soil";
+    return "";
+  })();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [authName, setAuthName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
@@ -167,24 +177,8 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const scrollY = window.scrollY;
-          const isNowScrolled = scrollY > 40;
+          const isNowScrolled = window.scrollY > 30;
           setIsScrolled((prev) => (prev !== isNowScrolled ? isNowScrolled : prev));
-
-          const productsEl = document.getElementById("products");
-          const promiseEl = document.getElementById("vedics-promise");
-          const soilEl = document.getElementById("soil-to-self");
-
-          let nextTab = "home";
-          if (soilEl && scrollY >= soilEl.offsetTop - 250) {
-            nextTab = "soil";
-          } else if (promiseEl && scrollY >= promiseEl.offsetTop - 250) {
-            nextTab = "promise";
-          } else if (productsEl && scrollY >= productsEl.offsetTop - 250) {
-            nextTab = "products";
-          }
-
-          setActiveTab((prev) => (prev !== nextTab ? nextTab : prev));
           ticking = false;
         });
         ticking = true;
@@ -202,40 +196,34 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
       icon: Home,
       href: "/",
       onClick: () => {
-        if (window.location.pathname === "/") {
+        if (pathname === "/") {
           scrollTo(0);
         }
       },
     },
     {
-      id: "shop",
-      label: "Shop All",
+      id: "products",
+      label: "Products",
       icon: ShoppingBag,
       href: "/products",
     },
     {
+      id: "consult",
+      label: "Consult a Vaidya",
+      icon: Stethoscope,
+      href: "/doctors",
+    },
+    {
       id: "promise",
-      label: "Promise",
+      label: "Our Promise",
       icon: Sparkles,
-      href: "/#vedics-promise",
-      onClick: () => {
-        scrollTo("#vedics-promise", { offset: -70 });
-      },
+      href: "/promise",
     },
     {
       id: "soil",
       label: "Soil to Self",
       icon: Bookmark,
-      href: "/#soil-to-self",
-      onClick: () => {
-        scrollTo("#soil-to-self", { offset: -70 });
-      },
-    },
-    {
-      id: "consult",
-      label: "Consult Vaidya",
-      icon: Stethoscope,
-      href: "/doctors",
+      href: "/soil-to-self",
     },
   ];
 
@@ -249,10 +237,16 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
 
   return (
     <>
-      <header className="absolute top-0 left-0 right-0 z-50 pointer-events-none">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-none ${
+          isHeaderSolid
+            ? "bg-[#070D08]/95 backdrop-blur-xl border-b border-white/10 shadow-[0_12px_35px_rgba(0,0,0,0.65)] py-1.5 sm:py-2"
+            : "bg-gradient-to-b from-[#070D08]/90 via-[#070D08]/50 to-transparent py-2.5 sm:py-3.5"
+        }`}
+      >
         <LayoutGroup id="navbar-capsule">
-          {/* Top Bar with Logo & Luxury Dark Header (Scrolls with page, not fixed) */}
-          <div className="w-full px-4 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between pointer-events-auto bg-gradient-to-b from-[#070D08]/90 via-[#070D08]/50 to-transparent">
+          {/* Top Bar with Logo & Luxury Dark Header */}
+          <div className="w-full px-4 sm:px-8 flex items-center justify-between pointer-events-auto">
             {/* Left: Kerala Vedics Brand Logo (Prominent & High Clarity) */}
             <Link href="/" className="flex items-center gap-3 group focus:outline-none shrink-0 py-1">
               <img
@@ -276,9 +270,8 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                     <Link
                       key={item.id}
                       href={item.href || "#"}
-                      onClick={(e: React.MouseEvent) => {
+                      onClick={() => {
                         if (item.onClick) item.onClick();
-                        setActiveTab(item.id);
                       }}
                       className={`relative flex items-center gap-2 px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium select-none transition-colors duration-200 ${
                         isActive
@@ -508,19 +501,66 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
               {/* Home */}
               <Link
                 href="/"
-                className="flex flex-col items-center p-2 text-white/70 hover:text-white"
+                className={`flex flex-col items-center p-2 transition-colors ${
+                  pathname === "/" ? "text-[#EDC918]" : "text-white/70 hover:text-white"
+                }`}
               >
-                <Home className="w-4 h-4 text-[#EDC918]" />
+                <Home className="w-4 h-4" />
                 <span className="text-[9px] mt-0.5">Home</span>
               </Link>
 
-              {/* Shop */}
+              {/* Products */}
               <Link
                 href="/products"
-                className="flex flex-col items-center p-2 text-white/70 hover:text-white"
+                className={`flex flex-col items-center p-2 transition-colors ${
+                  pathname.startsWith("/products") ? "text-[#EDC918]" : "text-white/70 hover:text-white"
+                }`}
               >
-                <ShoppingBag className="w-4 h-4 text-[#EDC918]" />
-                <span className="text-[9px] mt-0.5">Shop</span>
+                <ShoppingBag className="w-4 h-4" />
+                <span className="text-[9px] mt-0.5">Products</span>
+              </Link>
+
+              {/* Consult */}
+              <Link
+                href="/doctors"
+                className={`flex flex-col items-center p-2 transition-colors ${
+                  pathname.startsWith("/doctors") ? "text-[#EDC918]" : "text-white/70 hover:text-white"
+                }`}
+              >
+                <Stethoscope className="w-4 h-4" />
+                <span className="text-[9px] mt-0.5">Consult</span>
+              </Link>
+
+              {/* Wishlist */}
+              <Link
+                href="/wishlist"
+                className={`relative flex flex-col items-center p-2 transition-colors ${
+                  pathname === "/wishlist" ? "text-[#EDC918]" : "text-white/70 hover:text-white"
+                }`}
+              >
+                <Heart className="w-4 h-4" />
+                {totalWishlistItems > 0 && (
+                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[8px] flex items-center justify-center">
+                    {totalWishlistItems}
+                  </span>
+                )}
+                <span className="text-[9px] mt-0.5">Wishlist</span>
+              </Link>
+
+              {/* Bag */}
+              <Link
+                href="/cart"
+                className={`relative flex flex-col items-center p-2 transition-colors ${
+                  pathname === "/cart" ? "text-[#EDC918]" : "text-white/70 hover:text-white"
+                }`}
+              >
+                <Package className="w-4 h-4" />
+                {totalItems > 0 && (
+                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[8px] flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+                <span className="text-[9px] mt-0.5">Bag</span>
               </Link>
 
               {/* Profile */}
@@ -532,39 +572,15 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                     openAuthModal("login");
                   }
                 }}
-                className="flex flex-col items-center p-2 text-white/70 hover:text-white cursor-pointer"
+                className={`flex flex-col items-center p-2 transition-colors cursor-pointer ${
+                  pathname === "/sanctuary" || pathname === "/profile"
+                    ? "text-[#EDC918]"
+                    : "text-white/70 hover:text-white"
+                }`}
               >
-                <User className="w-4 h-4 text-[#EDC918]" />
+                <User className="w-4 h-4" />
                 <span className="text-[9px] mt-0.5">Profile</span>
               </button>
-
-              {/* Wishlist */}
-              <Link
-                href="/wishlist"
-                className="relative flex flex-col items-center p-2 text-white/70 hover:text-white"
-              >
-                <Heart className="w-4 h-4 text-[#EDC918]" />
-                {totalWishlistItems > 0 && (
-                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[8px] flex items-center justify-center">
-                    {totalWishlistItems}
-                  </span>
-                )}
-                <span className="text-[9px] mt-0.5">Wishlist</span>
-              </Link>
-
-              {/* Cart */}
-              <Link
-                href="/cart"
-                className="relative flex flex-col items-center p-2 text-white/70 hover:text-white"
-              >
-                <Package className="w-4 h-4 text-[#EDC918]" />
-                {totalItems > 0 && (
-                  <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-[#EDC918] text-[#273F25] font-bold text-[8px] flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-                <span className="text-[9px] mt-0.5">Bag</span>
-              </Link>
             </motion.div>
           </div>
         </LayoutGroup>

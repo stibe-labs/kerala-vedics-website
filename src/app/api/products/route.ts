@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeD1Query } from "@/lib/d1";
 import { Product } from "@/types/product";
+import { DEFAULT_PRODUCTS } from "@/data/keralaVedicProducts";
 
-let serverProductsCache: Product[] = [];
+let serverProductsCache: Product[] = [...DEFAULT_PRODUCTS];
 
 export async function GET() {
   try {
     const d1Results = await executeD1Query<Product>("SELECT * FROM products ORDER BY created_at DESC;");
-    return NextResponse.json({ success: true, source: "cloudflare-d1", products: d1Results || [] });
+    if (d1Results && d1Results.length > 0) {
+      return NextResponse.json({ success: true, source: "cloudflare-d1", products: d1Results });
+    }
   } catch (err) {
-    console.warn("D1 products query error:", err);
-    return NextResponse.json({ success: true, source: "cloudflare-d1", products: [] });
+    console.warn("D1 products query error, serving authentic catalog:", err);
   }
+  return NextResponse.json({
+    success: true,
+    source: "authentic-kerala-formulations",
+    products: serverProductsCache.length > 0 ? serverProductsCache : DEFAULT_PRODUCTS,
+  });
 }
 
 export async function POST(req: NextRequest) {

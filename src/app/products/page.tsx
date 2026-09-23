@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Product } from "@/types/product";
+import { DEFAULT_PRODUCTS } from "@/data/keralaVedicProducts";
 import {
   Filter,
   SlidersHorizontal,
@@ -32,6 +33,8 @@ const CATEGORIES = [
   "Herbal Drops",
   "Therapeutic Oils",
   "Internal Elixirs",
+  "Skin Radiance",
+  "Hair Nourishment",
 ];
 
 const DOSHAS = ["All Doshas", "Tridoshic", "Vata", "Pitta", "Kapha"];
@@ -52,13 +55,13 @@ function ProductsContent() {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
+  const [loading, setLoading] = useState(false);
 
   // Filters State
   const [selectedCategory, setSelectedCategory] = useState(urlCategory);
   const [selectedDosha, setSelectedDosha] = useState("All Doshas");
-  const [maxPrice, setMaxPrice] = useState<number>(2000);
+  const [maxPrice, setMaxPrice] = useState<number>(3000);
   const [minRating, setMinRating] = useState<number>(0);
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [searchFilter, setSearchFilter] = useState(urlSearch);
@@ -80,7 +83,7 @@ function ProductsContent() {
         const res = await fetch("/api/products");
         if (res.ok) {
           const data = await res.json();
-          if (data.products && Array.isArray(data.products)) {
+          if (data.products && Array.isArray(data.products) && data.products.length > 0) {
             setProducts(data.products);
             return;
           }
