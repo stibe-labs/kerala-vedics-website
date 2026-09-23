@@ -71,32 +71,34 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
     if (isStarted.current) return;
     isStarted.current = true;
 
-    // ── Start buffering all hero videos in background ──────────────────────
-    const loadedSet = new Set<string>();
+    // ── Prioritize Slide 0 immediately with 100% bandwidth ─────────────────
+    const firstVideo = LANDING_PAGE_VIDEOS[0];
+    if (firstVideo) {
+      try {
+        const v = document.createElement("video");
+        v.preload = "auto";
+        v.muted = true;
+        v.playsInline = true;
+        v.src = getMediaUrl(firstVideo.path);
+        v.load();
+      } catch (_) {}
+    }
 
-    LANDING_PAGE_VIDEOS.forEach((item, index) => {
-      setTimeout(() => {
-        try {
-          const v = document.createElement("video");
-          v.preload = "auto";
-          v.muted = true;
-          v.playsInline = true;
-          v.src = getMediaUrl(item.path);
-
-          const markDone = () => {
-            if (!loadedSet.has(item.path)) {
-              loadedSet.add(item.path);
-              setCompletedVideos((prev) => ({ ...prev, [item.path]: true }));
-              setLoadedCount(loadedSet.size);
-            }
-          };
-
-          v.addEventListener("canplaythrough", markDone, { once: true });
-          v.addEventListener("canplay", markDone, { once: true });
-          v.load();
-        } catch (_) {}
-      }, index * 150);
-    });
+    // ── Stagger remaining videos lazily so network is never saturated ───────
+    const remainingTimer = setTimeout(() => {
+      LANDING_PAGE_VIDEOS.slice(1).forEach((item, index) => {
+        setTimeout(() => {
+          try {
+            const v = document.createElement("video");
+            v.preload = "auto";
+            v.muted = true;
+            v.playsInline = true;
+            v.src = getMediaUrl(item.path);
+            v.load();
+          } catch (_) {}
+        }, index * 2500);
+      });
+    }, 4000);
 
     // ── Hard 3-second progress fill ────────────────────────────────────────
     // Progress animates 0 → 100 over exactly MIN_DURATION ms.

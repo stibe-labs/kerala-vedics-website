@@ -187,11 +187,12 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
                     el.play().catch(() => {});
                   }
                 }}
+                src={resolvedSrc}
                 autoPlay
                 loop
                 muted
                 playsInline
-                preload={idx === 0 ? "auto" : "metadata"}
+                preload={idx === 0 ? "auto" : "none"}
                 onLoadedData={(e) => {
                   if (idx === currentSlideIdx) {
                     const v = e.currentTarget;
@@ -207,10 +208,7 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
                   }
                 }}
                 className="w-full h-full object-cover object-center contrast-[1.08] saturate-[1.15] brightness-[1.03]"
-              >
-                <source src={resolvedSrc} type="video/mp4" />
-                <source src={item.videoSrc} type="video/mp4" />
-              </video>
+              />
             </div>
           );
         })}

@@ -10,9 +10,13 @@ export const metadata: Metadata = {
   title: "Kerala Vedics | Luxury Ayurvedic Rituals & Formulations",
   description: "Classical Ayurvedic manufacture anchored in the virgin rainforests of Kerala. Formulated with reverence to ancient Vaidyas and the healing intelligence of nature.",
   icons: {
-    icon: "/favicon-kv.png",
-    shortcut: "/favicon-kv.png",
-    apple: "/favicon-kv.png",
+    icon: [
+      { url: "/favicon.ico?v=2" },
+      { url: "/favicon.png?v=2", type: "image/png" },
+      { url: "/favicon-kv.png?v=2", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico?v=2",
+    apple: "/apple-touch-icon.png?v=2",
   },
 };
 
