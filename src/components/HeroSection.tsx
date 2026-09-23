@@ -111,11 +111,23 @@ const HERO_SLIDES: HeroSlide[] = [
 ];
 
 export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => void }) {
-  const { getVideoUrl } = useVideoPreload();
+  const { getVideoUrl, markHeroVideoReady } = useVideoPreload();
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   // One ref per slide video element
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  // Immediately buffer and play slide 0 on mount behind loading screen
+  useEffect(() => {
+    const vid0 = videoRefs.current[0];
+    if (vid0) {
+      vid0.muted = true;
+      if (vid0.readyState >= 2) {
+        markHeroVideoReady();
+      }
+      vid0.play().then(() => markHeroVideoReady()).catch(() => {});
+    }
+  }, [markHeroVideoReady]);
 
   const slide = HERO_SLIDES[currentSlideIdx];
 
@@ -182,7 +194,10 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
               <video
                 ref={(el) => {
                   videoRefs.current[idx] = el;
-                  if (el && idx === currentSlideIdx && el.paused) {
+                  if (el && idx === 0) {
+                    el.muted = true;
+                    el.play().then(() => markHeroVideoReady()).catch(() => {});
+                  } else if (el && idx === currentSlideIdx && el.paused) {
                     el.muted = true;
                     el.play().catch(() => {});
                   }
@@ -194,17 +209,28 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
                 playsInline
                 preload={idx === 0 ? "auto" : "none"}
                 onLoadedData={(e) => {
-                  if (idx === currentSlideIdx) {
-                    const v = e.currentTarget;
-                    v.muted = true;
+                  const v = e.currentTarget;
+                  v.muted = true;
+                  if (idx === 0) {
+                    v.play().then(() => markHeroVideoReady()).catch(() => {});
+                    markHeroVideoReady();
+                  } else if (idx === currentSlideIdx) {
                     v.play().catch(() => {});
                   }
                 }}
                 onCanPlay={(e) => {
-                  if (idx === currentSlideIdx) {
-                    const v = e.currentTarget;
-                    v.muted = true;
+                  const v = e.currentTarget;
+                  v.muted = true;
+                  if (idx === 0) {
+                    v.play().then(() => markHeroVideoReady()).catch(() => {});
+                    markHeroVideoReady();
+                  } else if (idx === currentSlideIdx) {
                     v.play().catch(() => {});
+                  }
+                }}
+                onPlaying={() => {
+                  if (idx === 0) {
+                    markHeroVideoReady();
                   }
                 }}
                 className="w-full h-full object-cover object-center contrast-[1.08] saturate-[1.15] brightness-[1.03]"

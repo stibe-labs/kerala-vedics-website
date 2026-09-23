@@ -36,6 +36,8 @@ interface VideoPreloadContextType {
   finishLoading: () => void;
   getVideoUrl: (path: string) => string;
   isReady: boolean;
+  heroVideoReady: boolean;
+  markHeroVideoReady: () => void;
 }
 
 const VideoPreloadContext = createContext<VideoPreloadContextType | null>(null);
@@ -46,8 +48,17 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
   const [completedVideos, setCompletedVideos] = useState<Record<string, boolean>>({});
   const [loadedCount, setLoadedCount] = useState<number>(0);
   const [isReady, setIsReady] = useState<boolean>(false);
+  const [heroVideoReady, setHeroVideoReady] = useState<boolean>(false);
 
+  const heroReadyRef = useRef<boolean>(false);
   const isStarted = useRef<boolean>(false);
+
+  const markHeroVideoReady = useCallback(() => {
+    if (!heroReadyRef.current) {
+      heroReadyRef.current = true;
+      setHeroVideoReady(true);
+    }
+  }, []);
 
   const getStatusMessage = (prog: number): string => {
     if (prog < 30) return "Awakening ancient botanical wisdom...";
@@ -80,6 +91,8 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
         v.muted = true;
         v.playsInline = true;
         v.src = getMediaUrl(firstVideo.path);
+        v.oncanplay = () => markHeroVideoReady();
+        v.onplaying = () => markHeroVideoReady();
         v.load();
       } catch (_) {}
     }
@@ -100,36 +113,44 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
       });
     }, 4000);
 
-    // ── Hard 3-second progress fill ────────────────────────────────────────
-    // Progress animates 0 → 100 over exactly MIN_DURATION ms.
-    // isReady is only set after the full duration — the Enter button appears
-    // only then, so the user can never enter before 3 seconds.
+    // ── Synchronized progress fill (minimum 3 seconds + video ready) ────────
     const MIN_DURATION = 3000;
+    const MAX_WAIT_DURATION = 6000;
     const startTime = Date.now();
 
     const progressTimer = setInterval(() => {
       const elapsed = Date.now() - startTime;
-      const pct = Math.min(100, Math.round((elapsed / MIN_DURATION) * 100));
-      setProgress(pct);
+      const isVideoReady = heroReadyRef.current;
 
-      if (pct >= 100) {
+      let targetPct = 0;
+      if (elapsed < 2600) {
+        targetPct = Math.round((elapsed / 2600) * 92);
+      } else if (isVideoReady || elapsed >= MAX_WAIT_DURATION) {
+        const finishElapsed = elapsed - 2600;
+        targetPct = Math.min(100, 92 + Math.round((finishElapsed / 400) * 8));
+      } else {
+        targetPct = 95;
+      }
+
+      setProgress((prev) => Math.max(prev, targetPct));
+
+      if (targetPct >= 100 && elapsed >= MIN_DURATION && (isVideoReady || elapsed >= MAX_WAIT_DURATION)) {
         clearInterval(progressTimer);
-        // Mark ready after a brief hold at 100% so the bar visually completes
         setTimeout(() => {
           setIsReady(true);
-          // Auto-dismiss 800ms after ready (after user has seen the full bar)
           setTimeout(() => {
             setIsLoading(false);
-          }, 800);
+          }, 400);
         }, 200);
       }
-    }, 25);
+    }, 30);
 
     return () => {
       clearInterval(progressTimer);
+      clearTimeout(remainingTimer);
       isStarted.current = false;
     };
-  }, [finishLoading]);
+  }, [finishLoading, markHeroVideoReady]);
 
   return (
     <VideoPreloadContext.Provider
@@ -143,6 +164,8 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
         finishLoading,
         getVideoUrl,
         isReady,
+        heroVideoReady,
+        markHeroVideoReady,
       }}
     >
       {children}
