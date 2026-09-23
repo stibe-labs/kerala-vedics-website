@@ -82,8 +82,12 @@ export default function SanctuaryDashboardPage() {
     return (
       <div className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-[#4C6B3D]/15 shadow-xl text-center space-y-5">
-          <div className="w-16 h-16 rounded-full bg-[#1F3D2B] text-[#E0BA6A] mx-auto flex items-center justify-center font-serif text-2xl font-bold">
-            KV
+          <div className="w-20 h-20 rounded-2xl bg-[#1F3D2B] mx-auto flex items-center justify-center p-3 border border-[#C89D4A]/30 shadow-lg">
+            <img
+              src="/KV-Logo-w.png"
+              alt="Kerala Vedics"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h2 className="text-2xl font-serif font-bold text-[#1F3D2B]">
             Sacred Sanctuary Restricted

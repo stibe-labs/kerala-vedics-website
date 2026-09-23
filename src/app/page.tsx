@@ -16,6 +16,7 @@ import { NewsletterStockistSection } from "@/components/NewsletterStockistSectio
 import { Footer } from "@/components/Footer";
 import { DoshaFinderModal } from "@/components/DoshaFinderModal";
 import { ProductDetailDrawer } from "@/components/ProductDetailDrawer";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { ProductRitual } from "@/data/vedicsData";
 
 export default function Home() {
@@ -24,8 +25,12 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<ProductRitual | null>(null);
 
   return (
-    <SmoothScrollProvider>
-      <main className="min-h-screen bg-[#FAF8F2] text-[#273F25] relative selection:bg-[#EDC918] selection:text-[#273F25]">
+    <>
+      {/* Luxury Ayurvedic Video Preloading Screen */}
+      <LoadingScreen />
+
+      <SmoothScrollProvider>
+        <main className="min-h-screen bg-[#FAF8F2] text-[#273F25] relative selection:bg-[#EDC918] selection:text-[#273F25]">
         {/* Sticky Minimal Header */}
         <Navbar onOpenDoshaFinder={() => setIsDoshaModalOpen(true)} />
 
@@ -67,5 +72,6 @@ export default function Home() {
         />
       </main>
     </SmoothScrollProvider>
+    </>
   );
 }

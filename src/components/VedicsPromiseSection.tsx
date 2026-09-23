@@ -5,8 +5,10 @@ import { VEDICS_LETTERS } from "@/data/vedicsData";
 import { Sparkles, ArrowRight, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMediaUrl } from "@/lib/media";
+import { useVideoPreload } from "@/context/VideoPreloadContext";
 
 export function VedicsPromiseSection() {
+  const { getVideoUrl } = useVideoPreload();
   const [activeIndex, setActiveIndex] = useState(0);
   const total = VEDICS_LETTERS.length;
   const activeItem = VEDICS_LETTERS[activeIndex];
@@ -226,11 +228,12 @@ export function VedicsPromiseSection() {
                     {activeItem.videoSrc ? (
                       <video
                         key={`vid-${activeItem.letter}`}
-                        src={getMediaUrl(activeItem.videoSrc)}
+                        src={getVideoUrl(activeItem.videoSrc)}
                         autoPlay
                         loop
                         muted
                         playsInline
+                        preload="auto"
                         className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                       />
                     ) : (

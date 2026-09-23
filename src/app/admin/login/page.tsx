@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, ShieldCheck, Leaf } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -43,8 +43,13 @@ export default function AdminLoginPage() {
       <div className="relative w-full max-w-md">
         {/* Logo / Brand */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#C89D4A]/15 border border-[#C89D4A]/30 mb-4">
-            <Leaf className="w-8 h-8 text-[#C89D4A]" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#1F3D2B] border border-[#C89D4A]/35 mb-5 p-3 shadow-lg shadow-black/30">
+            <img
+              src="/KV-Logo-w.png"
+              alt="Kerala Vedics"
+              className="w-full h-full object-contain"
+              style={{ filter: "drop-shadow(0 0 8px rgba(237,201,24,0.3))" }}
+            />
           </div>
           <h1
             className="text-3xl text-[#FAF8F2] mb-1"

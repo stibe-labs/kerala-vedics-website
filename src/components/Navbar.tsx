@@ -721,11 +721,14 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
 
               {/* Header */}
               <div className="text-center mb-6 space-y-2">
-                <img
-                  src="/brand-icon.png"
-                  alt="Kerala Vedics"
-                  className="w-12 h-12 mx-auto object-contain drop-shadow-md mb-2"
-                />
+                <div className="w-14 h-14 rounded-2xl bg-[#1F3D2B] border border-[#C89D4A]/30 mx-auto flex items-center justify-center p-2.5 mb-2 shadow-lg">
+                  <img
+                    src="/KV-Logo-w.png"
+                    alt="Kerala Vedics"
+                    className="w-full h-full object-contain"
+                    style={{ filter: "drop-shadow(0 0 6px rgba(237,201,24,0.3))" }}
+                  />
+                </div>
                 <h3 className="text-2xl font-serif font-medium text-white">
                   {authMode === "login" ? "Welcome Back" : "Begin Your Vedic Journey"}
                 </h3>

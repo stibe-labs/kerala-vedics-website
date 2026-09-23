@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Sparkles,
   Leaf,
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMediaUrl } from "@/lib/media";
+import { useVideoPreload } from "@/context/VideoPreloadContext";
 
 interface HeroSlide {
   id: string;
@@ -110,10 +111,38 @@ const HERO_SLIDES: HeroSlide[] = [
 ];
 
 export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => void }) {
+  const { getVideoUrl } = useVideoPreload();
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  // One ref per slide video element
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const slide = HERO_SLIDES[currentSlideIdx];
+
+  // Explicitly play the active video — bypasses browser autoplay policy restrictions
+  const playActive = useCallback((idx: number) => {
+    HERO_SLIDES.forEach((_, i) => {
+      const vid = videoRefs.current[i];
+      if (!vid) return;
+      if (i === idx) {
+        // Ensure src is set and attempt play
+        const promise = vid.play();
+        if (promise !== undefined) {
+          promise.catch(() => {
+            // Retry once after a short delay (some browsers need user gesture context to settle)
+            setTimeout(() => vid.play().catch(() => {}), 300);
+          });
+        }
+      } else {
+        vid.pause();
+      }
+    });
+  }, []);
+
+  // Play active video whenever slide changes
+  useEffect(() => {
+    playActive(currentSlideIdx);
+  }, [currentSlideIdx, playActive]);
 
   // Auto-advance slides every 8 seconds
   useEffect(() => {
@@ -131,32 +160,43 @@ export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => v
       id="hero"
       className="relative w-full min-h-screen min-h-[100dvh] bg-[#0D160E] text-white select-none flex flex-col justify-between overflow-hidden"
     >
-      {/* RIGHT SIDE VIDEO (100% FILL ON RIGHT SIDE, NO GREEN LETTERBOXING) */}
+      {/* RIGHT SIDE VIDEO STACK */}
       <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[50%] xl:w-[52%] h-full overflow-hidden pointer-events-none z-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={slide.videoSrc}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full h-full"
-          >
-            <video
-              src={getMediaUrl(slide.videoSrc)}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover object-center contrast-[1.08] saturate-[1.15] brightness-[1.03]"
-            />
-          </motion.div>
-        </AnimatePresence>
+        {HERO_SLIDES.map((item, idx) => {
+          const isCurrent = idx === currentSlideIdx;
+          const resolvedSrc = getVideoUrl(item.videoSrc);
 
-        {/* Clean Left-Only Gradient Transition: softly blends text area into the video */}
+          return (
+            <div
+              key={item.id}
+              className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
+                isCurrent ? "opacity-100 z-[1]" : "opacity-0 z-[0] pointer-events-none"
+              }`}
+            >
+              <video
+                ref={(el) => { videoRefs.current[idx] = el; }}
+                src={resolvedSrc}
+                loop
+                muted
+                playsInline
+                // Only eagerly buffer the first slide; others load on demand
+                preload={idx === 0 ? "auto" : "metadata"}
+                onCanPlay={(e) => {
+                  // As soon as a video can play, start it if it's the active slide
+                  if (idx === currentSlideIdx) {
+                    (e.currentTarget as HTMLVideoElement).play().catch(() => {});
+                  }
+                }}
+                className="w-full h-full object-cover object-center contrast-[1.08] saturate-[1.15] brightness-[1.03]"
+              />
+            </div>
+          );
+        })}
+
+        {/* Clean Left-Only Gradient Transition */}
         <div className="absolute inset-y-0 left-0 w-24 sm:w-36 lg:w-44 bg-gradient-to-r from-[#0D160E] to-transparent z-10 pointer-events-none" />
 
-        {/* Mobile-only light overlay for text readability */}
+        {/* Mobile overlay for text readability */}
         <div className="absolute inset-0 bg-[#0D160E]/50 lg:hidden z-10 pointer-events-none" />
       </div>
 
