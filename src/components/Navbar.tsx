@@ -77,6 +77,8 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
   const { totalWishlistItems } = useWishlist();
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = React.useRef(0);
   const isHeaderSolid = isScrolled || pathname !== "/";
 
   const activeTab = (() => {
@@ -177,8 +179,17 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const isNowScrolled = window.scrollY > 30;
+          const currentY = window.scrollY;
+          const isNowScrolled = currentY > 30;
           setIsScrolled((prev) => (prev !== isNowScrolled ? isNowScrolled : prev));
+
+          // Hide when scrolling down past 80px, show when scrolling up
+          if (currentY > 80) {
+            setIsHidden(currentY > lastScrollY.current);
+          } else {
+            setIsHidden(false);
+          }
+          lastScrollY.current = currentY;
           ticking = false;
         });
         ticking = true;
@@ -242,7 +253,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
           isHeaderSolid
             ? "bg-[#070D08]/95 backdrop-blur-xl border-b border-white/10 shadow-[0_12px_35px_rgba(0,0,0,0.65)] py-1.5 sm:py-2"
             : "bg-gradient-to-b from-[#070D08]/90 via-[#070D08]/50 to-transparent py-2.5 sm:py-3.5"
-        }`}
+        } ${isHidden ? "-translate-y-full" : "translate-y-0"}`}
       >
         <LayoutGroup id="navbar-capsule">
           {/* Top Bar with Logo & Luxury Dark Header */}
