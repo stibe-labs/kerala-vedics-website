@@ -114,8 +114,9 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
     }, 4000);
 
     // ── Synchronized progress fill (minimum 3 seconds + video ready) ────────
-    const MIN_DURATION = 3000;
-    const MAX_WAIT_DURATION = 6000;
+    // ── Synchronized progress fill (minimum ~1 second + video ready) ────────
+    const MIN_DURATION = 1000;
+    const MAX_WAIT_DURATION = 2500;
     const startTime = Date.now();
 
     const progressTimer = setInterval(() => {
@@ -123,11 +124,11 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
       const isVideoReady = heroReadyRef.current;
 
       let targetPct = 0;
-      if (elapsed < 2600) {
-        targetPct = Math.round((elapsed / 2600) * 92);
+      if (elapsed < 800) {
+        targetPct = Math.round((elapsed / 800) * 90);
       } else if (isVideoReady || elapsed >= MAX_WAIT_DURATION) {
-        const finishElapsed = elapsed - 2600;
-        targetPct = Math.min(100, 92 + Math.round((finishElapsed / 400) * 8));
+        const finishElapsed = elapsed - 800;
+        targetPct = Math.min(100, 90 + Math.round((finishElapsed / 200) * 10));
       } else {
         targetPct = 95;
       }
@@ -136,11 +137,9 @@ export function VideoPreloadProvider({ children }: { children: React.ReactNode }
 
       if (targetPct >= 100 && elapsed >= MIN_DURATION && (isVideoReady || elapsed >= MAX_WAIT_DURATION)) {
         clearInterval(progressTimer);
+        setIsReady(true);
         setTimeout(() => {
-          setIsReady(true);
-          setTimeout(() => {
-            setIsLoading(false);
-          }, 400);
+          setIsLoading(false);
         }, 200);
       }
     }, 30);
