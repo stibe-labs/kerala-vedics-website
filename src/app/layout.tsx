@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { CartDrawer } from "@/components/CartDrawer";
+import { ConsultVaidyaPortal } from "@/components/ConsultVaidyaPortal";
 import { VideoPreloadProvider } from "@/context/VideoPreloadContext";
 import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
 import "./globals.css";
@@ -39,6 +40,7 @@ export default function RootLayout({
                 <SmoothScrollProvider>
                   {children}
                   <CartDrawer />
+                  <ConsultVaidyaPortal />
                 </SmoothScrollProvider>
               </VideoPreloadProvider>
             </CartProvider>
