@@ -529,12 +529,23 @@ export default function AdminPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDeleteProduct = (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete formulation "${name}"?`)) return;
-    const filtered = products.filter((p) => p.id !== id);
-    setProducts(filtered);
-    loadProducts();
-    setSuccessMsg(`Formulation "${name}" removed.`);
+  const handleDeleteProduct = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete formulation "${name}"? This will permanently remove it from the catalog.`)) return;
+    try {
+      const res = await fetch(`/api/products?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccessMsg(`Formulation "${name}" permanently deleted.`);
+        await loadProducts();
+      } else {
+        alert(data.error || "Failed to delete formulation.");
+      }
+    } catch (err) {
+      console.error("Delete product error:", err);
+      alert("Network error while deleting formulation.");
+    }
   };
 
   // Filtered lists

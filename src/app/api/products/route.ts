@@ -8,11 +8,24 @@ let serverProductsCache: Product[] = [...DEFAULT_PRODUCTS];
 export async function GET() {
   try {
     const d1Results = await executeD1Query<Product>("SELECT * FROM products ORDER BY created_at DESC;");
-    if (d1Results && d1Results.length > 0) {
-      return NextResponse.json({ success: true, source: "cloudflare-d1", products: d1Results });
+    if (d1Results && Array.isArray(d1Results)) {
+      const formatted = d1Results.map((p: any) => ({
+        ...p,
+        images:
+          typeof p.images === "string"
+            ? (() => {
+                try {
+                  return JSON.parse(p.images);
+                } catch {
+                  return [];
+                }
+              })()
+            : p.images || [],
+      }));
+      return NextResponse.json({ success: true, source: "cloudflare-d1", products: formatted });
     }
   } catch (err) {
-    console.warn("D1 products query error, serving authentic catalog:", err);
+    console.warn("D1 products query error, serving authentic catalog fallback:", err);
   }
   return NextResponse.json({
     success: true,
