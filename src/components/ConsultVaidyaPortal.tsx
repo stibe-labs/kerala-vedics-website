@@ -166,19 +166,53 @@ function FloatingConsultButton({ onClick }: { onClick: () => void }) {
 // ─── Main Portal Component ───────────────────────────────────────────────────
 export function ConsultVaidyaPortal() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [isExcludedHost, setIsExcludedHost] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [doctorCount, setDoctorCount] = useState<number | null>(null);
   const [topDoctors, setTopDoctors] = useState<
     { name: string; specialization: string; rating: number; profile_photo?: string }[]
   >([]);
 
-  // Hide floating button on /doctors and /consultant pages
-  const isOnDoctorsPage =
-    pathname?.startsWith("/doctors") || pathname?.startsWith("/consultant");
-  const isHomePage = pathname === "/";
-
-  // Fetch doctor count on mount
   useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname.toLowerCase();
+      if (
+        host.startsWith("admin.") ||
+        host.startsWith("consultant.") ||
+        host === "admin.localhost" ||
+        host === "consultant.localhost"
+      ) {
+        setIsExcludedHost(true);
+      }
+    }
+  }, []);
+
+  // Strictly exclude admin panel, consultant portal, and doctor listing page
+  const isExcludedArea =
+    isExcludedHost ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/consultant");
+
+  const isOnDoctorsPage = isExcludedArea || pathname?.startsWith("/doctors");
+  const isHomePage = pathname === "/" && !isExcludedArea;
+
+  // Fetch doctor count on mount (strictly for customer-facing store)
+  useEffect(() => {
+    if (!mounted || isExcludedArea) return;
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname.toLowerCase();
+      if (
+        host.startsWith("admin.") ||
+        host.startsWith("consultant.") ||
+        host === "admin.localhost" ||
+        host === "consultant.localhost"
+      ) {
+        return;
+      }
+    }
+
     async function fetchDoctors() {
       try {
         const res = await fetch("/api/doctors");
@@ -209,11 +243,23 @@ export function ConsultVaidyaPortal() {
       }
     }
     fetchDoctors();
-  }, []);
+  }, [mounted, isExcludedArea]);
 
-  // Auto-trigger popup on homepage after 3s (once per session)
+  // Auto-trigger popup on homepage after 3s (once per session, strictly customer site only)
   useEffect(() => {
-    if (!isHomePage) return;
+    if (!mounted || isExcludedArea || !isHomePage) return;
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname.toLowerCase();
+      if (
+        host.startsWith("admin.") ||
+        host.startsWith("consultant.") ||
+        host === "admin.localhost" ||
+        host === "consultant.localhost"
+      ) {
+        return;
+      }
+    }
+
     const alreadyShown = sessionStorage.getItem(SESSION_KEY);
     if (alreadyShown) return;
 
@@ -223,10 +269,15 @@ export function ConsultVaidyaPortal() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [isHomePage]);
+  }, [mounted, isHomePage, isExcludedArea]);
 
   const openPopup = useCallback(() => setIsPopupOpen(true), []);
   const closePopup = useCallback(() => setIsPopupOpen(false), []);
+
+  // Never render floating button or consultation popup on admin or consultant portals
+  if (!mounted || isExcludedArea) {
+    return null;
+  }
 
   return (
     <>
