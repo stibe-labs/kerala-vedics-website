@@ -1,62 +1,90 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import React, { useState } from "react";
 import { Navbar } from "@/components/Navbar";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { HeroSection } from "@/components/HeroSection";
-import { BrandStatementSection } from "@/components/BrandStatementSection";
-import { CorePillarsSection } from "@/components/CorePillarsSection";
-import { VedicsPromiseSection } from "@/components/VedicsPromiseSection";
-import { RitualsRailSection } from "@/components/RitualsRailSection";
-import { SoilToSelfSection } from "@/components/SoilToSelfSection";
-import { TrustBadgesSection } from "@/components/TrustBadgesSection";
-import { NewsletterStockistSection } from "@/components/NewsletterStockistSection";
+import { SeasonalOffersSection } from "@/components/SeasonalOffersSection";
+import { RateOrderedProductsSection } from "@/components/RateOrderedProductsSection";
+import { BrandAboutUsSection } from "@/components/BrandAboutUsSection";
+import { StoriesOfWellnessSection } from "@/components/StoriesOfWellnessSection";
+import { KnowYourProductsSection } from "@/components/KnowYourProductsSection";
+import { KeralaHeritageSection } from "@/components/KeralaHeritageSection";
+import { SeasonalCTASection } from "@/components/SeasonalCTASection";
 import { Footer } from "@/components/Footer";
 import { DoshaFinderModal } from "@/components/DoshaFinderModal";
 import { ProductDetailDrawer } from "@/components/ProductDetailDrawer";
-import { LoadingScreen } from "@/components/LoadingScreen";
-import { ProductRitual } from "@/data/vedicsData";
+import { ProductRitual, PRODUCT_RITUALS } from "@/data/vedicsData";
 
 export default function Home() {
-  const { user } = useAuth();
   const [isDoshaModalOpen, setIsDoshaModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductRitual | null>(null);
 
+  const handleSelectProduct = (product: any) => {
+    const matchedRitual = PRODUCT_RITUALS.find(
+      (p) => p.id === product.id || p.id === product.slug
+    );
+
+    if (matchedRitual) {
+      setSelectedProduct(matchedRitual);
+    } else {
+      setSelectedProduct({
+        id: product.id,
+        name: product.name || product.title,
+        sanskritName: product.sanskrit_name || product.sanskrit || "",
+        category: product.category || "Therapeutic Oils",
+        tagline: product.tagline || "",
+        description: product.description || "",
+        volume: product.volume || "100 ml",
+        price: `₹${product.price}`,
+        accentColor: "#C89D4A",
+        videoPreviewUrl: "/videos/hero-bottle.mp4",
+        posterImage: product.poster_image || product.image || "/products/arshana-lehyam.png",
+        keyBotanicals: ["Sahyadri Herbs", "Cold-Pressed Sesame", "Forest Honey"],
+        doshaAffinity: product.dosha_affinity || "Tridoshic",
+        ritualBenefit: product.tagline || "Holistic healing and deep balance.",
+        usageMethod: "Take as directed by your Ayurvedic Vaidya.",
+      });
+    }
+  };
+
   return (
     <>
-      {/* Luxury Ayurvedic Video Preloading Screen */}
+      {/* 1. Loading screen unchanged as on live */}
       <LoadingScreen />
 
       <main className="min-h-screen bg-[#FAF8F2] text-[#273F25] relative selection:bg-[#EDC918] selection:text-[#273F25]">
-        {/* Sticky Minimal Header */}
+        {/* 2. Live Header / Navbar */}
         <Navbar onOpenDoshaFinder={() => setIsDoshaModalOpen(true)} />
 
-        {/* S1: Google Labs-Style Cinematic Video Carousel Hero */}
+        {/* 3. Live HeroSection (Arshana Lehyam, bottle video, slides 01-05) */}
         <HeroSection onOpenDoshaFinder={() => setIsDoshaModalOpen(true)} />
 
-        {/* S2: Word-by-Word Scroll Pinned Brand Statement */}
-        <BrandStatementSection />
+        {/* 4. Seasonal Offers & Harvest Packages (50% OFF) */}
+        <SeasonalOffersSection />
 
-        {/* S3: Core Pillars (5 Ayurvedic Pillars) */}
-        <CorePillarsSection />
+        {/* 5. Our Ayurvedic Formulations (Sorted from Small to Large by Rate: ₹499 to ₹2,499) */}
+        <RateOrderedProductsSection onSelectProduct={handleSelectProduct} />
 
-        {/* S4: Signature VEDICS Promise (V-E-D-I-C-S Letter Journey) */}
-        <VedicsPromiseSection />
+        {/* 6. What is Our Brand / About Us (For a Better Living) */}
+        <BrandAboutUsSection />
 
-        {/* S6: From Soil to Self (Editorial Craftsmanship & Sourcing) */}
-        <SoilToSelfSection />
+        {/* 7. Customer Testimonials (Stories of Wellness) */}
+        <StoriesOfWellnessSection />
 
-        {/* S7: Trust Badges & Certifications Row */}
-        <TrustBadgesSection />
+        {/* 8. Know More About Your Products (Benefits, Ingredients, Usage, Quality) */}
+        <KnowYourProductsSection />
 
-        {/* S9: Newsletter & Stockists High-Contrast Closing Strip */}
-        <NewsletterStockistSection />
+        {/* 9. Kerala Heritages (Where Ayurveda is a Living Tradition) */}
+        <KeralaHeritageSection />
 
-        {/* S10: Footer with Slow Looping Mantra Marquee */}
+        {/* 10. CTA (Seasonal Rituals & Botanical Wisdom) */}
+        <SeasonalCTASection />
+
+        {/* 11. Footer */}
         <Footer />
 
-        {/* Interactive Google Labs-Style Dosha Formulation Explorer Modal */}
+        {/* Interactive Dosha Finder Explorer Modal */}
         <DoshaFinderModal
           isOpen={isDoshaModalOpen}
           onClose={() => setIsDoshaModalOpen(false)}
