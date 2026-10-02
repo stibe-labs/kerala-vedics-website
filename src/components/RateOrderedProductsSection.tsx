@@ -17,7 +17,6 @@ import {
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Product } from "@/types/product";
-import { DEFAULT_PRODUCTS } from "@/data/keralaVedicProducts";
 
 interface RateOrderedProductsProps {
   onSelectProduct?: (product: any) => void;
@@ -28,9 +27,31 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
   const { isInWishlist, toggleWishlist } = useWishlist();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch only admin-added products from the database
+  React.useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch("/api/products");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.products)) {
+            setProducts(data.products);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to fetch products:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
   // Sort products strictly from small to large according to rate
-  const sortedProducts = [...DEFAULT_PRODUCTS].sort((a, b) => a.price - b.price);
+  const sortedProducts = [...products].sort((a, b) => a.price - b.price);
 
   const handleAddToCart = (product: Product) => {
     addToCart({
@@ -116,6 +137,27 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
       </div>
 
       {/* Arch-Top Product Cards Horizontal Track — full bleed so last card never clips */}
+      {loading ? (
+        /* Loading skeleton */
+        <div className="flex items-stretch gap-6 overflow-x-auto no-scrollbar pb-6 pt-2 px-4 sm:px-6 lg:px-8">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="w-[280px] sm:w-[310px] shrink-0 bg-white rounded-t-[72px] rounded-b-3xl border border-[#273F25]/10 overflow-hidden animate-pulse">
+              <div className="aspect-[4/5] bg-[#EFF5EE] rounded-t-[70px]" />
+              <div className="p-5 space-y-3">
+                <div className="h-3 bg-gray-200 rounded-full w-2/3" />
+                <div className="h-4 bg-gray-200 rounded-full w-full" />
+                <div className="h-3 bg-gray-200 rounded-full w-4/5" />
+                <div className="h-3 bg-gray-200 rounded-full w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : sortedProducts.length === 0 ? (
+        /* Empty state — no admin-added products yet */
+        <div className="px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <p className="text-[#273F25]/50 text-sm font-light">No formulations available yet. Check back soon.</p>
+        </div>
+      ) : (
       <div
         ref={scrollContainerRef}
         className="flex items-stretch gap-6 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth px-4 sm:px-6 lg:px-8"
@@ -266,6 +308,7 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
             );
           })}
       </div>
+      )}
     </section>
   );
 }

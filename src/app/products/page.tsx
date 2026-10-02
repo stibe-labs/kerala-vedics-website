@@ -8,7 +8,6 @@ import { Footer } from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Product } from "@/types/product";
-import { DEFAULT_PRODUCTS } from "@/data/keralaVedicProducts";
 import {
   Filter,
   SlidersHorizontal,
@@ -55,8 +54,8 @@ function ProductsContent() {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Filters State
   const [selectedCategory, setSelectedCategory] = useState(urlCategory);
