@@ -93,10 +93,6 @@ export default function ConsultationRoomPage() {
     lifestyle_advice: "", follow_up_date: "", follow_up_notes: "", products: [],
   });
 
-  // ── Jitsi fallback ────────────────────────────────────────────────
-  const [useFallback, setUseFallback] = useState(false);
-  const jitsiUrl = appointment?.meeting_url || `https://meet.jit.si/kv-${appointmentId}`;
-
   useEffect(() => {
     setMounted(true);
     loadAppointment();
@@ -225,12 +221,6 @@ export default function ConsultationRoomPage() {
       });
       const sessionData = await sessionRes.json();
 
-      if (sessionData.fallback) {
-        // CF Calls not configured – switch to Jitsi fallback
-        setUseFallback(true);
-        cleanupCall();
-        return;
-      }
       if (!sessionData.success) {
         throw new Error(sessionData.error || "Failed to create call session");
       }
@@ -827,22 +817,15 @@ export default function ConsultationRoomPage() {
             </div>
           )}
           {/* CF Calls status badge */}
-          {!useFallback && (
-            <div className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-full"
-              style={{ background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.2)", color: "#38bdf8" }}>
-              {callStatus === "connecting" && <Loader2 className="w-3 h-3 animate-spin" />}
-              {callStatus === "connected" && <Wifi className="w-3 h-3" />}
-              {callStatus === "failed" && <WifiOff className="w-3 h-3" style={{ color: "#f87171" }} />}
-              <span style={{ color: callStatus === "failed" ? "#f87171" : "#38bdf8" }}>
-                {callStatus === "connecting" ? "Connecting…" : callStatus === "connected" ? "Cloudflare SFU" : "Connection Error"}
-              </span>
-            </div>
-          )}
-          {useFallback && (
-            <div className="text-xs px-2 py-1 rounded-full" style={{ background: "rgba(250,248,242,0.06)", color: "rgba(250,248,242,0.4)" }}>
-              Jitsi Fallback
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full"
+            style={{ background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.2)", color: "#38bdf8" }}>
+            {callStatus === "connecting" && <Loader2 className="w-3 h-3 animate-spin" />}
+            {callStatus === "connected" && <Wifi className="w-3 h-3" />}
+            {callStatus === "failed" && <WifiOff className="w-3 h-3" style={{ color: "#f87171" }} />}
+            <span style={{ color: callStatus === "failed" ? "#f87171" : "#38bdf8" }}>
+              {callStatus === "connecting" ? "Connecting…" : callStatus === "connected" ? "Cloudflare SFU Live" : "Connection Error"}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -863,16 +846,7 @@ export default function ConsultationRoomPage() {
               <span>Session concluding in {sessionInfo.secondsRemaining}s ({sessionInfo.formattedEndTime})</span>
             </div>
           )}
-          {useFallback ? (
-            /* Jitsi fallback iframe */
-            <iframe
-              src={`${jitsiUrl}#userInfo.displayName="${appointment?.doctor_name || "Doctor"}"&config.startWithAudioMuted=${!isMicOn}&config.startWithVideoMuted=${!isCamOn}&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.TOOLBAR_BUTTONS=[]`}
-              allow="camera; microphone; fullscreen; display-capture"
-              className="w-full h-full border-0"
-              title="Video Consultation"
-            />
-          ) : (
-            /* Cloudflare SFU WebRTC video */
+            {/* Cloudflare SFU WebRTC video */}
             <div className="w-full h-full relative flex items-center justify-center bg-[#050A05]">
               {/* Remote video — full frame */}
               <video
@@ -928,14 +902,9 @@ export default function ConsultationRoomPage() {
                       <p className="text-sm" style={{ color: "#f87171" }}>{callError || "Connection failed"}</p>
                       <div className="flex gap-3">
                         <button onClick={() => initWebRTCCall()}
-                          className="px-4 py-2 rounded-xl text-xs font-bold"
-                          style={{ background: "var(--kv-forest)", color: "#FAF8F2" }}>
+                          className="px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg transition-transform active:scale-95"
+                          style={{ background: "var(--kv-forest)", color: "#FAF8F2", border: "1px solid rgba(223,193,136,0.3)" }}>
                           Retry Connection
-                        </button>
-                        <button onClick={() => setUseFallback(true)}
-                          className="px-4 py-2 rounded-xl text-xs font-bold border"
-                          style={{ borderColor: "rgba(250,248,242,0.2)", color: "rgba(250,248,242,0.6)" }}>
-                          Use Jitsi Instead
                         </button>
                       </div>
                     </>
@@ -961,7 +930,6 @@ export default function ConsultationRoomPage() {
                 )}
               </div>
             </div>
-          )}
 
           {/* Controls Overlay */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">

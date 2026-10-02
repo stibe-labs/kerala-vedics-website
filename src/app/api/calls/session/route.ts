@@ -58,13 +58,12 @@ export async function POST(req: NextRequest) {
     const APP_ID = getEnv(req, "CLOUDFLARE_CALLS_APP_ID");
     const APP_TOKEN = getEnv(req, "CLOUDFLARE_CALLS_APP_TOKEN");
 
-    // ── Fallback mode: no CF Calls configured ─────────────────────────
+    // ── Check CF Calls credentials ───────────────────────────────────
     if (!APP_ID || !APP_TOKEN) {
       return NextResponse.json({
         success: false,
-        error: "Cloudflare Calls not configured – set CLOUDFLARE_CALLS_APP_ID and CLOUDFLARE_CALLS_APP_TOKEN",
-        fallback: true,
-      });
+        error: "Cloudflare Calls credentials not configured on server",
+      }, { status: 500 });
     }
 
     const BASE = `https://rtc.live.cloudflare.com/v1/apps/${APP_ID}`;

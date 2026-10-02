@@ -92,14 +92,24 @@ export function getAppointmentWindow(
   const startParts = parseTimeParts(startTimeStr);
   if (!startParts) return null;
 
-  const startDateTime = new Date(year, month - 1, day, startParts.hours, startParts.minutes, 0, 0);
+  const yyyy = String(year).padStart(4, "0");
+  const mm = String(month).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  const sh = String(startParts.hours).padStart(2, "0");
+  const sm = String(startParts.minutes).padStart(2, "0");
+
+  // All Kerala Vedics clinic consultation slots are booked in Indian Standard Time (IST, UTC+05:30).
+  // Explicitly specifying +05:30 ensures absolute synchronization between Cloudflare Workers (running in UTC) and client browsers.
+  const startDateTime = new Date(`${yyyy}-${mm}-${dd}T${sh}:${sm}:00+05:30`);
 
   let endDateTime: Date;
   const endParts = endTimeStr ? parseTimeParts(endTimeStr) : null;
 
   if (endParts) {
-    // Session ends at the end of that minute (e.g. 13:15:59.999)
-    endDateTime = new Date(year, month - 1, day, endParts.hours, endParts.minutes, 59, 999);
+    const eh = String(endParts.hours).padStart(2, "0");
+    const em = String(endParts.minutes).padStart(2, "0");
+    // Session ends at the end of that minute (e.g. 16:30:59.999 IST)
+    endDateTime = new Date(`${yyyy}-${mm}-${dd}T${eh}:${em}:59.999+05:30`);
   } else {
     // Default to start time + 15 minutes
     endDateTime = new Date(startDateTime.getTime() + 15 * 60 * 1000 + 59 * 1000 + 999);
@@ -231,8 +241,13 @@ export function getAppointmentSessionStatus(
     };
   }
 
-  // 1. Before scheduled start time (e.g. before 1:00 PM)
-  if (nowMs < startMs) {
+  // Allow joining up to 10 minutes before the scheduled slot
+  const EARLY_BUFFER_MS = 10 * 60 * 1000;
+  // Allow a 15-minute grace period after scheduled slot end to conclude consultations smoothly
+  const GRACE_PERIOD_MS = 15 * 60 * 1000;
+
+  // 1. Before early buffer (e.g. more than 10 mins before start)
+  if (nowMs < startMs - EARLY_BUFFER_MS) {
     const diffMs = startMs - nowMs;
     const secondsUntilStart = Math.ceil(diffMs / 1000);
     const minutesUntilStart = Math.ceil(diffMs / (60 * 1000));
@@ -252,20 +267,21 @@ export function getAppointmentSessionStatus(
       secondsUntilStart,
       minutesRemaining: 0,
       secondsRemaining: 0,
-      message: `Session is scheduled for ${formattedStartTime} to ${formattedEndTime}. Permission will open at ${formattedStartTime}.`,
+      message: `Session is scheduled for ${formattedStartTime} to ${formattedEndTime}. The room will open 10 minutes prior to your appointment.`,
     };
   }
 
-  // 2. Within scheduled time slot (e.g. 1:00 PM to 1:15:59 PM)
-  if (nowMs >= startMs && nowMs <= endMs) {
-    const remMs = endMs - nowMs;
-    const secondsRemaining = Math.max(0, Math.floor(remMs / 1000));
-    const minutesRemaining = Math.max(0, Math.floor(remMs / (60 * 1000)));
+  // 2. Early arrival or Active window (10 mins early through end + 15 min grace)
+  if (nowMs >= startMs - EARLY_BUFFER_MS && nowMs <= endMs + GRACE_PERIOD_MS) {
+    const remMs = Math.max(0, endMs - nowMs);
+    const secondsRemaining = Math.floor(remMs / 1000);
+    const minutesRemaining = Math.floor(remMs / (60 * 1000));
+    const isEarly = nowMs < startMs;
 
     return {
       status: "LIVE",
       canJoin: true,
-      isEarly: false,
+      isEarly,
       isExpired: false,
       isLive: true,
       startDateTime,
@@ -273,15 +289,17 @@ export function getAppointmentSessionStatus(
       formattedStartTime,
       formattedEndTime,
       formattedDate,
-      minutesUntilStart: 0,
-      secondsUntilStart: 0,
+      minutesUntilStart: isEarly ? Math.ceil((startMs - nowMs) / (60 * 1000)) : 0,
+      secondsUntilStart: isEarly ? Math.ceil((startMs - nowMs) / 1000) : 0,
       minutesRemaining,
       secondsRemaining,
-      message: `Session is live now (${formattedStartTime} – ${formattedEndTime}).`,
+      message: isEarly
+        ? `You are early for your ${formattedStartTime} consultation. You can test your camera and microphone now.`
+        : `Session is live now (${formattedStartTime} – ${formattedEndTime}).`,
     };
   }
 
-  // 3. After scheduled end time (e.g. 1:16 PM)
+  // 3. After scheduled end time + grace period
   return {
     status: "EXPIRED",
     canJoin: false,
