@@ -62,7 +62,7 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
   };
 
   return (
-    <section id="formulations" className="relative w-full bg-[#FAF8F2] text-[#273F25] py-20 sm:py-28 overflow-hidden border-b border-[#273F25]/10">
+    <section id="formulations" className="relative w-full bg-[#FAF8F2] text-[#273F25] py-20 sm:py-28 border-b border-[#273F25]/10">
       {/* Background ambient accents */}
       <div
         className="absolute top-0 right-1/4 w-[450px] h-[450px] rounded-full pointer-events-none opacity-20 blur-3xl"
@@ -113,11 +113,14 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
           </div>
         </div>
 
-        {/* Arch-Top Product Cards Horizontal Track */}
-        <div
-          ref={scrollContainerRef}
-          className="flex items-stretch gap-6 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth"
-        >
+      </div>
+
+      {/* Arch-Top Product Cards Horizontal Track — full bleed so last card never clips */}
+      <div
+        ref={scrollContainerRef}
+        className="flex items-stretch gap-6 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth px-4 sm:px-6 lg:px-8"
+        style={{ paddingRight: "max(2rem, calc((100vw - 80rem) / 2 + 2rem))" }}
+      >
           {sortedProducts.map((product, idx) => {
             const inWishlist = isInWishlist(product.id);
             const isAdded = !!addedMap[product.id];
@@ -262,7 +265,6 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
               </div>
             );
           })}
-        </div>
       </div>
     </section>
   );
