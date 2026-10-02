@@ -126,12 +126,14 @@ export async function POST(req: NextRequest) {
     );
 
     let userId = existingUsers[0]?.id;
+    // Default password: Vaidya@<CurrentYear> — doctor can change after first login
+    const defaultPassword = `Vaidya@${new Date().getFullYear()}`;
     if (!userId) {
       userId = `user_doc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       await executeD1Write(
         `INSERT INTO users (id, name, email, password_hash, phone)
-         VALUES (?, ?, ?, 'admin_provisioned', ?)`,
-        [userId, name, email, phone || null]
+         VALUES (?, ?, ?, ?, ?)`,
+        [userId, name, email, defaultPassword, phone || null]
       );
     }
 
