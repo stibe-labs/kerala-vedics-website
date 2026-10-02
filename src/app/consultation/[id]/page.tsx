@@ -396,7 +396,7 @@ export default function ConsultationRoomPage() {
 
   // ── Start WebRTC once appointment is loaded and session is permitted ──
   useEffect(() => {
-    if (!mounted || !appointmentId || useFallback || loadingAppointment) return;
+    if (!mounted || !appointmentId || loadingAppointment) return;
 
     const role = getRole();
     // Strict slot enforcement for patient
@@ -413,7 +413,7 @@ export default function ConsultationRoomPage() {
     if (callStatus === "idle" && (role === "doctor" || sessionInfo?.canJoin)) {
       initWebRTCCall();
     }
-  }, [mounted, appointmentId, useFallback, loadingAppointment, sessionInfo?.canJoin, callStatus, initWebRTCCall, cleanupCall, getRole]);
+  }, [mounted, appointmentId, loadingAppointment, sessionInfo?.canJoin, callStatus, initWebRTCCall, cleanupCall, getRole]);
 
   // ── Toggle mic/cam ────────────────────────────────────────────────
   const toggleMic = useCallback(() => {
