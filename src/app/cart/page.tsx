@@ -41,7 +41,7 @@ export default function CartPage() {
     <div className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] flex flex-col justify-between selection:bg-[#C89D4A] selection:text-[#14281C]">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 lg:pt-40 pb-16">
         {/* Guest Reminder Banner (non-intrusive) */}
         {!user && (
           <div className="mb-6 p-4 rounded-2xl bg-white border border-[#C89D4A]/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xs">

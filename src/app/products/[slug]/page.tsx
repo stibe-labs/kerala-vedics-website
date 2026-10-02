@@ -188,7 +188,7 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] flex flex-col justify-between selection:bg-[#C89D4A] selection:text-[#14281C]">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 lg:pt-40 pb-16">
         {/* Breadcrumb Strip */}
         <div className="flex items-center gap-2 text-xs font-mono text-[#8BA664] pb-6 border-b border-[#4C6B3D]/15">
           <Link href="/" className="hover:text-[#1F3D2B] transition-colors">
@@ -209,7 +209,7 @@ export default function ProductDetailPage() {
         {/* Product Hero Dual Column (Left Gallery, Right Specifications) */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* LEFT: Interactive Gallery (Col 1-6) */}
-          <div className="lg:col-span-6 space-y-4 sticky top-28">
+          <div className="lg:col-span-6 space-y-4 sticky top-32 lg:top-36">
             {/* Main Stage Image */}
             <div className="relative rounded-3xl overflow-hidden bg-[#14281C] aspect-[1/1] sm:aspect-[4/3] shadow-lg border border-[#4C6B3D]/15 group">
               <img

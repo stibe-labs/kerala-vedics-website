@@ -89,7 +89,7 @@ export default function ProfilePage() {
       {/* Navbar */}
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 lg:pt-40 pb-16">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between mb-8">
           <Link

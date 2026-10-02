@@ -617,22 +617,12 @@ export default function AdminPage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/consultant/dashboard"
-              target="_blank"
-              className="hidden md:flex items-center gap-1.5 text-xs text-[#E5D7B7] hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 transition-all"
-            >
-              <Stethoscope className="w-3.5 h-3.5 text-[#C89D4A]" />
-              <span>Doctor Portal</span>
-              <ExternalLink className="w-3 h-3 opacity-60" />
-            </Link>
-
-            <Link
-              href="/doctors"
+              href="/"
               target="_blank"
               className="hidden sm:flex items-center gap-1.5 text-xs text-[#E5D7B7] hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 transition-all"
             >
-              <span>Vaidya Directory</span>
-              <ExternalLink className="w-3 h-3 opacity-60" />
+              <ExternalLink className="w-3 h-3 text-[#C89D4A]" />
+              <span>Visit Website</span>
             </Link>
 
             <button
@@ -871,9 +861,7 @@ export default function AdminPage() {
                 </div>
                 <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
                   <span>Total Consultations: {analytics?.total_appointments || 0}</span>
-                  <Link href="/consultant/dashboard" className="text-[#C89D4A] font-semibold hover:underline">
-                    View Logs →
-                  </Link>
+                  <span className="text-[#C89D4A] font-semibold">Admin View Only</span>
                 </div>
               </div>
 

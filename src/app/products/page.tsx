@@ -175,7 +175,7 @@ function ProductsContent() {
     <div className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] flex flex-col justify-between selection:bg-[#C89D4A] selection:text-[#14281C]">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 lg:pt-40 pb-16">
         {/* Header Strip & Breadcrumbs */}
         <div className="pb-6 border-b border-[#4C6B3D]/15 space-y-3">
           <div className="flex items-center gap-2 text-xs font-mono text-[#8BA664]">
@@ -230,7 +230,7 @@ function ProductsContent() {
         {/* Catalog Main Layout: Sidebar on Left, Products on Right */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* DESKTOP FILTER SIDEBAR (Col 1-3) */}
-          <aside className="hidden lg:block lg:col-span-3 bg-white rounded-3xl p-6 border border-[#4C6B3D]/15 shadow-sm space-y-6 sticky top-28">
+          <aside className="hidden lg:block lg:col-span-3 bg-white rounded-3xl p-6 border border-[#4C6B3D]/15 shadow-sm space-y-6 sticky top-32 lg:top-36">
             <div className="flex items-center justify-between pb-3 border-b border-[#4C6B3D]/10">
               <div className="flex items-center gap-2 text-sm font-serif font-bold text-[#1F3D2B]">
                 <Filter className="w-4 h-4 text-[#C89D4A]" />

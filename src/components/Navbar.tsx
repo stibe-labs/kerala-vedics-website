@@ -263,7 +263,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
               <img
                 src="/KV-Logo-w.png"
                 alt="Kerala Vedics Logo"
-                className="h-16 sm:h-20 lg:h-24 w-auto max-w-[280px] sm:max-w-[340px] object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)] group-hover:scale-[1.03] transition-transform duration-300"
+                className="h-14 sm:h-16 lg:h-20 w-auto max-w-[240px] sm:max-w-[280px] lg:max-w-[320px] object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)] group-hover:scale-[1.03] transition-transform duration-300"
               />
             </Link>
 

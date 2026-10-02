@@ -152,7 +152,7 @@ export default function AppointmentsPage() {
     <div className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] antialiased selection:bg-[#C89D4A] selection:text-[#14281C]">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 lg:pt-40 pb-20">
         {/* Breadcrumb & Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#516830] mb-2">
