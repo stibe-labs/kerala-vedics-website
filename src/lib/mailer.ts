@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 interface SendEmailParams {
   to: string;
@@ -8,17 +9,22 @@ interface SendEmailParams {
 
 export async function sendEmail({ to, subject, html }: SendEmailParams): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if SMTP is configured in environment variables
-    const host = process.env.SMTP_HOST || "smtp.gmail.com";
-    const port = Number(process.env.SMTP_PORT || "587");
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
+    let cfEnv: any = null;
+    try {
+      const ctx = await getCloudflareContext({ async: true });
+      cfEnv = ctx?.env;
+    } catch {}
+
+    const host = process.env.SMTP_HOST || cfEnv?.SMTP_HOST || "smtp.gmail.com";
+    const port = Number(process.env.SMTP_PORT || cfEnv?.SMTP_PORT || "587");
+    const user = process.env.SMTP_USER || cfEnv?.SMTP_USER || "mail.keralavedics@gmail.com";
+    const pass = process.env.SMTP_PASS || cfEnv?.SMTP_PASS || "vvaqdpbkrjasyawq";
 
     if (!user || !pass) {
-      console.warn("⚠️ SMTP credentials (SMTP_USER, SMTP_PASS) not configured in .env.local.");
+      console.warn("⚠️ SMTP credentials (SMTP_USER, SMTP_PASS) not configured.");
       return {
         success: false,
-        error: "SMTP credentials not configured. Please add SMTP_USER and SMTP_PASS to .env.local to send real emails to your inbox."
+        error: "SMTP credentials not configured."
       };
     }
 
