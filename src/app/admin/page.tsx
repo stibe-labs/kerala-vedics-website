@@ -259,14 +259,16 @@ export default function AdminPage() {
   };
 
   const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!window.confirm(`Permanently delete user "${userName}"? This will also remove their doctor profile if any. This action cannot be undone.`)) return;
+    if (!window.confirm(`Permanently delete user "${userName}"? This will also remove all associated appointments, prescriptions, and profile records. This action cannot be undone.`)) return;
+    setErrorMsg("");
     try {
       const res = await fetch(`/api/admin/users?id=${encodeURIComponent(userId)}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         setSuccessMsg(`User "${userName}" deleted successfully.`);
-        setAllUsers(prev => prev.filter(u => u.id !== userId));
+        setAllUsers(prev => prev.filter(u => u.id !== userId && (u as any).doctor_id !== userId));
         loadDoctors();
+        loadUsers();
       } else {
         setErrorMsg(data.error || "Failed to delete user.");
       }
@@ -1304,11 +1306,8 @@ export default function AdminPage() {
                           {/* Delete Doctor */}
                           <button
                             onClick={() => {
-                              const uid = (doc as any).user_id;
+                              const uid = (doc as any).user_id || doc.id;
                               if (uid) handleDeleteUser(uid, doc.name || "this doctor");
-                              else if (window.confirm(`Delete doctor ${doc.name}? Cannot be undone.`)) {
-                                handleDoctorAction(doc.id, "suspend");
-                              }
                             }}
                             className="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold flex items-center gap-1 border border-red-200 transition-all"
                             title="Delete this doctor account permanently"
