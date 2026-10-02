@@ -8,9 +8,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAuthModalOpen: boolean;
-  authModalMode: "login" | "signup";
+  authModalMode: "login" | "signup" | "forgot";
   authModalNotice: string | null;
-  openAuthModal: (mode?: "login" | "signup", notice?: string) => void;
+  openAuthModal: (mode?: "login" | "signup" | "forgot", notice?: string) => void;
   closeAuthModal: () => void;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string, otp: string, dosha_affinity?: string) => Promise<{ success: boolean; error?: string }>;
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
+  const [authModalMode, setAuthModalMode] = useState<"login" | "signup" | "forgot">("login");
   const [authModalNotice, setAuthModalNotice] = useState<string | null>(null);
 
   const syncUserSession = () => {
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const openAuthModal = (mode: "login" | "signup" = "login", notice?: string) => {
+  const openAuthModal = (mode: "login" | "signup" | "forgot" = "login", notice?: string) => {
     setAuthModalMode(mode);
     setAuthModalNotice(notice || null);
     setIsAuthModalOpen(true);

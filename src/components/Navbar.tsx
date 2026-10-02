@@ -28,6 +28,10 @@ import {
   CheckCircle2,
   Stethoscope,
   Calendar,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  KeyRound,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
@@ -89,7 +93,7 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
     if (pathname.startsWith("/soil-to-self")) return "soil";
     return "";
   })();
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [authMode, setAuthMode] = useState<"login" | "signup" | "forgot">("login");
   const [authName, setAuthName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
@@ -102,6 +106,15 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+
+  // Forgot Password State
+  const [forgotStep, setForgotStep] = useState<"email" | "otp" | "reset">("email");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [forgotNewPassword, setForgotNewPassword] = useState("");
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState("");
+  const [showForgotNewPassword, setShowForgotNewPassword] = useState(false);
+  const [showForgotConfirmPassword, setShowForgotConfirmPassword] = useState(false);
 
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -168,10 +181,130 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
     if (isAuthModalOpen) {
       setAuthMode(authModalMode);
       setAuthStep("form");
+      setForgotStep("email");
       setAuthError(null);
       setAuthSuccess(null);
     }
   }, [isAuthModalOpen, authModalMode]);
+
+  // Forgot Password: Step 1 — Send OTP
+  const handleSendForgotOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    const targetEmail = (forgotEmail || authEmail).trim();
+    if (!targetEmail || !targetEmail.includes("@")) {
+      setAuthError("Please enter a valid email address.");
+      return;
+    }
+    setIsSendingOtp(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send-otp", email: targetEmail }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setForgotEmail(targetEmail);
+        setForgotStep("otp");
+        setOtpNotice(`A 6-digit verification code has been dispatched to ${targetEmail}`);
+        setTimeout(() => setOtpNotice(null), 4000);
+      } else {
+        setAuthError(data.error || "Failed to send verification code.");
+      }
+    } catch (err: any) {
+      setAuthError(err.message || "Network error. Please try again.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Forgot Password: Step 2 — Verify OTP
+  const handleVerifyForgotOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    if (!forgotOtp || forgotOtp.trim().length !== 6) {
+      setAuthError("Please enter the complete 6-digit verification code.");
+      return;
+    }
+    setIsAuthLoading(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify-otp", email: forgotEmail, otp: forgotOtp }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setForgotStep("reset");
+        setAuthError(null);
+      } else {
+        setAuthError(data.error || "Invalid or expired verification code.");
+      }
+    } catch (err: any) {
+      setAuthError(err.message || "Network error. Please try again.");
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  // Forgot Password: Step 3 — Set New Password & Re-enter
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    if (!forgotNewPassword || forgotNewPassword.length < 6) {
+      setAuthError("Password must be at least 6 characters long.");
+      return;
+    }
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      setAuthError("Passwords do not match. Please re-enter your password.");
+      return;
+    }
+    setIsAuthLoading(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reset-password",
+          email: forgotEmail,
+          otp: forgotOtp,
+          newPassword: forgotNewPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        // Attempt automatic login with new credentials
+        const loginRes = await login(forgotEmail, forgotNewPassword);
+        if (loginRes.success) {
+          setAuthSuccess("Password updated successfully! Welcome back to your Sanctuary...");
+          setTimeout(() => {
+            closeAuthModal();
+            setAuthSuccess(null);
+            setAuthEmail("");
+            setAuthPassword("");
+            setForgotEmail("");
+            setForgotOtp("");
+            setForgotNewPassword("");
+            setForgotConfirmPassword("");
+            window.location.href = "/sanctuary";
+          }, 1500);
+        } else {
+          setAuthMode("login");
+          setAuthEmail(forgotEmail);
+          setAuthPassword("");
+          setAuthSuccess("Password updated successfully! Please log in with your new password.");
+          setTimeout(() => setAuthSuccess(null), 5000);
+        }
+      } else {
+        setAuthError(data.error || "Failed to update password.");
+      }
+    } catch (err: any) {
+      setAuthError(err.message || "Network error. Please try again.");
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
 
   useEffect(() => {
     let ticking = false;
@@ -767,10 +900,20 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                   />
                 </div>
                 <h3 className="text-2xl font-serif font-medium text-white">
-                  {authMode === "login" ? "Welcome Back" : "Begin Your Vedic Journey"}
+                  {authMode === "forgot"
+                    ? (forgotStep === "email" ? "Reset Password" : forgotStep === "otp" ? "Enter Verification Code" : "Set New Password")
+                    : authMode === "login"
+                    ? "Welcome Back"
+                    : "Begin Your Vedic Journey"}
                 </h3>
                 <p className="text-xs text-white/60">
-                  {authMode === "login"
+                  {authMode === "forgot"
+                    ? (forgotStep === "email"
+                        ? "Enter your registered email to receive a 6-digit recovery code"
+                        : forgotStep === "otp"
+                        ? `Enter the 6-digit verification code sent to ${forgotEmail || authEmail}`
+                        : "Create a new secure password for your sanctuary account")
+                    : authMode === "login"
                     ? "Log in to access your consultations & curated ritual formulations"
                     : "Create an account for personalized Ayurvedic wellness"}
                 </p>
@@ -918,6 +1061,263 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                       </button>
                     </div>
                   </form>
+                </div>
+              ) : authMode === "forgot" ? (
+                /* FORGOT PASSWORD FLOW (EMAIL -> OTP -> NEW PASSWORD BY RE-ENTERING) */
+                <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
+                  {/* Step Breadcrumb Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("login");
+                        setAuthError(null);
+                        setOtpNotice(null);
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back to Sign In</span>
+                    </button>
+                    <span className="text-[11px] text-[#DFC188] font-mono tracking-wider font-semibold uppercase">
+                      {forgotStep === "email" ? "Step 1 of 3" : forgotStep === "otp" ? "Step 2 of 3" : "Step 3 of 3"}
+                    </span>
+                  </div>
+
+                  {/* Error & Info Notices */}
+                  {authError && (
+                    <div className="p-3 rounded-xl bg-red-900/40 border border-red-500/40 text-red-200 text-xs flex items-center gap-2 animate-in fade-in duration-200">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400" />
+                      <span>{authError}</span>
+                    </div>
+                  )}
+
+                  {otpNotice && (
+                    <div className="p-3 rounded-xl bg-[#C89D4A]/20 border border-[#C89D4A]/40 text-[#E0BA6A] text-xs flex items-center gap-2 animate-in fade-in duration-200">
+                      <Sparkles className="w-4 h-4 flex-shrink-0 text-[#C89D4A]" />
+                      <span>{otpNotice}</span>
+                    </div>
+                  )}
+
+                  {/* SUBSTEP 1: ENTER EMAIL FOR OTP */}
+                  {forgotStep === "email" && (
+                    <form onSubmit={handleSendForgotOtp} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-medium text-white/70 mb-1.5">
+                          Registered Email Address
+                        </label>
+                        <div className="relative">
+                          <Mail className="absolute left-3.5 top-3 w-4 h-4 text-white/40" />
+                          <input
+                            type="email"
+                            required
+                            autoFocus
+                            value={forgotEmail || authEmail}
+                            onChange={(e) => setForgotEmail(e.target.value)}
+                            placeholder="you@keralavedics.com"
+                            className="w-full bg-white/5 border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#C89D4A] transition-colors"
+                          />
+                        </div>
+                        <p className="text-[11px] text-white/50 mt-1.5">
+                          We will send a 6-digit verification code to this email to reset your password.
+                        </p>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSendingOtp || !(forgotEmail || authEmail)}
+                        className="w-full py-3.5 mt-2 rounded-xl font-semibold text-sm bg-gradient-to-r from-[#DFC188] via-[#E0BA6A] to-[#C89D4A] hover:from-[#ebd09d] hover:to-[#d4aa56] text-[#0d1712] shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                      >
+                        {isSendingOtp ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>Sending Verification Code...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Send Verification Code</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  )}
+
+                  {/* SUBSTEP 2: ENTER OTP */}
+                  {forgotStep === "otp" && (
+                    <form onSubmit={handleVerifyForgotOtp} className="space-y-4">
+                      <div className="p-3.5 rounded-2xl bg-[#C89D4A]/10 border border-[#C89D4A]/30 text-center space-y-1">
+                        <p className="text-xs text-white/80">
+                          Verification code sent to <strong className="text-[#E0BA6A] font-mono">{forgotEmail}</strong>
+                        </p>
+                        <p className="text-[11px] text-white/50">
+                          Please check your email inbox and enter the 6-digit code below.
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-center text-white/80 mb-2 uppercase tracking-widest">
+                          Enter 6-Digit Code
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          required
+                          autoFocus
+                          value={forgotOtp}
+                          onChange={(e) => setForgotOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                          placeholder="••••••"
+                          className="w-full bg-white/10 border border-[#C89D4A]/60 rounded-2xl py-3.5 text-center text-2xl font-mono tracking-[0.6em] text-[#E0BA6A] placeholder:text-white/20 focus:outline-none focus:border-[#DFC188] shadow-inner"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isAuthLoading || forgotOtp.length !== 6}
+                        className="w-full py-3.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-[#DFC188] via-[#E0BA6A] to-[#C89D4A] hover:from-[#ebd09d] hover:to-[#d4aa56] text-[#0d1712] shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                      >
+                        {isAuthLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>Verifying Code...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Verify Code & Continue</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+
+                      <div className="flex items-center justify-between pt-1 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForgotStep("email");
+                            setAuthError(null);
+                          }}
+                          className="text-white/50 hover:text-white underline transition-colors"
+                        >
+                          ← Change Email
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isSendingOtp}
+                          onClick={async () => {
+                            setIsSendingOtp(true);
+                            setAuthError(null);
+                            try {
+                              const res = await fetch("/api/auth/forgot-password", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ action: "send-otp", email: forgotEmail }),
+                              });
+                              const data = await res.json();
+                              if (res.ok && data.success) {
+                                setOtpNotice(`A fresh verification code was sent to ${forgotEmail}`);
+                                setTimeout(() => setOtpNotice(null), 4000);
+                              } else {
+                                setAuthError(data.error || "Failed to resend code");
+                              }
+                            } catch (e: any) {
+                              setAuthError(e.message || "Network error");
+                            } finally {
+                              setIsSendingOtp(false);
+                            }
+                          }}
+                          className="text-[#DFC188] hover:underline transition-colors font-medium disabled:opacity-50 cursor-pointer"
+                        >
+                          {isSendingOtp ? "Resending..." : "Resend Code"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* SUBSTEP 3: SET NEW PASSWORD & RE-ENTER */}
+                  {forgotStep === "reset" && (
+                    <form onSubmit={handleResetPassword} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-medium text-white/70 mb-1.5">
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-3 w-4 h-4 text-white/40" />
+                          <input
+                            type={showForgotNewPassword ? "text" : "password"}
+                            required
+                            autoFocus
+                            value={forgotNewPassword}
+                            onChange={(e) => setForgotNewPassword(e.target.value)}
+                            placeholder="At least 6 characters"
+                            className="w-full bg-white/5 border border-white/15 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#C89D4A] transition-colors"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowForgotNewPassword(!showForgotNewPassword)}
+                            className="absolute right-3 top-3 text-white/40 hover:text-white transition-colors"
+                          >
+                            {showForgotNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-white/70 mb-1.5">
+                          Re-enter New Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-3 w-4 h-4 text-white/40" />
+                          <input
+                            type={showForgotConfirmPassword ? "text" : "password"}
+                            required
+                            value={forgotConfirmPassword}
+                            onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                            placeholder="Re-enter your new password"
+                            className={`w-full bg-white/5 border rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none transition-colors ${
+                              forgotConfirmPassword && forgotNewPassword !== forgotConfirmPassword
+                                ? "border-red-500/70 focus:border-red-500"
+                                : "border-white/15 focus:border-[#C89D4A]"
+                            }`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowForgotConfirmPassword(!showForgotConfirmPassword)}
+                            className="absolute right-3 top-3 text-white/40 hover:text-white transition-colors"
+                          >
+                            {showForgotConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        {forgotConfirmPassword && forgotNewPassword !== forgotConfirmPassword && (
+                          <span className="text-[11px] text-red-400 mt-1 block">
+                            Passwords do not match
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={
+                          isAuthLoading ||
+                          forgotNewPassword.length < 6 ||
+                          forgotNewPassword !== forgotConfirmPassword
+                        }
+                        className="w-full py-3.5 mt-2 rounded-xl font-semibold text-sm bg-gradient-to-r from-[#DFC188] via-[#E0BA6A] to-[#C89D4A] hover:from-[#ebd09d] hover:to-[#d4aa56] text-[#0d1712] shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                      >
+                        {isAuthLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>Updating Password...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Set New Password & Sign In</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  )}
                 </div>
               ) : (
                 /* STEP 1: FORM (LOGIN / ENTER SIGNUP DETAILS) */
@@ -1074,9 +1474,29 @@ export function Navbar({ onOpenDoshaFinder }: NavbarProps) {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-medium text-white/70 mb-1.5">
-                            Password
-                          </label>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="block text-xs font-medium text-white/70">
+                              Password
+                            </label>
+                            {authMode === "login" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setForgotEmail(authEmail);
+                                  setForgotOtp("");
+                                  setForgotNewPassword("");
+                                  setForgotConfirmPassword("");
+                                  setAuthError(null);
+                                  setAuthSuccess(null);
+                                  setForgotStep("email");
+                                  setAuthMode("forgot");
+                                }}
+                                className="text-[11px] text-[#DFC188] hover:text-[#e9cd98] hover:underline transition-colors cursor-pointer"
+                              >
+                                Forgot password?
+                              </button>
+                            )}
+                          </div>
                           <div className="relative">
                             <Lock className="absolute left-3.5 top-3 w-4 h-4 text-white/40" />
                             <input
