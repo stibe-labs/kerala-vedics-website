@@ -175,18 +175,24 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
                 key={product.id}
                 className="w-[280px] sm:w-[310px] shrink-0 flex flex-col justify-between bg-white rounded-t-[72px] rounded-b-3xl border border-[#273F25]/15 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden"
               >
-                {/* Top Arch Image Container */}
-                <div className="relative w-full aspect-square bg-gradient-to-b from-[#EFF5EE] via-[#EAF2E8] to-[#FAF8F2] rounded-t-[70px] p-4 flex flex-col items-center justify-between overflow-hidden">
-                  {/* Top Badges */}
-                  <div className="w-full flex items-center justify-between z-10">
-                    <span className="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-xs text-[#273F25] text-[10px] font-mono font-bold uppercase tracking-wider shadow-xs border border-[#273F25]/10">
+                {/* Top Arch Image Container — image fills full area, badges overlaid */}
+                <div className="relative w-full rounded-t-[70px] overflow-hidden bg-gradient-to-b from-[#EFF5EE] via-[#EAF2E8] to-[#FAF8F2]" style={{ height: "320px" }}>
+                  {/* Full-fill product image */}
+                  <img
+                    src={product.poster_image}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500 filter drop-shadow-lg"
+                  />
+
+                  {/* Top badges — absolute overlay */}
+                  <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+                    <span className="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[#273F25] text-[10px] font-mono font-bold uppercase tracking-wider shadow-sm border border-[#273F25]/10">
                       Rate #{idx + 1}
                     </span>
-
                     <button
                       type="button"
                       onClick={() => toggleWishlist(product)}
-                      className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center shadow-xs border border-[#273F25]/10 text-[#273F25] hover:text-red-500 transition-colors cursor-pointer"
+                      className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm border border-[#273F25]/10 text-[#273F25] hover:text-red-500 transition-colors cursor-pointer"
                       title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                     >
                       <Heart
@@ -197,21 +203,12 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
                     </button>
                   </div>
 
-                  {/* Centered Product Image */}
-                  <div className="relative w-full h-[240px] flex items-center justify-center my-auto">
-                    <img
-                      src={product.poster_image}
-                      alt={product.name}
-                      className="max-h-full max-w-[95%] object-contain filter drop-shadow-lg group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-
-                  {/* Bottom Arch Tags */}
-                  <div className="w-full flex items-center justify-between z-10 text-[10px] text-[#516830] font-medium">
-                    <span className="px-2 py-0.5 rounded-full bg-white/80 border border-[#273F25]/10">
+                  {/* Bottom tags — absolute overlay */}
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10 text-[10px] text-[#516830] font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-white/85 backdrop-blur-sm border border-[#273F25]/10">
                       {product.volume}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-700/10 text-emerald-800 font-semibold border border-emerald-700/20">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-700/10 backdrop-blur-sm text-emerald-800 font-semibold border border-emerald-700/20">
                       {product.dosha_affinity}
                     </span>
                   </div>
