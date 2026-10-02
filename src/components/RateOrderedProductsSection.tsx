@@ -176,7 +176,7 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
                 className="w-[280px] sm:w-[310px] shrink-0 flex flex-col justify-between bg-white rounded-t-[72px] rounded-b-3xl border border-[#273F25]/15 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden"
               >
                 {/* Top Arch Image Container */}
-                <div className="relative w-full aspect-[4/5] bg-gradient-to-b from-[#EFF5EE] via-[#EAF2E8] to-[#FAF8F2] rounded-t-[70px] p-6 flex flex-col items-center justify-between overflow-hidden">
+                <div className="relative w-full aspect-square bg-gradient-to-b from-[#EFF5EE] via-[#EAF2E8] to-[#FAF8F2] rounded-t-[70px] p-4 flex flex-col items-center justify-between overflow-hidden">
                   {/* Top Badges */}
                   <div className="w-full flex items-center justify-between z-10">
                     <span className="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-xs text-[#273F25] text-[10px] font-mono font-bold uppercase tracking-wider shadow-xs border border-[#273F25]/10">
@@ -198,11 +198,11 @@ export function RateOrderedProductsSection({ onSelectProduct }: RateOrderedProdu
                   </div>
 
                   {/* Centered Product Image */}
-                  <div className="relative w-full h-[180px] flex items-center justify-center my-auto">
+                  <div className="relative w-full h-[240px] flex items-center justify-center my-auto">
                     <img
                       src={product.poster_image}
                       alt={product.name}
-                      className="max-h-full max-w-[85%] object-contain filter drop-shadow-lg group-hover:scale-110 transition-transform duration-500"
+                      className="max-h-full max-w-[95%] object-contain filter drop-shadow-lg group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
 
