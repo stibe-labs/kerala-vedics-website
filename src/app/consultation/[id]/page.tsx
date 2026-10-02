@@ -77,6 +77,7 @@ export default function ConsultationRoomPage() {
   // ── WebRTC state ──────────────────────────────────────────────────
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
   const [remoteConnected, setRemoteConnected] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [callError, setCallError] = useState<string | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -86,6 +87,8 @@ export default function ConsultationRoomPage() {
   const cfSessionIdRef = useRef<string | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const subscribedRef = useRef(false);
+  const subscribingRef = useRef(false);
+  const lastSubscribedSessionIdRef = useRef<string | null>(null);
 
   // ── Prescription draft ────────────────────────────────────────────
   const [draft, setDraft] = useState<PrescriptionDraft>({
@@ -109,7 +112,10 @@ export default function ConsultationRoomPage() {
     remoteStreamRef.current = null;
     cfSessionIdRef.current = null;
     subscribedRef.current = false;
+    subscribingRef.current = false;
+    lastSubscribedSessionIdRef.current = null;
     setRemoteConnected(false);
+    setAutoplayBlocked(false);
   }, []);
 
   // Ensure local and remote video elements stay bound to their streams
@@ -132,6 +138,13 @@ export default function ConsultationRoomPage() {
   // ── Determine caller role ─────────────────────────────────────────
   const getRole = useCallback((): "doctor" | "patient" => {
     try {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const urlRole = params.get("role");
+        if (urlRole === "doctor" || urlRole === "patient") return urlRole;
+
+        if (window.location.hostname.includes("consultant")) return "doctor";
+      }
       const consultantStr = localStorage.getItem("kv_consultant_session");
       if (consultantStr) {
         const c = JSON.parse(consultantStr);
@@ -253,7 +266,13 @@ export default function ConsultationRoomPage() {
             remoteVideoRef.current.srcObject = currentRemoteStream;
           }
           remoteVideoRef.current.play().catch(e => {
-            console.warn("[WebRTC] remoteVideo play warning:", e);
+            console.warn("[WebRTC] remoteVideo play warning (attempting muted fallback):", e);
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.muted = true;
+              remoteVideoRef.current.play().then(() => {
+                setAutoplayBlocked(true);
+              }).catch(() => {});
+            }
           });
         }
 
@@ -293,99 +312,114 @@ export default function ConsultationRoomPage() {
     }
   }, [appointmentId, getRole, cleanupCall]);
 
-  // ── Renegotiate to subscribe to remote peer's tracks ─────────────
+  // ── Subscribe to remote peer's tracks via Cloudflare SFU renegotiation ──
   const subscribeToRemoteTracks = useCallback(async (
     pc: RTCPeerConnection,
     remoteSessionId: string,
     trackNames: string[],
   ): Promise<boolean> => {
-    if (subscribedRef.current || !cfSessionIdRef.current) return false;
+    if (!cfSessionIdRef.current) return false;
+    if (subscribingRef.current) return false;
+    if (subscribedRef.current && lastSubscribedSessionIdRef.current === remoteSessionId) {
+      return true;
+    }
+    if (pc.signalingState !== "stable") {
+      console.log(`[WebRTC] PeerConnection in state '${pc.signalingState}', waiting for stable state...`);
+      return false;
+    }
 
+    subscribingRef.current = true;
     try {
-      console.log(`[WebRTC] Subscribing to tracks from ${remoteSessionId}:`, trackNames);
+      console.log(`[WebRTC] Requesting SFU tracks from remote session ${remoteSessionId}:`, trackNames);
 
-      // Check existing transceivers to avoid creating duplicates on retries
-      const transceivers = pc.getTransceivers();
-      const hasRecvVideo = transceivers.some(
-        t => t.receiver.track.kind === "video" && t.direction === "recvonly"
-      );
-      const hasRecvAudio = transceivers.some(
-        t => t.receiver.track.kind === "audio" && t.direction === "recvonly"
-      );
-
-      // Sort track names so video is always first
-      const sortedNames = [...trackNames].sort((a, b) => {
-        if (a.toLowerCase().includes("video")) return -1;
-        if (b.toLowerCase().includes("video")) return 1;
-        return 0;
-      });
-
-      if (!hasRecvVideo) {
-        pc.addTransceiver("video", { direction: "recvonly" });
-      }
-      if (!hasRecvAudio) {
-        pc.addTransceiver("audio", { direction: "recvonly" });
-      }
-
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      await waitForIceGathering(pc);
-
+      // 1. Request remote tracks from SFU (No local transceivers/offer generated here)
       const res = await fetch("/api/calls/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           local_session_id: cfSessionIdRef.current,
           remote_session_id: remoteSessionId,
-          track_names: sortedNames,
-          sdp_offer: pc.localDescription!.sdp,
+          track_names: trackNames,
         }),
       });
       const data = await res.json();
 
-      if (data.success && data.sdp_answer) {
-        console.log("[WebRTC] Applying remote description from subscribe answer");
-        await pc.setRemoteDescription({ type: "answer", sdp: data.sdp_answer });
-        console.log("[WebRTC] Successfully subscribed to remote tracks!");
-        subscribedRef.current = true;
-        return true;
-      } else {
+      if (!data.success || !data.sessionDescription?.sdp) {
         console.log("[WebRTC] Remote peer track not transmitting packets yet, will retry:", data.error);
         return false;
       }
+
+      console.log("[WebRTC] Received SFU offer for remote tracks. Applying remote description...");
+      // 2. SFU sent an offer — apply it to our PeerConnection
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sessionDescription));
+
+      // 3. Create answer in response to SFU's offer
+      console.log("[WebRTC] Creating local answer for SFU offer...");
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      // Brief wait for ICE candidates if any
+      await waitForIceGathering(pc, 1500);
+
+      // 4. Send our answer to SFU to finalize the renegotiation
+      console.log("[WebRTC] Submitting renegotiation answer to SFU...");
+      const renegoRes = await fetch("/api/calls/renegotiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: cfSessionIdRef.current,
+          sessionDescription: {
+            type: "answer",
+            sdp: pc.localDescription?.sdp || answer.sdp,
+          },
+        }),
+      });
+      const renegoData = await renegoRes.json();
+
+      if (!renegoData.success) {
+        console.warn("[WebRTC] SFU renegotiation failed:", renegoData.error);
+        return false;
+      }
+
+      console.log("[WebRTC] Successfully subscribed and renegotiated with SFU!");
+      subscribedRef.current = true;
+      lastSubscribedSessionIdRef.current = remoteSessionId;
+      return true;
     } catch (err) {
       console.warn("[WebRTC] Subscribe error:", err);
       return false;
+    } finally {
+      subscribingRef.current = false;
     }
   }, []);
 
   // ── Poll for remote peer's published track IDs, then subscribe ────
   const startRemoteTrackPolling = useCallback((pc: RTCPeerConnection, remoteRole: string) => {
     let attempts = 0;
-    const MAX = 90; // 3 minutes
+    const MAX = 180; // 6 minutes
+
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
 
     pollTimerRef.current = setInterval(async () => {
-      if (subscribedRef.current) {
-        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-        return;
-      }
+      attempts++;
       if (attempts >= MAX) {
         if (pollTimerRef.current) clearInterval(pollTimerRef.current);
         return;
       }
-      attempts++;
 
       try {
         const res = await fetch(`/api/calls/tracks?appointment_id=${appointmentId}&role=${remoteRole}`);
         const data = await res.json();
 
         if (data.success && data.found && data.session_id && data.track_names?.length > 0) {
-          const success = await subscribeToRemoteTracks(pc, data.session_id, data.track_names);
-          if (success) {
-            console.log(`[WebRTC] Successfully subscribed to ${remoteRole} tracks! Stopping poller.`);
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-          } else {
-            console.log(`[WebRTC] Remote peer ${remoteRole} not ready yet (attempt ${attempts}/${MAX}), retrying in 2s...`);
+          // If not yet subscribed, OR remote peer has a new session ID (they refreshed)
+          if (!subscribedRef.current || lastSubscribedSessionIdRef.current !== data.session_id) {
+            const success = await subscribeToRemoteTracks(pc, data.session_id, data.track_names);
+            if (success) {
+              console.log(`[WebRTC] Successfully subscribed to ${remoteRole} tracks!`);
+            } else {
+              console.log(`[WebRTC] Remote peer ${remoteRole} not transmitting packets yet (attempt ${attempts}/${MAX}), retrying in 2s...`);
+            }
           }
         }
       } catch (e) {
@@ -866,6 +900,22 @@ export default function ConsultationRoomPage() {
                   setRemoteConnected(true);
                 }}
               />
+
+              {/* Unmute notification banner if browser blocked audio autoplay */}
+              {autoplayBlocked && (
+                <button
+                  onClick={() => {
+                    if (remoteVideoRef.current) {
+                      remoteVideoRef.current.muted = false;
+                      setAutoplayBlocked(false);
+                    }
+                  }}
+                  className="absolute top-4 left-4 z-40 px-3.5 py-1.5 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg backdrop-blur-sm transition-transform active:scale-95"
+                >
+                  <Mic className="w-3.5 h-3.5" />
+                  <span>Audio Muted by Browser · Click to Unmute 🔊</span>
+                </button>
+              )}
 
               {/* Waiting / connecting overlay when no remote stream yet */}
               {!remoteConnected && (

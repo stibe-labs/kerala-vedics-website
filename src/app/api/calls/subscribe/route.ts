@@ -17,17 +17,17 @@ function getEnv(req: NextRequest, key: string): string | undefined {
 
 export async function POST(req: NextRequest) {
   try {
-    const { local_session_id, remote_session_id, track_names, tracks: tracksPayload, sdp_offer } = await req.json();
+    const { local_session_id, remote_session_id, track_names, tracks: tracksPayload } = await req.json();
 
-    if (!local_session_id || !remote_session_id || !sdp_offer) {
-      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
+    if (!local_session_id || !remote_session_id) {
+      return NextResponse.json({ success: false, error: "local_session_id and remote_session_id are required" }, { status: 400 });
     }
 
     const APP_ID = getEnv(req, "CLOUDFLARE_CALLS_APP_ID");
     const APP_TOKEN = getEnv(req, "CLOUDFLARE_CALLS_APP_TOKEN");
 
     if (!APP_ID || !APP_TOKEN) {
-      return NextResponse.json({ success: false, error: "Cloudflare Calls not configured", fallback: true });
+      return NextResponse.json({ success: false, error: "Cloudflare Calls credentials not configured" }, { status: 500 });
     }
 
     const BASE = `https://rtc.live.cloudflare.com/v1/apps/${APP_ID}`;
@@ -47,14 +47,11 @@ export async function POST(req: NextRequest) {
       trackName,
     }));
 
-    // Add remote tracks via renegotiation
+    // Request remote tracks from SFU
     const res = await fetch(`${BASE}/sessions/${local_session_id}/tracks/new`, {
       method: "POST",
       headers: AUTH,
-      body: JSON.stringify({
-        sessionDescription: { type: "offer", sdp: sdp_offer },
-        tracks,
-      }),
+      body: JSON.stringify({ tracks }),
     });
 
     const raw = await res.text();
@@ -70,11 +67,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: `Invalid JSON from CF: ${raw}`, retryable: true });
     }
 
-    // Check if any track returned an error (e.g., not_found_track_error while remote peer is still connecting)
+    // Check if any track returned an error (e.g. not_found_track_error while remote peer is still connecting)
     const trackErrors = data.tracks?.filter((t: any) => t.errorCode);
     if (trackErrors && trackErrors.length > 0) {
       const errDesc = trackErrors[0].errorDescription || trackErrors[0].errorCode;
-      console.warn("CF subscribe track error (retryable):", errDesc);
       return NextResponse.json({
         success: false,
         error: errDesc,
@@ -82,32 +78,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // If CF requires immediate renegotiation, trigger the renegotiate endpoint
-    if (data.requiresImmediateRenegotiation && data.sessionDescription?.sdp) {
-      const renego = await fetch(`${BASE}/sessions/${local_session_id}/renegotiate`, {
-        method: "PUT",
-        headers: AUTH,
-        body: JSON.stringify({
-          sessionDescription: { type: "answer", sdp: data.sessionDescription.sdp },
-        }),
-      });
-      if (!renego.ok) {
-        console.warn("CF renegotiate warning:", await renego.text());
-      }
-    }
-
-    const sdpAnswer = data.sessionDescription?.sdp;
-    if (!sdpAnswer) {
+    if (!data.sessionDescription?.sdp) {
       console.warn("CF missing sessionDescription (retryable):", raw);
-      return NextResponse.json({ success: false, error: `CF response missing sessionDescription: ${raw}`, retryable: true });
+      return NextResponse.json({ success: false, error: "CF response missing sessionDescription", retryable: true });
     }
 
     return NextResponse.json({
       success: true,
-      sdp_answer: sdpAnswer,
+      requiresImmediateRenegotiation: Boolean(data.requiresImmediateRenegotiation),
+      sessionDescription: data.sessionDescription,
+      tracks: data.tracks,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
+    console.error("Subscribe route error:", message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
