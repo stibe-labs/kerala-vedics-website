@@ -266,19 +266,19 @@ export default function CheckoutPage() {
 
   if (cart.length === 0 && !isProcessing) {
     return (
-      <div className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] flex flex-col justify-between">
+      <div className="min-h-screen bg-[#F4EFE6] text-[#273F25] flex flex-col justify-between">
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-32 text-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-[#1F3D2B]/5 text-[#C89D4A] flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 rounded-full bg-[#273F25]/5 text-[#EDC918] flex items-center justify-center mx-auto">
             <Lock className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-serif font-bold">Your Bag is Empty</h2>
-          <p className="text-xs text-[#4C6B3D]">
+          <p className="text-xs text-[#516830]">
             Add our classical formulations to your sacred cart before proceeding to checkout.
           </p>
           <Link
             href="/products"
-            className="inline-block px-7 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-[#1F3D2B] text-white hover:bg-[#C89D4A] hover:text-[#14281C] transition-all"
+            className="inline-block px-7 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-[#273F25] text-[#EDC918] hover:bg-[#516830] hover:text-white transition-all shadow-md"
           >
             Explore Sacred Catalog
           </Link>
@@ -289,11 +289,11 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4EFE6] text-[#1F3D2B] flex flex-col justify-between selection:bg-[#C89D4A] selection:text-[#14281C]">
+    <div className="min-h-screen bg-[#F4EFE6] text-[#273F25] flex flex-col justify-between selection:bg-[#273F25] selection:text-[#EDC918]">
       <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 lg:pt-40 pb-16">
-        {/* Modern 3-Step Wizard Navigation (Myntra-Style) */}
+        {/* Modern 3-Step Wizard Navigation */}
         <div className="max-w-3xl mx-auto pb-8">
           <div className="flex items-center justify-between relative">
             <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-gray-200 -z-0" />
@@ -303,7 +303,7 @@ export default function CheckoutPage() {
               href="/cart"
               className="relative z-10 flex flex-col items-center gap-1.5 bg-[#F4EFE6] px-4 cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-emerald-700 text-white font-bold text-xs flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-[#516830] text-white font-bold text-xs flex items-center justify-center">
                 <Check className="w-4 h-4" />
               </div>
               <span className="text-xs font-semibold text-gray-700">1. Sacred Bag</span>
@@ -317,13 +317,13 @@ export default function CheckoutPage() {
               <div
                 className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center transition-colors ${
                   step === "address"
-                    ? "bg-[#1F3D2B] text-[#E0BA6A] ring-4 ring-[#C89D4A]/30"
-                    : "bg-emerald-700 text-white"
+                    ? "bg-[#273F25] text-[#EDC918] ring-4 ring-[#EDC918]/30"
+                    : "bg-[#516830] text-white"
                 }`}
               >
                 {step === "payment" ? <Check className="w-4 h-4" /> : "2"}
               </div>
-              <span className={`text-xs font-semibold ${step === "address" ? "text-[#1F3D2B]" : "text-gray-600"}`}>
+              <span className={`text-xs font-semibold ${step === "address" ? "text-[#273F25]" : "text-gray-600"}`}>
                 2. Delivery Address
               </span>
             </button>
@@ -333,13 +333,13 @@ export default function CheckoutPage() {
               <div
                 className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center transition-colors ${
                   step === "payment"
-                    ? "bg-[#1F3D2B] text-[#E0BA6A] ring-4 ring-[#C89D4A]/30"
+                    ? "bg-[#273F25] text-[#EDC918] ring-4 ring-[#EDC918]/30"
                     : "bg-gray-300 text-gray-600"
                 }`}
               >
                 3
               </div>
-              <span className={`text-xs font-semibold ${step === "payment" ? "text-[#1F3D2B]" : "text-gray-400"}`}>
+              <span className={`text-xs font-semibold ${step === "payment" ? "text-[#273F25]" : "text-gray-400"}`}>
                 3. Secure Payment
               </span>
             </div>
@@ -352,11 +352,11 @@ export default function CheckoutPage() {
           <div className="lg:col-span-8 space-y-6">
             {/* STEP 2: DELIVERY ADDRESS FORM */}
             {step === "address" && (
-              <form onSubmit={handleProceedToPayment} className="bg-white rounded-3xl p-6 sm:p-8 border border-[#4C6B3D]/15 shadow-sm space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#4C6B3D]/10">
+              <form onSubmit={handleProceedToPayment} className="bg-white rounded-3xl p-6 sm:p-8 border border-[#273F25]/15 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-[#273F25]/10">
                   <div className="flex items-center gap-2.5">
-                    <MapPin className="w-5 h-5 text-[#C89D4A]" />
-                    <h2 className="text-xl font-serif font-bold text-[#1F3D2B]">
+                    <MapPin className="w-5 h-5 text-[#EDC918]" />
+                    <h2 className="text-xl font-serif font-bold text-[#273F25]">
                       Delivery Shipping Details
                     </h2>
                   </div>
@@ -366,7 +366,7 @@ export default function CheckoutPage() {
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs uppercase font-bold text-[#8BA664]">
+                    <label className="text-xs uppercase font-bold text-[#516830]">
                       Full Name *
                     </label>
                     <div className="relative">
@@ -377,13 +377,13 @@ export default function CheckoutPage() {
                         value={address.recipient_name}
                         onChange={(e) => setAddress({ ...address, recipient_name: e.target.value })}
                         placeholder="Recipient full name"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#C89D4A]"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#EDC918]"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase font-bold text-[#8BA664]">
+                    <label className="text-xs uppercase font-bold text-[#516830]">
                       10-Digit Mobile Number *
                     </label>
                     <div className="relative">
@@ -395,13 +395,13 @@ export default function CheckoutPage() {
                         value={address.phone}
                         onChange={(e) => setAddress({ ...address, phone: e.target.value })}
                         placeholder="Mobile for delivery OTP"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#C89D4A]"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#EDC918]"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase font-bold text-[#8BA664]">
+                    <label className="text-xs uppercase font-bold text-[#516830]">
                       6-Digit PIN Code *
                     </label>
                     <input
@@ -411,12 +411,12 @@ export default function CheckoutPage() {
                       value={address.pincode}
                       onChange={(e) => handlePincodeChange(e.target.value)}
                       placeholder="e.g. 682001"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#C89D4A]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#EDC918]"
                     />
                   </div>
 
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs uppercase font-bold text-[#8BA664]">
+                    <label className="text-xs uppercase font-bold text-[#516830]">
                       Flat / House No. / Building / Floor *
                     </label>
                     <input
@@ -425,12 +425,12 @@ export default function CheckoutPage() {
                       value={address.flat}
                       onChange={(e) => setAddress({ ...address, flat: e.target.value })}
                       placeholder="e.g. Flat 4B, Lotus Heights"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#C89D4A]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#EDC918]"
                     />
                   </div>
 
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs uppercase font-bold text-[#8BA664]">
+                    <label className="text-xs uppercase font-bold text-[#516830]">
                       Area / Street / Sector / Locality *
                     </label>
                     <input
@@ -439,38 +439,38 @@ export default function CheckoutPage() {
                       value={address.street}
                       onChange={(e) => setAddress({ ...address, street: e.target.value })}
                       placeholder="e.g. MG Road, Near Marine Walk"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#C89D4A]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#EDC918]"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase font-bold text-[#8BA664]">City / Town *</label>
+                    <label className="text-xs uppercase font-bold text-[#516830]">City / Town *</label>
                     <input
                       type="text"
                       required
                       value={address.city}
                       onChange={(e) => setAddress({ ...address, city: e.target.value })}
                       placeholder="e.g. Kochi"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#C89D4A]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#EDC918]"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase font-bold text-[#8BA664]">State *</label>
+                    <label className="text-xs uppercase font-bold text-[#516830]">State *</label>
                     <input
                       type="text"
                       required
                       value={address.state}
                       onChange={(e) => setAddress({ ...address, state: e.target.value })}
                       placeholder="e.g. Kerala"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#C89D4A]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#EDC918]"
                     />
                   </div>
                 </div>
 
                 {/* Address Tag Selector */}
                 <div className="space-y-2 pt-2">
-                  <label className="text-xs uppercase font-bold text-[#8BA664]">
+                  <label className="text-xs uppercase font-bold text-[#516830]">
                     Address Type
                   </label>
                   <div className="flex items-center gap-3">
@@ -479,7 +479,7 @@ export default function CheckoutPage() {
                       onClick={() => setAddress({ ...address, address_type: "Home" })}
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                         address.address_type === "Home"
-                          ? "bg-[#1F3D2B] text-white border-[#1F3D2B]"
+                          ? "bg-[#273F25] text-[#EDC918] border-[#273F25]"
                           : "bg-white text-gray-700 border-gray-200"
                       }`}
                     >
@@ -492,7 +492,7 @@ export default function CheckoutPage() {
                       onClick={() => setAddress({ ...address, address_type: "Work" })}
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                         address.address_type === "Work"
-                          ? "bg-[#1F3D2B] text-white border-[#1F3D2B]"
+                          ? "bg-[#273F25] text-[#EDC918] border-[#273F25]"
                           : "bg-white text-gray-700 border-gray-200"
                       }`}
                     >
@@ -513,7 +513,7 @@ export default function CheckoutPage() {
 
                   <button
                     type="submit"
-                    className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#1F3D2B] text-white hover:bg-[#C89D4A] hover:text-[#14281C] transition-all flex items-center gap-2 shadow-md cursor-pointer"
+                    className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#273F25] text-[#EDC918] hover:bg-[#516830] hover:text-white transition-all flex items-center gap-2 shadow-md cursor-pointer"
                   >
                     <span>Proceed to Payment</span>
                     <ArrowRight className="w-4 h-4" />
@@ -524,11 +524,11 @@ export default function CheckoutPage() {
 
             {/* STEP 3: PAYMENT GATEWAY SIMULATION */}
             {step === "payment" && (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#4C6B3D]/15 shadow-sm space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#4C6B3D]/10">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#273F25]/15 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-[#273F25]/10">
                   <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="w-5 h-5 text-[#C89D4A]" />
-                    <h2 className="text-xl font-serif font-bold text-[#1F3D2B]">
+                    <ShieldCheck className="w-5 h-5 text-[#EDC918]" />
+                    <h2 className="text-xl font-serif font-bold text-[#273F25]">
                       Secure Ayurvedic Payment
                     </h2>
                   </div>
@@ -536,9 +536,9 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Delivery Address Summary Pill */}
-                <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#4C6B3D]/15 flex items-center justify-between text-xs">
+                <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#273F25]/15 flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-bold text-[#1F3D2B]">
+                    <span className="font-bold text-[#273F25]">
                       Delivering to: {address.recipient_name}
                     </span>
                     <p className="text-gray-600 font-light truncate max-w-sm">
@@ -547,7 +547,7 @@ export default function CheckoutPage() {
                   </div>
                   <button
                     onClick={() => setStep("address")}
-                    className="text-[#C89D4A] hover:underline font-semibold"
+                    className="text-[#EDC918] hover:underline font-bold"
                   >
                     Change
                   </button>
@@ -555,7 +555,7 @@ export default function CheckoutPage() {
 
                 {/* Payment Method Selector Tabs */}
                 <div className="space-y-3">
-                  <label className="text-xs uppercase font-bold text-[#8BA664]">
+                  <label className="text-xs uppercase font-bold text-[#516830]">
                     Select Payment Gateway
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -564,11 +564,11 @@ export default function CheckoutPage() {
                       onClick={() => setPaymentMethod("UPI")}
                       className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
                         paymentMethod === "UPI"
-                          ? "bg-[#1F3D2B] text-white border-[#1F3D2B] shadow-md"
+                          ? "bg-[#273F25] text-white border-[#273F25] shadow-md"
                           : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      <QrCode className="w-6 h-6 text-[#E0BA6A] mb-2" />
+                      <QrCode className="w-6 h-6 text-[#EDC918] mb-2" />
                       <div>
                         <span className="font-bold text-xs block">UPI / QR Code</span>
                         <span className="text-[10px] opacity-80">GPay, PhonePe, Paytm</span>
@@ -580,11 +580,11 @@ export default function CheckoutPage() {
                       onClick={() => setPaymentMethod("CARD")}
                       className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
                         paymentMethod === "CARD"
-                          ? "bg-[#1F3D2B] text-white border-[#1F3D2B] shadow-md"
+                          ? "bg-[#273F25] text-white border-[#273F25] shadow-md"
                           : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      <CreditCard className="w-6 h-6 text-[#E0BA6A] mb-2" />
+                      <CreditCard className="w-6 h-6 text-[#EDC918] mb-2" />
                       <div>
                         <span className="font-bold text-xs block">Cards</span>
                         <span className="text-[10px] opacity-80">Credit & Debit Cards</span>
@@ -596,11 +596,11 @@ export default function CheckoutPage() {
                       onClick={() => setPaymentMethod("COD")}
                       className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
                         paymentMethod === "COD"
-                          ? "bg-[#1F3D2B] text-white border-[#1F3D2B] shadow-md"
+                          ? "bg-[#273F25] text-white border-[#273F25] shadow-md"
                           : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      <Banknote className="w-6 h-6 text-[#E0BA6A] mb-2" />
+                      <Banknote className="w-6 h-6 text-[#EDC918] mb-2" />
                       <div>
                         <span className="font-bold text-xs block">Cash on Delivery</span>
                         <span className="text-[10px] opacity-80">Pay upon botanical arrival</span>
@@ -615,16 +615,16 @@ export default function CheckoutPage() {
                     <div className="flex flex-col sm:flex-row items-center gap-6">
                       {/* Dynamic Simulated QR Code */}
                       <div className="w-36 h-36 rounded-2xl bg-white p-3 border border-gray-200 shadow-sm flex flex-col items-center justify-center shrink-0">
-                        <div className="w-full h-full bg-[#1F3D2B]/5 rounded-xl flex flex-col items-center justify-center text-center p-2">
-                          <QrCode className="w-16 h-16 text-[#1F3D2B]" />
-                          <span className="text-[9px] font-mono font-bold text-[#C89D4A] mt-1">
+                        <div className="w-full h-full bg-[#273F25]/5 rounded-xl flex flex-col items-center justify-center text-center p-2">
+                          <QrCode className="w-16 h-16 text-[#273F25]" />
+                          <span className="text-[9px] font-mono font-bold text-[#516830] mt-1">
                             ₹{finalTotal.toLocaleString("en-IN")}
                           </span>
                         </div>
                       </div>
 
                       <div className="space-y-2 text-xs">
-                        <h4 className="font-serif font-bold text-sm text-[#1F3D2B]">
+                        <h4 className="font-serif font-bold text-sm text-[#273F25]">
                           Scan QR Code with any UPI App
                         </h4>
                         <p className="text-gray-500 leading-relaxed font-light">
@@ -636,7 +636,7 @@ export default function CheckoutPage() {
                             value={upiId}
                             onChange={(e) => setUpiId(e.target.value)}
                             placeholder="e.g. patron@okhdfcbank"
-                            className="w-full max-w-xs px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#C89D4A]"
+                            className="w-full max-w-xs px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#EDC918]"
                           />
                         </div>
                       </div>
@@ -648,7 +648,7 @@ export default function CheckoutPage() {
                 {paymentMethod === "CARD" && (
                   <div className="p-5 rounded-2xl bg-gray-50 border border-gray-200 space-y-4">
                     <div className="space-y-1">
-                      <label className="text-[11px] uppercase font-bold text-[#8BA664]">
+                      <label className="text-[11px] uppercase font-bold text-[#516830]">
                         Card Number
                       </label>
                       <input
@@ -657,13 +657,13 @@ export default function CheckoutPage() {
                         value={cardNumber}
                         onChange={(e) => setCardNumber(e.target.value)}
                         placeholder="•••• •••• •••• ••••"
-                        className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#C89D4A]"
+                        className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#EDC918]"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-[11px] uppercase font-bold text-[#8BA664]">
+                        <label className="text-[11px] uppercase font-bold text-[#516830]">
                           Expiry (MM/YY)
                         </label>
                         <input
@@ -672,12 +672,12 @@ export default function CheckoutPage() {
                           value={cardExpiry}
                           onChange={(e) => setCardExpiry(e.target.value)}
                           placeholder="MM/YY"
-                          className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#C89D4A]"
+                          className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#EDC918]"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] uppercase font-bold text-[#8BA664]">
+                        <label className="text-[11px] uppercase font-bold text-[#516830]">
                           CVV Security Code
                         </label>
                         <input
@@ -686,13 +686,13 @@ export default function CheckoutPage() {
                           value={cardCvv}
                           onChange={(e) => setCardCvv(e.target.value)}
                           placeholder="•••"
-                          className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#C89D4A]"
+                          className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#EDC918]"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] uppercase font-bold text-[#8BA664]">
+                      <label className="text-[11px] uppercase font-bold text-[#516830]">
                         Name on Card
                       </label>
                       <input
@@ -700,7 +700,7 @@ export default function CheckoutPage() {
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
                         placeholder="Name as printed on card"
-                        className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs focus:outline-none focus:border-[#C89D4A]"
+                        className="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs focus:outline-none focus:border-[#EDC918]"
                       />
                     </div>
                   </div>
@@ -714,7 +714,7 @@ export default function CheckoutPage() {
                     </p>
 
                     <div className="flex items-center gap-3">
-                      <div className="px-4 py-2 rounded-xl bg-[#1F3D2B] text-[#E0BA6A] font-mono font-bold text-base tracking-widest select-none">
+                      <div className="px-4 py-2 rounded-xl bg-[#273F25] text-[#EDC918] font-mono font-bold text-base tracking-widest select-none">
                         {codCaptcha}
                       </div>
 
@@ -724,7 +724,7 @@ export default function CheckoutPage() {
                         value={userEnteredCaptcha}
                         onChange={(e) => setUserEnteredCaptcha(e.target.value)}
                         placeholder="Enter Code"
-                        className="w-32 p-2 rounded-xl bg-white border border-gray-200 text-xs font-mono text-center focus:outline-none focus:border-[#C89D4A]"
+                        className="w-32 p-2 rounded-xl bg-white border border-gray-200 text-xs font-mono text-center focus:outline-none focus:border-[#EDC918]"
                       />
                     </div>
                   </div>
@@ -749,7 +749,7 @@ export default function CheckoutPage() {
                   <button
                     onClick={handlePlaceOrder}
                     disabled={isProcessing}
-                    className="px-8 py-4 rounded-full text-xs font-bold uppercase tracking-wider bg-[#1F3D2B] text-[#FAF7F2] hover:bg-[#C89D4A] hover:text-[#14281C] transition-all flex items-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer"
+                    className="px-8 py-4 rounded-full text-xs font-bold uppercase tracking-wider bg-[#273F25] text-[#EDC918] hover:bg-[#516830] hover:text-white transition-all flex items-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer"
                   >
                     {isProcessing ? (
                       <>
@@ -770,8 +770,8 @@ export default function CheckoutPage() {
 
           {/* RIGHT: ORDER INVESTMENT SUMMARY (Col 9-12) */}
           <div className="lg:col-span-4 space-y-5 sticky top-28">
-            <div className="bg-white rounded-3xl p-6 border border-[#4C6B3D]/15 shadow-sm space-y-6">
-              <h3 className="text-lg font-serif font-bold text-[#1F3D2B] pb-3 border-b border-[#4C6B3D]/10">
+            <div className="bg-white rounded-3xl p-6 border border-[#273F25]/15 shadow-sm space-y-6">
+              <h3 className="text-lg font-serif font-bold text-[#273F25] pb-3 border-b border-[#273F25]/10">
                 Order Summary ({cart.length} Formulations)
               </h3>
 
@@ -786,13 +786,13 @@ export default function CheckoutPage() {
                         className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
                       />
                       <div className="min-w-0">
-                        <span className="font-bold text-[#1F3D2B] truncate block">
+                        <span className="font-bold text-[#273F25] truncate block">
                           {item.name}
                         </span>
                         <span className="text-gray-400 font-mono">Qty: {item.quantity}</span>
                       </div>
                     </div>
-                    <span className="font-serif font-bold text-[#1F3D2B] shrink-0">
+                    <span className="font-serif font-bold text-[#273F25] shrink-0">
                       ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                     </span>
                   </div>
@@ -809,19 +809,19 @@ export default function CheckoutPage() {
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
                       placeholder="Coupon Code"
-                      className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#FAF7F2] border border-[#4C6B3D]/20 text-xs font-mono uppercase focus:outline-none focus:border-[#C89D4A]"
+                      className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#FAF7F2] border border-[#273F25]/20 text-xs font-mono uppercase focus:outline-none focus:border-[#EDC918]"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-[#1F3D2B] text-white text-xs font-semibold uppercase hover:bg-[#C89D4A] hover:text-[#14281C] transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-[#273F25] text-[#EDC918] text-xs font-semibold uppercase hover:bg-[#516830] hover:text-white transition-colors cursor-pointer"
                   >
                     Apply
                   </button>
                 </div>
 
                 {appliedCoupon && (
-                  <div className="text-xs text-emerald-700 font-semibold flex items-center justify-between">
+                  <div className="text-xs text-[#516830] font-semibold flex items-center justify-between">
                     <span>Coupon &apos;{appliedCoupon.code}&apos; applied</span>
                     <span>-₹{appliedCoupon.discount}</span>
                   </div>
@@ -840,14 +840,14 @@ export default function CheckoutPage() {
                 </div>
 
                 {savings > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-semibold">
+                  <div className="flex justify-between text-[#516830] font-semibold">
                     <span>Artisanal Savings</span>
                     <span>-₹{savings.toLocaleString("en-IN")}</span>
                   </div>
                 )}
 
                 {couponDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-semibold">
+                  <div className="flex justify-between text-[#516830] font-semibold">
                     <span>Coupon Savings</span>
                     <span>-₹{couponDiscount.toLocaleString("en-IN")}</span>
                   </div>
@@ -855,12 +855,12 @@ export default function CheckoutPage() {
 
                 <div className="flex justify-between">
                   <span>Express Botanical Shipping</span>
-                  <span className="font-bold text-emerald-700 uppercase text-[10px]">FREE</span>
+                  <span className="font-bold text-[#516830] uppercase text-[10px]">FREE</span>
                 </div>
 
-                <div className="pt-3 border-t border-[#4C6B3D]/15 flex items-center justify-between text-base">
-                  <span className="font-serif font-bold text-[#1F3D2B]">Total Investment</span>
-                  <span className="text-2xl font-serif font-bold text-[#1F3D2B]">
+                <div className="pt-3 border-t border-[#273F25]/15 flex items-center justify-between text-base">
+                  <span className="font-serif font-bold text-[#273F25]">Total Investment</span>
+                  <span className="text-2xl font-serif font-bold text-[#273F25]">
                     ₹{finalTotal.toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -868,12 +868,12 @@ export default function CheckoutPage() {
 
               {/* Safety Badges */}
               <div className="space-y-2 pt-2 text-[11px] text-gray-500 border-t border-gray-100">
-                <div className="flex items-center gap-2 text-[#1F3D2B]">
-                  <ShieldCheck className="w-4 h-4 text-[#C89D4A] shrink-0" />
+                <div className="flex items-center gap-2 text-[#273F25]">
+                  <ShieldCheck className="w-4 h-4 text-[#EDC918] shrink-0" />
                   <span>256-Bit SSL Encrypted Sacred Checkout</span>
                 </div>
-                <div className="flex items-center gap-2 text-[#1F3D2B]">
-                  <CheckCircle2 className="w-4 h-4 text-[#C89D4A] shrink-0" />
+                <div className="flex items-center gap-2 text-[#273F25]">
+                  <CheckCircle2 className="w-4 h-4 text-[#EDC918] shrink-0" />
                   <span>100% Bio-Active & AYUSH Certified</span>
                 </div>
               </div>

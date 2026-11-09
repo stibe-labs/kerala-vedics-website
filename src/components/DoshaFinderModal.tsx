@@ -77,7 +77,7 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
           particleCount: 80,
           spread: 60,
           origin: { y: 0.6 },
-          colors: ["#C89D4A", "#8BA664", "#4C6B3D"],
+          colors: ["#EDC918", "#516830", "#273F25"],
         });
       } catch (e) {
         // Safe fallback
@@ -98,7 +98,7 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="relative w-full max-w-xl bg-[#14281C] text-[#FAF7F2] rounded-3xl border border-[#C89D4A]/40 shadow-2xl p-6 sm:p-10 overflow-hidden">
+      <div className="relative w-full max-w-xl bg-[#182A17] text-[#FAF7F2] rounded-3xl border border-[#EDC918]/40 shadow-2xl p-6 sm:p-10 overflow-hidden">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -109,9 +109,9 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
 
         {/* Modal Header */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-[#C89D4A]/20 text-[#E0BA6A] border border-[#C89D4A]/40 mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-[#EDC918]/15 text-[#EDC918] border border-[#EDC918]/40 mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Google Labs Inspired Discovery Tool</span>
+            <span>Ayurvedic Constitution Analysis</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2]">
             Vedic Constitution Discovery
@@ -124,14 +124,14 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
         {/* Step Progression */}
         {!resultDosha ? (
           <div className="space-y-6">
-            <div className="flex items-center justify-between text-xs font-mono text-[#8BA664]">
+            <div className="flex items-center justify-between text-xs font-mono text-[#EDC918]">
               <span>QUESTION {currentStep + 1} OF 3</span>
               <span>{Math.round(((currentStep + 1) / 3) * 100)}%</span>
             </div>
 
             <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#C89D4A] transition-all duration-300"
+                className="h-full bg-[#EDC918] transition-all duration-300"
                 style={{ width: `${((currentStep + 1) / 3) * 100}%` }}
               />
             </div>
@@ -145,12 +145,12 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
                 <button
                   key={idx}
                   onClick={() => handleSelectOption(option.dosha)}
-                  className="w-full p-4 text-left rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-[#C89D4A]/60 transition-all duration-300 flex items-center justify-between group"
+                  className="w-full p-4 text-left rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-[#EDC918]/60 transition-all duration-300 flex items-center justify-between group"
                 >
                   <span className="text-xs sm:text-sm text-[#FAF7F2]/90 group-hover:text-[#FAF7F2]">
                     {option.label}
                   </span>
-                  <ArrowRight className="w-4 h-4 text-[#8BA664] group-hover:text-[#C89D4A] group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-[#EDC918]/70 group-hover:text-[#EDC918] group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
             </div>
@@ -158,11 +158,11 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
         ) : (
           /* Result Card */
           <div className="space-y-6 animate-in zoom-in-95 duration-300">
-            <div className="p-6 rounded-2xl bg-[#1F3D2B] border border-[#C89D4A]/50 text-center space-y-2">
-              <span className="text-xs uppercase tracking-widest text-[#8BA664] font-semibold">
+            <div className="p-6 rounded-2xl bg-[#273F25] border border-[#EDC918]/50 text-center space-y-2">
+              <span className="text-xs uppercase tracking-widest text-[#EDC918] font-semibold">
                 Your Primary Constitution
               </span>
-              <h4 className="text-3xl font-serif font-bold text-[#E0BA6A]">
+              <h4 className="text-3xl font-serif font-bold text-[#EDC918]">
                 {resultDosha} Prakriti
               </h4>
               <p className="text-xs text-[#FAF7F2]/80 max-w-sm mx-auto font-light leading-relaxed">
@@ -183,13 +183,13 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
                 className="w-16 h-16 rounded-xl object-cover border border-white/15"
               />
               <div className="flex-1">
-                <span className="text-[10px] uppercase tracking-widest text-[#C89D4A] font-semibold">
+                <span className="text-[10px] uppercase tracking-widest text-[#EDC918] font-semibold">
                   Recommended Daily Ritual
                 </span>
                 <h5 className="text-sm font-serif font-bold text-[#FAF7F2] line-clamp-1">
                   {recommendedProduct.name}
                 </h5>
-                <p className="text-xs text-[#8BA664]">
+                <p className="text-xs text-[#EDC918]/80">
                   {recommendedProduct.price} · {recommendedProduct.volume}
                 </p>
               </div>
@@ -202,7 +202,7 @@ export function DoshaFinderModal({ isOpen, onClose, onSelectProduct }: DoshaFind
                   onClose();
                   onSelectProduct(recommendedProduct);
                 }}
-                className="flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-[#C89D4A] text-[#14281C] hover:bg-[#E0BA6A] transition-colors text-center"
+                className="flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-[#EDC918] text-[#273F25] hover:bg-[#F5D84A] transition-colors text-center"
               >
                 View Recommended Ritual
               </button>

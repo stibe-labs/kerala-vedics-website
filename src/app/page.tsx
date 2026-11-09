@@ -1,101 +1,77 @@
 "use client";
 
 import React, { useState } from "react";
-import { Navbar } from "@/components/Navbar";
-import { LoadingScreen } from "@/components/LoadingScreen";
-import { HeroSection } from "@/components/HeroSection";
-import { SeasonalOffersSection } from "@/components/SeasonalOffersSection";
-import { RateOrderedProductsSection } from "@/components/RateOrderedProductsSection";
-import { BrandAboutUsSection } from "@/components/BrandAboutUsSection";
-import { StoriesOfWellnessSection } from "@/components/StoriesOfWellnessSection";
-import { KnowYourProductsSection } from "@/components/KnowYourProductsSection";
-import { KeralaHeritageSection } from "@/components/KeralaHeritageSection";
-import { SeasonalCTASection } from "@/components/SeasonalCTASection";
-import { Footer } from "@/components/Footer";
-import { DoshaFinderModal } from "@/components/DoshaFinderModal";
-import { ProductDetailDrawer } from "@/components/ProductDetailDrawer";
-import { ProductRitual, PRODUCT_RITUALS } from "@/data/vedicsData";
+import { AnnouncementBar }              from "@/components/AnnouncementBar";
+import { Navbar }                       from "@/components/Navbar";
+import { DoctorConsultStrip }           from "@/components/DoctorConsultStrip";
+import { SeasonalOffersHeroSlider }     from "@/components/SeasonalOffersHeroSlider";
+import { ProductsRateAscendingSection } from "@/components/ProductsRateAscendingSection";
+import { TrustSection }                 from "@/components/TrustSection";
+import { BrandSection }                 from "@/components/BrandSection";
+import { WhyKVSection }                 from "@/components/WhyKVSection";
+import { ConsultSection }               from "@/components/ConsultSection";
+import { TestimonialsSection }          from "@/components/TestimonialsSection";
+import { Footer }                       from "@/components/Footer";
+import { DoshaFinderModal }             from "@/components/DoshaFinderModal";
+import { ConsultVaidyaPortal }          from "@/components/ConsultVaidyaPortal";
+import { LoadingScreen }                from "@/components/LoadingScreen";
 
 export default function Home() {
   const [isDoshaModalOpen, setIsDoshaModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ProductRitual | null>(null);
-
-  const handleSelectProduct = (product: any) => {
-    const matchedRitual = PRODUCT_RITUALS.find(
-      (p) => p.id === product.id || p.id === product.slug
-    );
-
-    if (matchedRitual) {
-      setSelectedProduct(matchedRitual);
-    } else {
-      setSelectedProduct({
-        id: product.id,
-        name: product.name || product.title,
-        sanskritName: product.sanskrit_name || product.sanskrit || "",
-        category: product.category || "Therapeutic Oils",
-        tagline: product.tagline || "",
-        description: product.description || "",
-        volume: product.volume || "100 ml",
-        price: `₹${product.price}`,
-        accentColor: "#C89D4A",
-        videoPreviewUrl: "/videos/hero-bottle.mp4",
-        posterImage: product.poster_image || product.image || "/products/arshana-lehyam.png",
-        keyBotanicals: ["Sahyadri Herbs", "Cold-Pressed Sesame", "Forest Honey"],
-        doshaAffinity: product.dosha_affinity || "Tridoshic",
-        ritualBenefit: product.tagline || "Holistic healing and deep balance.",
-        usageMethod: "Take as directed by your Ayurvedic Vaidya.",
-      });
-    }
-  };
 
   return (
     <>
-      {/* 1. Loading screen unchanged as on live */}
       <LoadingScreen />
 
-      <main className="min-h-screen bg-[#FAF8F2] text-[#273F25] relative selection:bg-[#EDC918] selection:text-[#273F25]">
-        {/* 2. Live Header / Navbar */}
+      {/* ── Fixed Announcement Bar (Top: 0) ── */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <AnnouncementBar />
+      </div>
+
+      <main className="min-h-screen bg-white text-[#1A2518]">
+        {/* ── Fixed Navbar (Below Announcement bar, top: 36px) ── */}
         <Navbar onOpenDoshaFinder={() => setIsDoshaModalOpen(true)} />
 
-        {/* 3. Live HeroSection (Arshana Lehyam, bottle video, slides 01-05) */}
-        <HeroSection onOpenDoshaFinder={() => setIsDoshaModalOpen(true)} />
+        {/* Page content begins after AnnouncementBar (36px) + Navbar (64px) = 100px */}
+        <div style={{ paddingTop: 100 }}>
+          
+          {/* ── 1. STRIP UNDER NAVBAR: Consult a Doctor + Action Button ── */}
+          <DoctorConsultStrip />
 
-        {/* 4. Seasonal Offers & Harvest Packages (50% OFF) */}
-        <SeasonalOffersSection />
+          {/* ── 2. HEADER: Slideshow of Seasonal Offers ── */}
+          <SeasonalOffersHeroSlider />
 
-        {/* 5. Our Ayurvedic Formulations (Sorted from Small to Large by Rate: ₹499 to ₹2,499) */}
-        <RateOrderedProductsSection onSelectProduct={handleSelectProduct} />
+          {/* ── 3. NEXT SECTIONS: Products ordered from Small Rate to Higher Rate (₹350 → ₹1,999) ── */}
+          <ProductsRateAscendingSection />
 
-        {/* 6. What is Our Brand / About Us (For a Better Living) */}
-        <BrandAboutUsSection />
+          {/* ── 4. Trust & Ayush Certification Badges ── */}
+          <TrustSection />
 
-        {/* 7. Customer Testimonials (Stories of Wellness) */}
-        <StoriesOfWellnessSection />
+          {/* ── 5. Brand Heritage & Transparency (Be Minimalist style) ── */}
+          <BrandSection />
 
-        {/* 8. Know More About Your Products (Benefits, Ingredients, Usage, Quality) */}
-        <KnowYourProductsSection />
+          {/* ── 6. Why Kerala Vedics — Classical Taila Paka Vidhi extraction ── */}
+          <WhyKVSection />
 
-        {/* 9. Kerala Heritages (Where Ayurveda is a Living Tradition) */}
-        <KeralaHeritageSection />
+          {/* ── 7. Detailed Vaidya Consultation & 4-Step Regimen ── */}
+          <ConsultSection />
 
-        {/* 10. CTA (Seasonal Rituals & Botanical Wisdom) */}
-        <SeasonalCTASection />
+          {/* ── 8. Verified Clinical Reviews & Testimonials ── */}
+          <TestimonialsSection />
 
-        {/* 11. Footer */}
-        <Footer />
+          {/* ── 9. Luxe Minimalist Footer ── */}
+          <Footer />
+        </div>
 
-        {/* Interactive Dosha Finder Explorer Modal */}
+        {/* Dosha Finder Assessment Modal */}
         <DoshaFinderModal
           isOpen={isDoshaModalOpen}
           onClose={() => setIsDoshaModalOpen(false)}
-          onSelectProduct={(prod) => setSelectedProduct(prod)}
+          onSelectProduct={() => {}}
         />
 
-        {/* Product Details & Ceremony Drawer */}
-        <ProductDetailDrawer
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-        />
+        {/* Floating Doctor Consultation Portal Trigger */}
+        <ConsultVaidyaPortal />
       </main>
     </>
   );

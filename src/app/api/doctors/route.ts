@@ -46,11 +46,26 @@ export async function GET(req: NextRequest) {
       languages: typeof doc.languages === "string" ? JSON.parse(doc.languages) : doc.languages || [],
     }));
 
-    // Resilient fallback: If D1 returns empty, use in-memory store
+    // Resilient fallback: If D1 returns empty, try live website API then in-memory store
     if (parsed.length === 0) {
-      const storeDoctors = getAllDoctorsFromStore();
-      if (storeDoctors.length > 0) {
-        parsed = storeDoctors as any[];
+      try {
+        const liveRes = await fetch("https://keralavedics.com/api/doctors", {
+          next: { revalidate: 60 },
+          headers: { "Accept": "application/json" },
+        });
+        if (liveRes.ok) {
+          const liveData = await liveRes.json();
+          if (liveData?.doctors && Array.isArray(liveData.doctors) && liveData.doctors.length > 0) {
+            parsed = liveData.doctors;
+          }
+        }
+      } catch {}
+
+      if (parsed.length === 0) {
+        const storeDoctors = getAllDoctorsFromStore();
+        if (storeDoctors.length > 0) {
+          parsed = storeDoctors as any[];
+        }
       }
     }
 

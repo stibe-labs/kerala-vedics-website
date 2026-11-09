@@ -21,30 +21,30 @@ export function ProductDetailDrawer({ product, onClose }: ProductDetailDrawerPro
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="relative w-full max-w-2xl bg-[#FAF7F2] text-[#1F3D2B] h-full overflow-y-auto shadow-2xl p-6 sm:p-10 space-y-8 flex flex-col justify-between animate-in slide-in-from-right duration-500">
+      <div className="relative w-full max-w-2xl bg-[#FAF7F2] text-[#273F25] h-full overflow-y-auto shadow-2xl p-6 sm:p-10 space-y-8 flex flex-col justify-between animate-in slide-in-from-right duration-500">
         <div>
           {/* Header Action */}
-          <div className="flex items-center justify-between pb-4 border-b border-[#4C6B3D]/15">
-            <span className="text-xs uppercase tracking-widest font-mono text-[#8BA664]">
+          <div className="flex items-center justify-between pb-4 border-b border-[#273F25]/15">
+            <span className="text-xs uppercase tracking-widest font-mono text-[#516830] font-semibold">
               {product.category}
             </span>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-black/5 text-[#1F3D2B] transition-colors"
+              className="p-2 rounded-full hover:bg-black/5 text-[#273F25] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Media Header */}
-          <div className="mt-6 relative rounded-3xl overflow-hidden shadow-lg aspect-[16/10] bg-[#14281C]">
+          <div className="mt-6 relative rounded-3xl overflow-hidden shadow-lg aspect-[16/10] bg-[#273F25]">
             <img
               src={product.posterImage}
               alt={product.name}
               className="w-full h-full object-cover"
             />
             <div className="absolute bottom-4 right-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white text-[#1F3D2B] shadow-md">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#273F25] text-[#EDC918] shadow-md">
                 {product.volume}
               </span>
             </div>
@@ -52,28 +52,28 @@ export function ProductDetailDrawer({ product, onClose }: ProductDetailDrawerPro
 
           {/* Titles & Tagline */}
           <div className="mt-6 space-y-2">
-            <span className="text-sm font-serif italic text-[#C89D4A]">
+            <span className="text-sm font-serif italic text-[#516830] font-medium">
               {product.sanskritName}
             </span>
-            <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#1F3D2B]">
+            <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#273F25]">
               {product.name}
             </h3>
-            <p className="text-sm text-[#4C6B3D] font-medium">
+            <p className="text-sm text-[#516830] font-medium">
               {product.tagline}
             </p>
           </div>
 
           {/* Price & Primary Details */}
-          <div className="mt-6 flex items-center justify-between p-4 rounded-2xl bg-[#F4EFE6] border border-[#4C6B3D]/15">
+          <div className="mt-6 flex items-center justify-between p-4 rounded-2xl bg-[#F4EFE6] border border-[#273F25]/15">
             <div>
-              <span className="text-[10px] uppercase tracking-wider text-[#8BA664] block font-semibold">
+              <span className="text-[10px] uppercase tracking-wider text-[#516830] block font-semibold">
                 Investment in Vitality
               </span>
-              <span className="text-2xl font-serif font-bold text-[#1F3D2B]">
+              <span className="text-2xl font-serif font-bold text-[#273F25]">
                 {product.price}
               </span>
             </div>
-            <span className="text-xs text-[#4C6B3D] font-light">
+            <span className="text-xs text-[#516830] font-medium">
               Free Express Botanical Shipping Worldwide
             </span>
           </div>
@@ -81,44 +81,44 @@ export function ProductDetailDrawer({ product, onClose }: ProductDetailDrawerPro
           {/* Description & Ritual Benefits */}
           <div className="mt-6 space-y-6">
             <div>
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[#8BA664] mb-2">
+              <h4 className="text-xs uppercase tracking-widest font-bold text-[#516830] mb-2">
                 The Classical Formulation
               </h4>
-              <p className="text-sm text-[#1F3D2B]/85 leading-relaxed font-light">
+              <p className="text-sm text-[#273F25]/85 leading-relaxed font-light">
                 {product.description}
               </p>
             </div>
 
             <div>
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[#8BA664] mb-2">
+              <h4 className="text-xs uppercase tracking-widest font-bold text-[#516830] mb-2">
                 Ritual Benefit & Cellular Impact
               </h4>
-              <p className="text-sm text-[#1F3D2B]/85 leading-relaxed font-light">
+              <p className="text-sm text-[#273F25]/85 leading-relaxed font-light">
                 {product.ritualBenefit}
               </p>
             </div>
 
             <div>
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[#8BA664] mb-2">
+              <h4 className="text-xs uppercase tracking-widest font-bold text-[#516830] mb-2">
                 Recommended Application Ceremony
               </h4>
-              <p className="text-sm text-[#1F3D2B]/85 leading-relaxed font-light">
+              <p className="text-sm text-[#273F25]/85 leading-relaxed font-light">
                 {product.usageMethod}
               </p>
             </div>
 
             {/* Botanicals List */}
             <div>
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[#8BA664] mb-2">
+              <h4 className="text-xs uppercase tracking-widest font-bold text-[#516830] mb-2">
                 Core Active Botanicals
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {product.keyBotanicals.map((botanical) => (
                   <div
                     key={botanical}
-                    className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#4C6B3D]/10 text-xs font-medium text-[#1F3D2B]"
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#273F25]/10 text-xs font-medium text-[#273F25]"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#C89D4A] flex-shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#EDC918] flex-shrink-0" />
                     <span>{botanical}</span>
                   </div>
                 ))}
@@ -128,7 +128,7 @@ export function ProductDetailDrawer({ product, onClose }: ProductDetailDrawerPro
         </div>
 
         {/* Action Footer */}
-        <div className="pt-6 border-t border-[#4C6B3D]/15 flex items-center gap-3">
+        <div className="pt-6 border-t border-[#273F25]/15 flex items-center gap-3">
           <button
             onClick={() => {
               addToCart({
@@ -143,13 +143,13 @@ export function ProductDetailDrawer({ product, onClose }: ProductDetailDrawerPro
               }, 1);
               onClose();
             }}
-            className="flex-1 py-4 rounded-full text-xs font-bold uppercase tracking-wider bg-[#1F3D2B] text-[#FAF7F2] hover:bg-[#C89D4A] hover:text-[#14281C] transition-all duration-300 text-center shadow-lg cursor-pointer"
+            className="flex-1 py-4 rounded-full text-xs font-bold uppercase tracking-wider bg-[#273F25] text-[#EDC918] hover:bg-[#516830] hover:text-white transition-all duration-300 text-center shadow-lg cursor-pointer"
           >
             Acquire Ritual (₹{numericPrice.toLocaleString("en-IN")})
           </button>
           <button
             onClick={onClose}
-            className="p-4 rounded-full border border-[#4C6B3D]/20 text-[#1F3D2B] hover:bg-black/5 cursor-pointer"
+            className="p-4 rounded-full border border-[#273F25]/20 text-[#273F25] hover:bg-black/5 cursor-pointer"
             title="Close"
           >
             <X className="w-4 h-4" />

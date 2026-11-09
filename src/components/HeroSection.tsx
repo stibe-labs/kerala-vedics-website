@@ -1,363 +1,564 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  Sparkles,
-  Leaf,
-  ShieldCheck,
-  ChevronRight,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { getMediaUrl } from "@/lib/media";
-import { useVideoPreload } from "@/context/VideoPreloadContext";
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { ArrowRight, ChevronLeft, ChevronRight, Play, Pause, Star } from "lucide-react";
 
-interface HeroSlide {
-  id: string;
-  number: string;
-  badge: string;
-  titlePrimary: string;
-  titleSecondary: string;
-  description: string;
-  videoSrc: string;
-  features: {
-    title: string;
-    subtitle: string;
-    icon: "leaf" | "shield" | "lotus";
-  }[];
-  shopLink: string;
+interface HeroSectionProps {
+  onOpenDoshaFinder?: () => void;
 }
 
-const HERO_SLIDES: HeroSlide[] = [
+const FEATURED_LIVE_PRODUCTS = [
   {
     id: "arshana-lehyam",
-    number: "01",
-    badge: "Authentic Ayurveda. Modern Wellness.",
-    titlePrimary: "Arshana",
-    titleSecondary: "Lehyam",
-    description:
-      "Classical Ayurvedic Rasayana formulated for deep cellular rejuvenation and internal balance.",
-    videoSrc: "/videos/hero-bottle.mp4",
-    features: [
-      { title: "Rejuvenates", subtitle: "at Cellular Level", icon: "leaf" },
-      { title: "Strengthens", subtitle: "Immunity", icon: "shield" },
-      { title: "Promotes", subtitle: "Vitality & Balance", icon: "lotus" },
-    ],
-    shopLink: "#products",
+    slug: "arshan-lehyam",
+    name: "Arshan Lehyam",
+    sanskrit: "अर्शना अवलेह",
+    category: "Internal Elixir",
+    tagline: "Classical Digestive Rejuvenation & Colon Harmony",
+    volume: "500 g",
+    price: 1299,
+    mrp: 1499,
+    image: "/products/arshana-nobg.png",
+    dosha: "Tridoshic",
+    badge: "Charaka Samhita Formulation",
+    rating: 4.9,
+    reviews: 312,
+    accentColor: "#C89D4A",
   },
   {
-    id: "feedon-tonic",
-    number: "02",
-    badge: "Wild Botanical Nectar. 100% Bio-Active.",
-    titlePrimary: "Feedon",
-    titleSecondary: "Fruit Tonic",
-    description:
-      "Multi-fruit botanical nectar rich in wild antioxidants, bioflavonoids, and vitality-boosting prana.",
-    videoSrc: "/videos/freedon.mp4",
-    features: [
-      { title: "High Density", subtitle: "Antioxidants", icon: "leaf" },
-      { title: "Cellular Energy", subtitle: "& Stamina", icon: "shield" },
-      { title: "Zero Added", subtitle: "Artificial Sugar", icon: "lotus" },
-    ],
-    shopLink: "#products",
+    id: "rudra-tulasi",
+    slug: "amrith-tulasi",
+    name: "Amrith Tulasi",
+    sanskrit: "रुद्र तुलसी रस",
+    category: "Herbal Drops",
+    tagline: "Panchamrit 5-Tulsi Pure Botanical Extract",
+    volume: "30 ml",
+    price: 350,
+    mrp: 400,
+    image: "/products/rudra-nobg.png",
+    dosha: "Kapha",
+    badge: "Hydro-Distilled 5-Tulsi",
+    rating: 4.8,
+    reviews: 187,
+    accentColor: "#4C6B3D",
   },
   {
-    id: "rudra-tulasi-rollon",
-    number: "03",
-    badge: "Sacred Herbal Aromatherapy.",
-    titlePrimary: "Rudra",
-    titleSecondary: "Tulasi Roll-On",
-    description:
-      "Concentrated 5-Tulsi essential roll-on for instant respiratory relief, mental focus, and aura purification.",
-    videoSrc: "/videos/roll-on-animation.mp4",
-    features: [
-      { title: "Instant Relief", subtitle: "Clear Breathing", icon: "leaf" },
-      { title: "Deep Focus", subtitle: "Mental Clarity", icon: "shield" },
-      { title: "5-Tulsi Blend", subtitle: "Aura Protection", icon: "lotus" },
-    ],
-    shopLink: "#products",
+    id: "brahmi-memory-nectar",
+    slug: "brahmi-memory-nectar",
+    name: "Brahmi Medhya Rasayana",
+    sanskrit: "ब्राह्मी रसायन",
+    category: "Rasayana",
+    tagline: "Neurological Clarity, Cognitive Focus & Deep Sleep",
+    volume: "100 ml",
+    price: 1150,
+    mrp: 1450,
+    image: "/products/brahmi-nobg.png",
+    dosha: "Pitta",
+    badge: "Sustained Cognitive Nectar",
+    rating: 4.9,
+    reviews: 428,
+    accentColor: "#516830",
   },
   {
-    id: "botanical-infusion",
-    number: "04",
-    badge: "Classical Taila Paka Vidhi.",
-    titlePrimary: "Botanical",
-    titleSecondary: "Infusion",
-    description:
-      "Cold-pressed whole roots, bark, and medicinal herbs entering 72-hour slow copper extraction.",
-    videoSrc: "/videos/botanical-infusion.mp4",
-    features: [
-      { title: "72h Decoction", subtitle: "Copper Simmered", icon: "leaf" },
-      { title: "Whole Herb", subtitle: "Pure Potency", icon: "shield" },
-      { title: "Sub-Micron", subtitle: "Bioavailability", icon: "lotus" },
-    ],
-    shopLink: "#products",
+    id: "varicose-vein-elixir",
+    slug: "varicose-flow",
+    name: "Varicose Flow",
+    sanskrit: "सिरा शुद्धि लेपम्",
+    category: "Therapeutic Oil",
+    tagline: "Vascular Tonic for Venous Strength & Micro-Flow",
+    volume: "100 g",
+    price: 1399,
+    mrp: 1499,
+    image: "/products/varicose-nobg.png",
+    dosha: "Pitta",
+    badge: "Targeted Micro-Circulation",
+    rating: 4.7,
+    reviews: 215,
+    accentColor: "#8B4513",
   },
   {
-    id: "sidd-sutra-varicose",
-    number: "05",
-    badge: "Vascular Vitality & Micro-Flow.",
-    titlePrimary: "Sidd Sutra",
-    titleSecondary: "Varicose Oil",
-    description:
-      "Varicose vein oil enriched with Shatavari & Ashwagandha for vascular strength and micro-circulation.",
-    videoSrc: "/videos/vericose.mp4",
-    features: [
-      { title: "Vascular Tone", subtitle: "Natural Strength", icon: "leaf" },
-      { title: "Relieves Heaviness", subtitle: "Deep Comfort", icon: "shield" },
-      { title: "Sahyadri Herbs", subtitle: "Wildcrafted", icon: "lotus" },
-    ],
-    shopLink: "#products",
+    id: "freedom-joint-care",
+    slug: "freedom-joint-care",
+    name: "Freedom Joint Care",
+    sanskrit: "सन्धि मुक्ति तैल",
+    category: "Therapeutic Oil",
+    tagline: "54 Botanical Synergy for Deep Musculoskeletal Ease",
+    volume: "200 ml",
+    price: 990,
+    mrp: 1290,
+    image: "/products/freedom-nobg.png",
+    dosha: "Vata",
+    badge: "72h Medicated Oil",
+    rating: 4.8,
+    reviews: 356,
+    accentColor: "#6B7C4A",
   },
 ];
 
-export function HeroSection({ onOpenDoshaFinder }: { onOpenDoshaFinder?: () => void }) {
-  const { getVideoUrl, markHeroVideoReady } = useVideoPreload();
-  const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  // One ref per slide video element
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+const HERO_STATS = [
+  { value: "5000+", label: "Years of\nVaidya Science" },
+  { value: "AYUSH", label: "Govt. of India\nCertified" },
+  { value: "100%", label: "Natural Zero\nSynthetics" },
+  { value: "GMP", label: "Pharma-Grade\nFacility" },
+];
 
-  // Immediately buffer and play slide 0 on mount behind loading screen
+export function HeroSection({ onOpenDoshaFinder }: HeroSectionProps) {
+  const [mounted, setMounted] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [videoPaused, setVideoPaused] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
-    const vid0 = videoRefs.current[0];
-    if (vid0) {
-      vid0.muted = true;
-      if (vid0.readyState >= 2) {
-        markHeroVideoReady();
-      }
-      vid0.play().then(() => markHeroVideoReady()).catch(() => {});
-    }
-  }, [markHeroVideoReady]);
-
-  const slide = HERO_SLIDES[currentSlideIdx];
-
-  // Explicitly play the active video — bypasses browser autoplay policy restrictions
-  const playActive = useCallback((idx: number) => {
-    HERO_SLIDES.forEach((_, i) => {
-      const vid = videoRefs.current[i];
-      if (!vid) return;
-      if (i === idx) {
-        // Ensure muted and attempt play
-        vid.muted = true;
-        const promise = vid.play();
-        if (promise !== undefined) {
-          promise.catch(() => {
-            // Retry once after a short delay
-            setTimeout(() => {
-              if (vid) {
-                vid.muted = true;
-                vid.play().catch(() => {});
-              }
-            }, 300);
-          });
-        }
-      } else {
-        vid.pause();
-      }
-    });
+    setMounted(true);
   }, []);
 
-  // Play active video whenever slide changes
   useEffect(() => {
-    playActive(currentSlideIdx);
-  }, [currentSlideIdx, playActive]);
+    if (!videoPaused) {
+      intervalRef.current = setInterval(() => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setActiveIndex((prev) => (prev + 1) % FEATURED_LIVE_PRODUCTS.length);
+          setIsTransitioning(false);
+        }, 300);
+      }, 5500);
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [videoPaused]);
 
-  // Auto-advance slides every 8 seconds
-  useEffect(() => {
-    if (isHovered) return;
-    const timer = setInterval(() => {
-      setCurrentSlideIdx((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, [isHovered]);
+  const navigate = (dir: number) => {
+    if (isTransitioning) return;
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveIndex((prev) => (prev + dir + FEATURED_LIVE_PRODUCTS.length) % FEATURED_LIVE_PRODUCTS.length);
+      setIsTransitioning(false);
+    }, 280);
+  };
+
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (videoPaused) { videoRef.current.play(); setVideoPaused(false); }
+      else { videoRef.current.pause(); setVideoPaused(true); }
+    }
+  };
+
+  const active = FEATURED_LIVE_PRODUCTS[activeIndex];
+  const discount = Math.round(((active.mrp - active.price) / active.mrp) * 100);
 
   return (
-    <section
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      id="hero"
-      className="relative w-full min-h-screen min-h-[100dvh] bg-[#0D160E] text-white select-none flex flex-col justify-between overflow-hidden"
-    >
-      {/* RIGHT SIDE VIDEO STACK */}
-      <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[50%] xl:w-[52%] h-full overflow-hidden pointer-events-none z-0">
-        {HERO_SLIDES.map((item, idx) => {
-          const isCurrent = idx === currentSlideIdx;
-          const resolvedSrc = getVideoUrl(item.videoSrc);
+    <section className="relative bg-[#F4F1EB] overflow-hidden" style={{ minHeight: "100svh" }}>
 
-          return (
-            <div
-              key={item.id}
-              className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
-                isCurrent ? "opacity-100 z-[1]" : "opacity-0 z-[0] pointer-events-none"
-              }`}
-            >
-              <video
-                ref={(el) => {
-                  videoRefs.current[idx] = el;
-                  if (el && idx === 0) {
-                    el.muted = true;
-                    el.play().then(() => markHeroVideoReady()).catch(() => {});
-                  } else if (el && idx === currentSlideIdx && el.paused) {
-                    el.muted = true;
-                    el.play().catch(() => {});
-                  }
-                }}
-                src={resolvedSrc}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload={idx === 0 ? "auto" : "none"}
-                onLoadedData={(e) => {
-                  const v = e.currentTarget;
-                  v.muted = true;
-                  if (idx === 0) {
-                    v.play().then(() => markHeroVideoReady()).catch(() => {});
-                    markHeroVideoReady();
-                  } else if (idx === currentSlideIdx) {
-                    v.play().catch(() => {});
-                  }
-                }}
-                onCanPlay={(e) => {
-                  const v = e.currentTarget;
-                  v.muted = true;
-                  if (idx === 0) {
-                    v.play().then(() => markHeroVideoReady()).catch(() => {});
-                    markHeroVideoReady();
-                  } else if (idx === currentSlideIdx) {
-                    v.play().catch(() => {});
-                  }
-                }}
-                onPlaying={() => {
-                  if (idx === 0) {
-                    markHeroVideoReady();
-                  }
-                }}
-                className="w-full h-full object-cover object-center contrast-[1.08] saturate-[1.15] brightness-[1.03]"
-              />
-            </div>
-          );
-        })}
-
-        {/* Clean Left-Only Gradient Transition */}
-        <div className="absolute inset-y-0 left-0 w-24 sm:w-36 lg:w-44 bg-gradient-to-r from-[#0D160E] to-transparent z-10 pointer-events-none" />
-
-        {/* Mobile overlay for text readability */}
-        <div className="absolute inset-0 bg-[#0D160E]/50 lg:hidden z-10 pointer-events-none" />
+      {/* ── CINEMATIC BACKGROUND VIDEO ──────── */}
+      <div className="absolute inset-0 z-0">
+        <video
+          ref={videoRef}
+          src="/videos/bottle-landing.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "brightness(0.22) saturate(0.7)" }}
+        />
+        {/* Multi-layer gradient overlay */}
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(125deg, rgba(8,15,8,0.82) 0%, rgba(39,63,37,0.55) 40%, rgba(12,26,11,0.75) 100%)"
+        }} />
+        {/* Soft vignette edges */}
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.50) 100%)"
+        }} />
       </div>
 
-      {/* HERO CONTENT STAGE (ADAPTIVE FULL VIEWPORT HEIGHT) */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 flex-1 flex items-center">
-        {/* LEFT CONTENT COLUMN */}
-        <div className="w-full lg:w-[48%] flex flex-col justify-center space-y-4 sm:space-y-5">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slide.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="space-y-4 sm:space-y-5"
+      {/* ── DECORATIVE ELEMENTS ──────────────── */}
+      {/* Rotating botanical watermark */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none z-[1]" aria-hidden>
+        <span
+          className="block text-white/[0.025] spin-slow"
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "clamp(160px, 22vw, 380px)",
+            lineHeight: 1,
+            letterSpacing: "-0.05em",
+          }}
+        >
+          VEDIC
+        </span>
+      </div>
+
+      {/* Gold horizontal accent lines */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] z-10" style={{ background: "linear-gradient(90deg, transparent, #EDC918, transparent)" }} />
+
+      {/* ── MAIN GRID LAYOUT ────────────────── */}
+      <div className="relative z-10 flex flex-col lg:flex-row min-h-screen max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-16 pt-[104px] pb-8">
+
+        {/* ── LEFT: TEXT COLUMN ──────────────── */}
+        <div className="flex flex-col justify-center lg:w-[48%] xl:w-[44%] py-12 lg:py-20">
+
+          {/* Eyebrow */}
+          <div
+            style={{
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "none" : "translateY(16px)",
+              transition: "all 0.8s cubic-bezier(0.16,1,0.3,1)",
+            }}
+          >
+            <div className="inline-flex items-center gap-3 mb-7">
+              <span className="w-10 h-[1px] bg-[#EDC918]" />
+              <span style={{
+                fontSize: "9px",
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                fontWeight: 700,
+                color: "#EDC918",
+              }}>
+                Classical Ayurveda · Kerala Heritage
+              </span>
+            </div>
+          </div>
+
+          {/* Headline */}
+          <h1
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: "clamp(48px, 6.5vw, 96px)",
+              fontWeight: 300,
+              lineHeight: 0.92,
+              letterSpacing: "-0.025em",
+              color: "#FFFFFF",
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "none" : "translateY(20px)",
+              transition: "all 0.9s cubic-bezier(0.16,1,0.3,1) 0.1s",
+            }}
+          >
+            Ancient<br />
+            <em style={{ fontStyle: "italic", color: "#EDC918" }}>Wisdom,</em><br />
+            Refined.
+          </h1>
+
+          {/* Subline */}
+          <p
+            className="mt-8 max-w-sm text-white/65 font-light leading-relaxed"
+            style={{
+              fontSize: "13px",
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "none" : "translateY(16px)",
+              transition: "all 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s",
+            }}
+          >
+            Classical Ayurvedic formulations sourced from the Sahyadri rainforests — each remedy
+            crafted strictly per the Ashtanga Hridayam and Charaka Samhita.
+          </p>
+
+          {/* CTAs */}
+          <div
+            className="flex flex-wrap items-center gap-4 mt-10"
+            style={{
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "none" : "translateY(14px)",
+              transition: "all 0.9s cubic-bezier(0.16,1,0.3,1) 0.3s",
+            }}
+          >
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-3 px-8 py-4 text-[#273F25] text-[11px] tracking-[0.14em] uppercase font-bold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer"
+              style={{ background: "#EDC918", letterSpacing: "0.14em" }}
             >
-              {/* Top Pill Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#273F25] border border-[#516830] text-[11px] font-medium text-[#EDC918] shadow-xs">
-                <Leaf className="w-3 h-3 text-[#EDC918]" />
-                <span>{slide.badge}</span>
+              <span>Explore Formulations</span>
+              <ArrowRight size={13} strokeWidth={2.5} />
+            </Link>
+
+            {onOpenDoshaFinder && (
+              <button
+                onClick={onOpenDoshaFinder}
+                className="inline-flex items-center gap-3 px-8 py-4 text-[11px] tracking-[0.12em] uppercase font-medium text-white/90 hover:text-white transition-all duration-300 cursor-pointer"
+                style={{ border: "1px solid rgba(255,255,255,0.30)", letterSpacing: "0.12em" }}
+              >
+                Discover Your Dosha
+              </button>
+            )}
+          </div>
+
+          {/* Certification Strip */}
+          <div
+            className="mt-12 pt-8 border-t border-white/10 flex items-center gap-8 flex-wrap"
+            style={{
+              opacity: mounted ? 1 : 0,
+              transition: "all 0.9s ease 0.45s",
+            }}
+          >
+            {[
+              { label: "AYUSH Certified", sub: "Govt. of India" },
+              { label: "GMP Standard", sub: "Pharma Grade" },
+              { label: "100% Natural", sub: "Zero Synthetics" },
+            ].map((item) => (
+              <div key={item.label}>
+                <p style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, color: "#EDC918" }}>{item.label}</p>
+                <p className="text-white/50 mt-0.5" style={{ fontSize: "9px" }}>{item.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── RIGHT: PRODUCT SHOWCASE ─────────── */}
+        <div
+          className="lg:flex-1 flex items-center justify-center lg:justify-end relative py-8 lg:py-0"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "none" : "translateX(32px)",
+            transition: "all 1s cubic-bezier(0.16,1,0.3,1) 0.2s",
+          }}
+        >
+          {/* Product card */}
+          <div
+            className="relative w-full max-w-[380px] lg:max-w-[420px]"
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              backdropFilter: "blur(32px) saturate(140%)",
+              WebkitBackdropFilter: "blur(32px) saturate(140%)",
+              border: "1px solid rgba(255,255,255,0.13)",
+              borderRadius: "2px",
+            }}
+          >
+            {/* Card top bar */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <div>
+                <span style={{ fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "#EDC918", fontWeight: 700 }}>
+                  {active.category}
+                </span>
+                <span className="text-white/30 mx-2">·</span>
+                <span style={{ fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>
+                  {active.dosha}
+                </span>
+              </div>
+              <span className="text-white/35" style={{ fontSize: "10px", fontFamily: "monospace" }}>
+                {String(activeIndex + 1).padStart(2, "0")} / {String(FEATURED_LIVE_PRODUCTS.length).padStart(2, "0")}
+              </span>
+            </div>
+
+            {/* Badge */}
+            <div className="px-6 pt-5 pb-2">
+              <span
+                className="inline-block px-3 py-1"
+                style={{
+                  fontSize: "8px",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  background: "rgba(237,201,24,0.12)",
+                  color: "#EDC918",
+                  border: "1px solid rgba(237,201,24,0.25)",
+                  fontWeight: 700,
+                }}
+              >
+                {active.badge}
+              </span>
+            </div>
+
+            {/* Product Image */}
+            <Link href={`/products/${active.slug || active.id}`} className="block cursor-pointer group">
+              <div
+                className="mx-6 my-4 relative flex items-center justify-center"
+                style={{ height: "240px" }}
+              >
+                {/* Radial glow behind image */}
+                <div
+                  className="absolute inset-0"
+                  style={{ background: "radial-gradient(ellipse at center, rgba(237,201,24,0.08) 0%, transparent 70%)" }}
+                />
+                <img
+                  key={active.id}
+                  src={active.image}
+                  alt={active.name}
+                  className="relative max-h-full max-w-full object-contain transition-all duration-700 group-hover:scale-105"
+                  style={{
+                    filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.5))",
+                    opacity: isTransitioning ? 0 : 1,
+                    transform: isTransitioning ? "translateY(8px)" : "translateY(0)",
+                    transition: "opacity 0.28s ease, transform 0.28s ease, scale 0.5s ease",
+                  }}
+                />
               </div>
 
-              {/* Main Headline with dual-color serif typography */}
-              <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-serif font-normal tracking-tight text-[#FAF8F2] leading-[1.08]">
-                {slide.titlePrimary}{" "}
-                <span className="text-[#EDC918]">{slide.titleSecondary}</span>
-              </h1>
-
-              {/* Subtitle Description */}
-              <p className="text-xs sm:text-sm text-[#FAF8F2]/80 font-light leading-relaxed max-w-md">
-                {slide.description}
-              </p>
-
-              {/* 3 Circular Feature Pillars */}
-              <div className="pt-0.5 flex flex-wrap items-center gap-4 sm:gap-6">
-                {slide.features.map((feat, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#516830]/50 bg-[#273F25]/60 flex items-center justify-center shrink-0 text-[#EDC918]">
-                      {feat.icon === "leaf" && <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                      {feat.icon === "shield" && <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                      {feat.icon === "lotus" && <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                    </div>
-                    <div className="text-left leading-tight">
-                      <span className="block text-[11px] sm:text-xs font-medium text-white">
-                        {feat.title}
-                      </span>
-                      <span className="block text-[10px] text-[#516830]/90 font-medium">
-                        {feat.subtitle}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-1.5 flex items-center gap-3 flex-wrap">
-                <a
-                  href={slide.shopLink}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 sm:px-7 sm:py-3 rounded-xl bg-[#EDC918] hover:bg-[#F4D948] text-[#273F25] text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md hover:scale-[1.02]"
+              {/* Product Info */}
+              <div
+                className="px-6 pb-2 text-center"
+                style={{
+                  opacity: isTransitioning ? 0 : 1,
+                  transition: "opacity 0.28s ease",
+                }}
+              >
+                <p className="italic mb-1" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "12px", color: "#EDC918", opacity: 0.85 }}>
+                  {active.sanskrit}
+                </p>
+                <h3
+                  className="text-white group-hover:text-[#EDC918] transition-colors"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 400, lineHeight: 1.2 }}
                 >
-                  <span>Shop Now</span>
-                  <ChevronRight className="w-4 h-4" />
-                </a>
+                  {active.name}
+                </h3>
+                <p className="text-white/50 mt-1.5 line-clamp-1" style={{ fontSize: "11px" }}>
+                  {active.tagline}
+                </p>
 
-                {onOpenDoshaFinder && (
-                  <button
-                    onClick={onOpenDoshaFinder}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 sm:px-7 sm:py-3 rounded-xl bg-transparent hover:bg-white/10 text-white border border-white/25 text-xs sm:text-sm font-medium transition-all cursor-pointer"
-                  >
-                    <span>Learn More</span>
-                  </button>
+                {/* Stars */}
+                <div className="flex items-center justify-center gap-1.5 mt-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      size={11}
+                      className={i < Math.floor(active.rating) ? "fill-[#EDC918] text-[#EDC918]" : "text-white/25"}
+                    />
+                  ))}
+                  <span className="text-white/45 ml-1" style={{ fontSize: "10px" }}>({active.reviews})</span>
+                </div>
+              </div>
+            </Link>
+
+            {/* Pricing + CTA */}
+            <div
+              className="mx-6 mb-5 mt-3 flex items-center justify-between"
+              style={{
+                opacity: isTransitioning ? 0 : 1,
+                transition: "opacity 0.28s ease",
+              }}
+            >
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <span style={{ fontSize: "22px", fontWeight: 700, color: "#FFFFFF" }}>
+                    ₹{active.price.toLocaleString("en-IN")}
+                  </span>
+                  {active.mrp > active.price && (
+                    <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", textDecoration: "line-through" }}>
+                      ₹{active.mrp.toLocaleString("en-IN")}
+                    </span>
+                  )}
+                </div>
+                {discount > 0 && (
+                  <p style={{ fontSize: "10px", color: "#EDC918", fontWeight: 700, letterSpacing: "0.08em" }}>
+                    {discount}% OFF · {active.volume}
+                  </p>
                 )}
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* VERTICAL SLIDE INDICATORS (01, 02, 03, 04, 05) */}
-        <div className="absolute right-4 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-2.5">
-          {HERO_SLIDES.map((s, idx) => {
-            const isActive = currentSlideIdx === idx;
-            return (
-              <button
-                key={s.id}
-                onClick={() => setCurrentSlideIdx(idx)}
-                className={`text-[10px] sm:text-[11px] font-mono font-medium transition-all duration-300 flex items-center justify-center cursor-pointer ${
-                  isActive
-                    ? "w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#EDC918] text-[#EDC918] bg-[#273F25] shadow-md scale-110"
-                    : "w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white/40 hover:text-white/80 hover:bg-white/5"
-                }`}
-                aria-label={`Go to slide ${s.number}`}
+              <Link
+                href={`/products/${active.slug || active.id}`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-[#273F25] transition-all hover:scale-105 cursor-pointer"
+                style={{
+                  background: "#EDC918",
+                  fontSize: "10px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  fontWeight: 700,
+                }}
               >
-                {s.number}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                View <ArrowRight size={11} />
+              </Link>
+            </div>
 
-      {/* Subtle Bottom Scroll Indicator Cue */}
-      <div className="relative z-20 pb-5 flex justify-center items-center pointer-events-none">
-        <div className="flex flex-col items-center gap-1.5 opacity-75">
-          <span className="text-[10px] uppercase font-mono tracking-widest text-[#EDC918]">
-            Scroll to explore
-          </span>
-          <div className="w-4 h-7 rounded-full border border-[#EDC918]/40 flex justify-center p-1">
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-              className="w-1 h-1.5 rounded-full bg-[#EDC918]"
-            />
+            {/* Thumbnail Nav */}
+            <div className="flex items-center justify-between px-6 pb-5 border-t border-white/10 pt-4">
+              <div className="flex items-center gap-1.5">
+                {FEATURED_LIVE_PRODUCTS.map((prod, idx) => (
+                  <button
+                    key={prod.id}
+                    onClick={() => {
+                      if (intervalRef.current) clearInterval(intervalRef.current);
+                      setActiveIndex(idx);
+                    }}
+                    className="w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer"
+                    style={{
+                      background: activeIndex === idx ? "#EDC918" : "rgba(255,255,255,0.25)",
+                      transform: activeIndex === idx ? "scale(1.4)" : "scale(1)",
+                    }}
+                    aria-label={prod.name}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="w-8 h-8 flex items-center justify-center transition-all cursor-pointer text-white/60 hover:text-white"
+                  style={{ border: "1px solid rgba(255,255,255,0.15)" }}
+                  aria-label="Previous"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <button
+                  onClick={() => navigate(1)}
+                  className="w-8 h-8 flex items-center justify-center transition-all cursor-pointer text-white/60 hover:text-white"
+                  style={{ border: "1px solid rgba(255,255,255,0.15)" }}
+                  aria-label="Next"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* Gold corner accents */}
+            <span className="absolute top-3 left-3 w-5 h-[1.5px] bg-[#EDC918]" />
+            <span className="absolute top-3 left-3 w-[1.5px] h-5 bg-[#EDC918]" />
+            <span className="absolute bottom-3 right-3 w-5 h-[1.5px] bg-[#EDC918]" />
+            <span className="absolute bottom-3 right-3 w-[1.5px] h-5 bg-[#EDC918]" />
           </div>
         </div>
       </div>
+
+      {/* ── BOTTOM STATS BAR ────────────────── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-10"
+        style={{
+          background: "rgba(8,15,8,0.85)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderTop: "1px solid rgba(237,201,24,0.12)",
+          opacity: mounted ? 1 : 0,
+          transition: "opacity 1s ease 0.8s",
+        }}
+      >
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-16 py-4 grid grid-cols-2 sm:grid-cols-4 gap-px bg-[rgba(255,255,255,0.04)]">
+          {HERO_STATS.map((stat) => (
+            <div
+              key={stat.value}
+              className="bg-[rgba(8,15,8,0.8)] px-6 py-4 flex flex-col items-center text-center"
+            >
+              <span
+                style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: "24px",
+                  fontWeight: 500,
+                  color: "#EDC918",
+                  lineHeight: 1,
+                }}
+              >
+                {stat.value}
+              </span>
+              <span
+                className="mt-1.5 text-white/45 leading-tight whitespace-pre-line"
+                style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase" }}
+              >
+                {stat.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── VIDEO CONTROL ───────────────────── */}
+      <button
+        onClick={toggleVideo}
+        className="absolute bottom-24 right-6 lg:right-16 z-20 w-10 h-10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer"
+        style={{ border: "1px solid rgba(255,255,255,0.18)", background: "rgba(0,0,0,0.3)" }}
+        aria-label={videoPaused ? "Play background video" : "Pause background video"}
+      >
+        {videoPaused ? <Play size={14} /> : <Pause size={14} />}
+      </button>
+
+      {/* Bottom gold rule */}
+      <div className="absolute bottom-[68px] left-0 right-0 h-[1px] z-10" style={{ background: "linear-gradient(90deg, transparent, rgba(237,201,24,0.18), transparent)" }} />
     </section>
   );
 }
-

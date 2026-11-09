@@ -8,7 +8,7 @@ let serverProductsCache: Product[] = [...DEFAULT_PRODUCTS];
 export async function GET() {
   try {
     const d1Results = await executeD1Query<Product>("SELECT * FROM products ORDER BY created_at DESC;");
-    if (d1Results && Array.isArray(d1Results)) {
+    if (d1Results && Array.isArray(d1Results) && d1Results.length > 0) {
       const formatted = d1Results.map((p: any) => ({
         ...p,
         images:
@@ -25,8 +25,30 @@ export async function GET() {
       return NextResponse.json({ success: true, source: "cloudflare-d1", products: formatted });
     }
   } catch (err) {
-    console.warn("D1 products query error, serving authentic catalog fallback:", err);
+    console.warn("D1 products query error, checking live API:", err);
   }
+
+  // Live website proxy fallback (ensures development matches live keralavedics.com production)
+  try {
+    const liveRes = await fetch("https://keralavedics.com/api/products", {
+      next: { revalidate: 60 },
+      headers: { "Accept": "application/json" },
+    });
+    if (liveRes.ok) {
+      const liveData = await liveRes.json();
+      if (liveData?.products && Array.isArray(liveData.products) && liveData.products.length > 0) {
+        serverProductsCache = liveData.products;
+        return NextResponse.json({
+          success: true,
+          source: "live-keralavedics-db",
+          products: liveData.products,
+        });
+      }
+    }
+  } catch (liveErr) {
+    console.warn("Live API fetch fallback bypassed:", liveErr);
+  }
+
   return NextResponse.json({
     success: true,
     source: "authentic-kerala-formulations",

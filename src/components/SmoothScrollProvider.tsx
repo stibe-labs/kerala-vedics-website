@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
-import "lenis/dist/lenis.css";
 
 interface ScrollToOptions {
   offset?: number;

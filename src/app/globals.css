@@ -1,162 +1,279 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&display=swap');
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════
+   KERALA VEDICS — PREMIUM E-COMMERCE DESIGN SYSTEM v2.0
+═══════════════════════════════════════════════════════════════ */
 :root {
-  --kv-gold: #EDC918;
-  --kv-gold-light: #F4D948;
-  --kv-moss: #516830;
-  --kv-moss-light: #6D8B41;
-  --kv-forest: #273F25;
-  --kv-forest-dark: #192A18;
-  --kv-forest-black: #111D10;
-  --kv-cream: #FAF8F2;
-  --kv-cream-pure: #FFFFFF;
-  --kv-sand: #EAE6DC;
-  
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-display: 'Cinzel', serif;
-  --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
-  --font-manrope: 'Manrope', system-ui, sans-serif;
-  --font-cormorant: 'Cormorant Garamond', Georgia, serif;
-  
-  --kv-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* ── Core Brand Palette ──────────────────── */
+  --kv-gold:          #EDC918;
+  --kv-gold-light:    #F5D84A;
+  --kv-gold-pale:     #FFF8D1;
+  --kv-gold-dark:     #C8A800;
+  --kv-gold-amber:    #D4AF37;
+  --kv-moss:          #516830;
+  --kv-moss-light:    #688241;
+  --kv-moss-pale:     #E9EFE0;
+  --kv-forest:        #273F25;
+  --kv-forest-mid:    #345231;
+  --kv-forest-light:  #4A6E46;
+  --kv-forest-dark:   #182A17;
+  --kv-forest-deep:   #0C1A0B;
+  --kv-forest-black:  #080F08;
+
+  /* ── Neutrals ────────────────────────────── */
+  --kv-white:         #FFFFFF;
+  --kv-off-white:     #FBF9F4;
+  --kv-cream:         #F7F3EC;
+  --kv-stone:         #EDE8DD;
+  --kv-sand:          #D9D3C6;
+  --kv-mid:           #C4BEB2;
+  --kv-ink-faint:     rgba(39,63,37,0.06);
+  --kv-ink-soft:      rgba(39,63,37,0.35);
+  --kv-ink-light:     #5A6855;
+  --kv-ink:           #1A2518;
+  --kv-ink-deep:      #0F1A0E;
+
+  /* ── Footer ──────────────────────────────── */
+  --kv-footer-bg:     #0A1209;
+  --kv-footer-text:   #D8DDD4;
+  --kv-footer-muted:  #6B7A67;
+
+  /* ── Typography ──────────────────────────── */
+  --font-display:     'Cormorant Garamond', Georgia, serif;
+  --font-sans:        'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-serif:       'Cormorant Garamond', Georgia, serif;
+  --font-cormorant:   'Cormorant Garamond', Georgia, serif;
+  --font-manrope:     'DM Sans', system-ui, sans-serif;
+
+  /* ── Layout ──────────────────────────────── */
+  --max-width:        1440px;
+  --gutter:           clamp(20px, 4vw, 80px);
+  --ease-out-expo:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-expo:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth:      cubic-bezier(0.22, 1, 0.36, 1);
+  --kv-ease:          cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ── Shadows ─────────────────────────────── */
+  --shadow-xl:        0 32px 80px rgba(0,0,0,0.20), 0 12px 28px rgba(0,0,0,0.10);
+  --shadow-gold:      0 0 40px rgba(237,201,24,0.30), 0 0 80px rgba(237,201,24,0.12);
 }
+
+/* ── BASE ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
-  background-color: var(--kv-cream);
-  color: var(--kv-forest);
+  background-color: var(--kv-white);
+  color: var(--kv-ink);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-html.lenis,
-html.lenis body {
+html.lenis, html.lenis body {
   height: auto;
   scroll-behavior: auto !important;
 }
 
-body {
-  background-color: var(--kv-cream);
-  color: var(--kv-forest);
-  overflow-x: clip;
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
 }
 
-p, li, span:not([class*="tracking"]), label, td, th, blockquote {
-  letter-spacing: 1px;
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
+}
+
+body {
+  background-color: var(--kv-white);
+  color: var(--kv-ink);
+  overflow-x: clip;
+  line-height: 1.6;
 }
 
 ::selection {
-  background-color: var(--kv-gold);
-  color: var(--kv-forest-dark);
+  background-color: var(--kv-forest);
+  color: var(--kv-gold);
 }
 
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--kv-cream);
-}
-::-webkit-scrollbar-thumb {
-  background: #516830;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #273F25;
+/* ── SCROLLBAR ────────────────────────────── */
+::-webkit-scrollbar        { width: 4px; height: 4px; }
+::-webkit-scrollbar-track  { background: var(--kv-off-white); }
+::-webkit-scrollbar-thumb  { background: var(--kv-moss); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--kv-forest); }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── FONT UTILITIES ───────────────────────── */
+.font-display  { font-family: var(--font-display); }
+.font-sans     { font-family: var(--font-sans); }
+.font-serif    { font-family: var(--font-display); }
+.font-mono {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-/* Hide scrollbar for clean horizontal rails */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Glassmorphism & custom utility classes */
-.glass-nav {
-  background: rgba(250, 248, 242, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(81, 104, 48, 0.15);
-}
-
-.glass-nav-dark {
-  background: rgba(25, 42, 24, 0.90);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(237, 201, 24, 0.25);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(81, 104, 48, 0.2);
-}
-
-.glass-card-dark {
-  background: rgba(39, 63, 37, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(237, 201, 24, 0.3);
-}
-
-/* Glow effects */
-.gold-glow {
-  box-shadow: 0 0 25px rgba(237, 201, 24, 0.4);
-}
-
-.sage-glow {
-  box-shadow: 0 0 25px rgba(81, 104, 48, 0.25);
-}
-
-/* Marquee infinite scroll */
+/* ── ANIMATIONS ───────────────────────────── */
 @keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
-
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 35s linear infinite;
+  animation: marquee 40s linear infinite;
+}
+.animate-marquee:hover { animation-play-state: paused; }
+
+.animate-marquee-fast {
+  display: flex;
+  width: max-content;
+  animation: marquee 18s linear infinite;
 }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
+.animate-marquee-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee 65s linear infinite;
 }
 
-/* Shimmer animation */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
-
 .shimmer-text {
-  background: linear-gradient(90deg, #273F25 0%, #EDC918 50%, #273F25 100%);
+  background: linear-gradient(90deg, var(--kv-ink) 0%, var(--kv-gold) 50%, var(--kv-ink) 100%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer 6s infinite ease-in-out;
+  background-clip: text;
+  animation: shimmer 5s infinite ease-in-out;
+}
+.shimmer-gold {
+  background: linear-gradient(90deg, var(--kv-gold-dark) 0%, var(--kv-gold-light) 48%, var(--kv-gold-dark) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s infinite ease-in-out;
 }
 
-.font-serif {
-  font-family: var(--font-serif);
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.7s var(--ease-out-expo) both; }
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+.animate-float { animation: floatY 4s ease-in-out infinite; }
+.animate-float-slow { animation: floatY 6s ease-in-out infinite; }
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 rgba(237,201,24,0); }
+  50%       { box-shadow: 0 0 32px rgba(237,201,24,0.45); }
+}
+.pulse-gold { animation: pulseGold 2.5s ease-in-out infinite; }
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spin-slow { animation: spinSlow 22s linear infinite; }
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-.font-display {
-  font-family: var(--font-display);
+/* ── GLASS ────────────────────────────────── */
+.glass-nav {
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(26,26,24,0.07);
+}
+.glass-nav-dark {
+  background: rgba(8,15,8,0.92);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.glass-card {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+.glass-card-dark {
+  background: rgba(39,63,37,0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(237,201,24,0.25);
+}
+.glass-frosted {
+  background: rgba(251,249,244,0.82);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(237,208,130,0.30);
 }
 
-.font-sans {
-  font-family: var(--font-sans);
+/* ── GLOW UTILITIES ───────────────────────── */
+.gold-glow  { box-shadow: 0 0 28px rgba(237,201,24,0.40); }
+.sage-glow  { box-shadow: 0 0 24px rgba(81,104,48,0.30); }
+.shadow-premium { box-shadow: 0 24px 60px rgba(0,0,0,0.14), 0 8px 20px rgba(0,0,0,0.08); }
+
+/* ── GRADIENT TEXT ────────────────────────── */
+.text-grad-gold {
+  background: linear-gradient(135deg, var(--kv-gold-dark) 0%, var(--kv-gold) 50%, var(--kv-gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Remap font-mono → Manrope Bold (used on all label/eyebrow elements site-wide) */
-.font-mono {
-  font-family: 'Manrope', system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: inherit;
+/* ── IMAGE ZOOM ───────────────────────────── */
+.img-zoom { overflow: hidden; }
+.img-zoom img {
+  transition: transform 0.7s var(--ease-out-expo);
 }
+.img-zoom:hover img { transform: scale(1.07); }
+
+/* ── CARD LIFT ────────────────────────────── */
+.card-hover-lift {
+  transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s ease;
+}
+.card-hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.14);
+}
+
+/* ── LETTER SPACING ───────────────────────── */
+p, li, label, td, th, blockquote {
+  letter-spacing: 0.01em;
+}
+
+/* ── FOCUS RING ───────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--kv-gold);
+  outline-offset: 3px;
+}
+
+/* ── PHOTO TINT ───────────────────────────── */
+.photo-forest { filter: sepia(0.12) saturate(1.15); }
